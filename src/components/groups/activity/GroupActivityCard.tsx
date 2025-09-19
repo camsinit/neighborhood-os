@@ -30,6 +30,10 @@ export const GroupActivityCard: React.FC<GroupActivityCardProps> = ({
     <div
       className={`flex items-start space-x-3 p-3 rounded-lg transition-colors ${
         activity.type === 'group_start' ? '' : 'cursor-pointer hover:bg-muted/50'
+      } ${
+        activity.type === 'event' ? 'border-l-4 border-l-blue-500' : 
+        activity.type === 'group_start' ? 'border-l-4 border-l-purple-500' :
+        'border-l-4 border-l-purple-500'
       }`}
       onClick={activity.type === 'group_start' ? undefined : onClick}
       role={activity.type === 'group_start' ? undefined : "button"}
