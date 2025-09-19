@@ -98,7 +98,7 @@ export const CreateGroupForm: React.FC<CreateGroupFormProps> = ({ onClose, initi
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Group Name */}
       <div className="space-y-2">
-        <Label htmlFor="name">Group Name *</Label>
+        <Label htmlFor="name" className="text-lg font-bold">Group Name *</Label>
         <Input
           id="name"
           value={formData.name}
@@ -110,7 +110,7 @@ export const CreateGroupForm: React.FC<CreateGroupFormProps> = ({ onClose, initi
 
       {/* Description */}
       <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description" className="text-lg font-bold">Description</Label>
         <Textarea
           id="description"
           value={formData.description}
