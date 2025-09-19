@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { AppSheetContent } from '@/components/ui/app-sheet-content';
-import { Users, Lock, Globe, Plus, Edit, MessageSquare, User } from 'lucide-react';
+import { Users, Lock, Globe, Plus, Edit, MessageSquare, User, Share2 } from 'lucide-react';
 import { Group } from '@/types/groups';
 import { useJoinGroup, useLeaveGroup, useGroupMembers } from '@/hooks/useGroups';
 import { useGroupActivities } from '@/hooks/useGroupActivities';
@@ -168,16 +168,33 @@ const GroupSheetContent = ({
                 )}
               </span>
               
-              {/* Edit button for group owners/moderators */}
-              {canEditGroup && (
+              {/* Action buttons container */}
+              <div className="ml-auto flex items-center gap-2">
+                {/* Share button - visible to all users */}
                 <button 
-                  onClick={() => setIsEditGroupOpen(true)} 
-                  className="ml-auto p-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-colors" 
-                  aria-label="Edit group"
+                  onClick={() => {
+                    // Copy group URL to clipboard
+                    const groupUrl = `${window.location.origin}/n/${group.neighborhood_id}/neighbors?detail=${group.id}&type=group`;
+                    navigator.clipboard.writeText(groupUrl);
+                    // TODO: Add toast notification for successful copy
+                  }} 
+                  className="p-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-colors" 
+                  aria-label="Share group"
                 >
-                  <Edit className="h-4 w-4" />
+                  <Share2 className="h-4 w-4" />
                 </button>
-              )}
+                
+                {/* Edit button for group owners/moderators */}
+                {canEditGroup && (
+                  <button 
+                    onClick={() => setIsEditGroupOpen(true)} 
+                    className="p-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-colors" 
+                    aria-label="Edit group"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
             </div>
 
           </div>
