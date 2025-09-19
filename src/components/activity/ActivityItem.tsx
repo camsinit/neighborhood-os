@@ -132,7 +132,15 @@ const ActivityItem = ({
    * Handle click on activity item - uses unified navigation service
    */
   const handleItemClick = async () => {
+    logger.info('Activity item clicked', { 
+      activityType: activity.activity_type, 
+      contentId: activity.content_id,
+      neighborhoodId: activity.neighborhood_id,
+      isDeleted: isDeleted
+    });
+    
     if (isDeleted) {
+      logger.info('Content is deleted, showing action dialog');
       // For deleted content, show the action dialog
       onAction(activity);
       return;
@@ -140,8 +148,15 @@ const ActivityItem = ({
     
     // Get the item type and use unified navigation service
     const itemType = getHighlightableType(activity.activity_type);
+    logger.info('Mapped to highlight type:', itemType);
     
     try {
+      logger.info('Calling navigationService.navigateToItem with:', {
+        itemType,
+        contentId: activity.content_id,
+        neighborhoodId: activity.neighborhood_id
+      });
+      
       // Pass the neighborhood_id from the activity to ensure proper navigation context
       const result = await navigationService.navigateToItem(
         itemType, 
@@ -149,6 +164,8 @@ const ActivityItem = ({
         { showToast: true },
         activity.neighborhood_id // Provide neighborhood context from activity data
       );
+      
+      logger.info('Navigation result:', result);
       
       if (!result.success) {
         logger.error('Navigation failed', result.error as any);

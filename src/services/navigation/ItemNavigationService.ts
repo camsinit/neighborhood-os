@@ -96,7 +96,12 @@ export class ItemNavigationService {
     } = options;
     
     try {
-      logger.info(`Navigating to ${type} with ID: ${id}`);
+      logger.info(`[NAVIGATION] Starting navigation to ${type} with ID: ${id}`, {
+        type,
+        id,
+        options,
+        providedNeighborhoodId
+      });
       
       // Get the base route pattern - we need to build neighborhood-aware routes
       const baseRoute = ROUTE_MAP[type];
@@ -109,13 +114,28 @@ export class ItemNavigationService {
       // Build the full neighborhood-aware route via helpers
       // Use provided neighborhood ID first, then fall back to URL extraction
       const neighborhoodId = providedNeighborhoodId || extractNeighborhoodId(window.location.pathname);
+      logger.info(`[NAVIGATION] Neighborhood context resolved:`, {
+        providedNeighborhoodId,
+        extractedFromUrl: extractNeighborhoodId(window.location.pathname),
+        finalNeighborhoodId: neighborhoodId,
+        currentPathname: window.location.pathname
+      });
+      
       if (!neighborhoodId) {
         const error = `Cannot determine neighborhood context for navigation`;
-        logger.error(error);
+        logger.error(`[NAVIGATION] ${error}`, {
+          providedNeighborhoodId,
+          currentPathname: window.location.pathname
+        });
         return { success: false, error };
       }
-
-const fullRoute = neighborhoodPath(baseRoute, neighborhoodId);
+      
+      const fullRoute = neighborhoodPath(baseRoute, neighborhoodId);
+      logger.info(`[NAVIGATION] Route constructed:`, {
+        baseRoute,
+        neighborhoodId,
+        fullRoute
+      });
       
       // Build URL with parameters including highlight info and context
       const searchParams = new URLSearchParams({
@@ -145,8 +165,17 @@ const fullRoute = neighborhoodPath(baseRoute, neighborhoodId);
       }
       
       const fullRouteWithParams = `${fullRoute}?${searchParams.toString()}`;
+      logger.info(`[NAVIGATION] Final URL constructed:`, {
+        fullRoute,
+        searchParams: searchParams.toString(),
+        fullRouteWithParams
+      });
       
       // Navigate to the route
+      logger.info(`[NAVIGATION] Calling navigate with:`, { 
+        url: fullRouteWithParams, 
+        replace 
+      });
       this.navigate(fullRouteWithParams, { replace });
       
       // Set up highlighting with timeout
