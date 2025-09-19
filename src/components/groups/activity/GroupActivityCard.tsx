@@ -32,7 +32,7 @@ export const GroupActivityCard: React.FC<GroupActivityCardProps> = ({
         activity.type === 'group_start' ? '' : 'cursor-pointer hover:bg-muted/50'
       } ${
         activity.type === 'event' ? 'border-l-4 border-l-blue-500' : 
-        activity.type === 'group_start' ? 'border-l-4 border-l-green-500' :
+        activity.type === 'group_start' ? 'border-l-4 border-l-purple-500' :
         'border-l-4 border-l-purple-500'
       }`}
       onClick={activity.type === 'group_start' ? undefined : onClick}
@@ -42,7 +42,7 @@ export const GroupActivityCard: React.FC<GroupActivityCardProps> = ({
         activity.type === 'event' 
           ? 'bg-blue-100 text-blue-600' 
           : activity.type === 'group_start'
-          ? 'bg-green-100 text-green-600'
+          ? 'bg-purple-100 text-purple-600'
           : 'bg-purple-100 text-purple-600'
       }`}>
         {activity.type === 'event' ? (
@@ -70,7 +70,7 @@ export const GroupActivityCard: React.FC<GroupActivityCardProps> = ({
             </span>
             <Badge variant="outline" className={`text-xs ${
               activity.type === 'event' ? 'text-blue-600 border-blue-200' : 
-              activity.type === 'group_start' ? 'text-green-600 border-green-200' :
+              activity.type === 'group_start' ? 'text-purple-600 border-purple-200' :
               'text-purple-600 border-purple-200'
             }`}>
               {activity.type === 'event' ? 'Event' : activity.type === 'group_start' ? 'Group Start' : 'Update'}

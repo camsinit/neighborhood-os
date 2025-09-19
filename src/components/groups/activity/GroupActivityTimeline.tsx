@@ -261,6 +261,14 @@ export const GroupActivityTimeline: React.FC<GroupActivityTimelineProps> = ({
               New Update
             </Button>
             
+            <Button
+              onClick={() => onCreateEvent(groupId)}
+              className="flex-1 h-10"
+              variant="outline"
+            >
+              <Calendar className="w-4 h-4 mr-2 text-blue-600" />
+              New Event
+            </Button>
           </div>
         )}
 
