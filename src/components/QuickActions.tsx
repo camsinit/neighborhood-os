@@ -108,7 +108,7 @@ const QuickActions = () => {
   // Groups & Community actions (purple theme) - new focus on social connection
   const groupsActions = [{
     icon: UsersRound,
-    label: "Find Groups",
+    label: "Join a Group",
     onClick: () => {
       const groupsPath = neighborhoodPath(BASE_ROUTES.neighbors, currentNeighborhood?.id);
       navigate(groupsPath);
