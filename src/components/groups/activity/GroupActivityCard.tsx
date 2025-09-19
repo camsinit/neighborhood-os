@@ -39,36 +39,23 @@ export const GroupActivityCard: React.FC<GroupActivityCardProps> = ({
       role={activity.type === 'group_start' ? undefined : "button"}
       tabIndex={activity.type === 'group_start' ? undefined : 0}
     >
-      {/* Timeline icon */}
-      <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-        activity.type === 'event' 
-          ? 'bg-blue-100 text-blue-600' 
-          : activity.type === 'group_start'
-          ? 'bg-purple-100 text-purple-600'
-          : 'bg-purple-100 text-purple-600'
-      }`}>
-        {activity.type === 'event' ? (
-          <Calendar className="w-5 h-5" />
-        ) : activity.type === 'group_start' ? (
-          <Star className="w-5 h-5" />
-        ) : (
-          <MessageSquare className="w-5 h-5" />
-        )}
+      {/* Profile image replaces timeline icon */}
+      <div className="flex-shrink-0">
+        <Avatar className="w-10 h-10">
+          <AvatarImage src={avatarUrl} />
+          <AvatarFallback className="text-sm">
+            {displayName.charAt(0).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
       </div>
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        {/* Header with user info and timestamp */}
+        {/* Header with timestamp */}
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center space-x-2">
-            <Avatar className="w-6 h-6">
-              <AvatarImage src={avatarUrl} />
-              <AvatarFallback className="text-xs">
-                {displayName.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
             <span className="text-sm font-medium text-foreground">
-              {displayName}
+              {activity.title}
             </span>
             <Badge variant="outline" className={`text-xs ${
               activity.type === 'event' ? 'text-blue-600 border-blue-200' : 
@@ -83,10 +70,10 @@ export const GroupActivityCard: React.FC<GroupActivityCardProps> = ({
           </span>
         </div>
 
-        {/* Title */}
-        <h4 className="text-sm font-medium text-foreground mb-1 truncate">
-          {activity.title}
-        </h4>
+        {/* Author name moved here */}
+        <p className="text-xs text-muted-foreground mb-1">
+          by {displayName}
+        </p>
 
         {/* Event-specific details */}
         {activity.type === 'event' && activity.event && (
