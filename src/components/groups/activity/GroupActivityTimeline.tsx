@@ -14,7 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { GroupActivityItem } from '@/types/groupActivityTypes';
 import { GroupActivityCard } from './GroupActivityCard';
-import { CreateGroupUpdate } from './CreateGroupUpdate';
+import { InlineUpdateForm } from './InlineUpdateForm';
 import { GroupEventDetail } from './GroupEventDetail';
 import { GroupViewTabs, GroupViewType } from './GroupViewTabs';
 import { Button } from '@/components/ui/button';
@@ -258,41 +258,39 @@ export const GroupActivityTimeline: React.FC<GroupActivityTimelineProps> = ({
 
   return (
     <div className="relative">
-      {/* Create Update Overlay */}
-      {isCreateUpdateOpen && (
-        <CreateGroupUpdate
-          groupId={groupId}
-          onClose={handleCloseCreateUpdate}
-          onSuccess={() => {
-            setIsCreateUpdateOpen(false);
-            // Refetch will happen automatically due to real-time subscriptions
-          }}
-        />
-      )}
-
       {/* View Tabs */}
       <GroupViewTabs activeView={activeView} onViewChange={setActiveView}>
         {/* Action Buttons */}
-        {!isCreateUpdateOpen && (
-          <div className="flex gap-2 mb-6">
-            <Button
-              onClick={handleCreateUpdate}
-              className="flex-1 h-10"
-              variant="outline"
-            >
-              <MessageSquare className="w-4 h-4 mr-2 text-purple-600" />
-              New Update
-            </Button>
-            
-            <Button
-              onClick={() => onCreateEvent(groupId)}
-              className="flex-1 h-10"
-              variant="outline"
-            >
-              <Calendar className="w-4 h-4 mr-2 text-blue-600" />
-              New Event
-            </Button>
-          </div>
+        <div className="flex gap-2 mb-6">
+          <Button
+            onClick={handleCreateUpdate}
+            className="flex-1 h-10"
+            variant="outline"
+          >
+            <MessageSquare className="w-4 h-4 mr-2 text-purple-600" />
+            New Update
+          </Button>
+          
+          <Button
+            onClick={() => onCreateEvent(groupId)}
+            className="flex-1 h-10"
+            variant="outline"
+          >
+            <Calendar className="w-4 h-4 mr-2 text-blue-600" />
+            New Event
+          </Button>
+        </div>
+
+        {/* Inline Update Form */}
+        {isCreateUpdateOpen && (
+          <InlineUpdateForm
+            groupId={groupId}
+            onClose={handleCloseCreateUpdate}
+            onSuccess={() => {
+              setIsCreateUpdateOpen(false);
+              // Refetch will happen automatically due to real-time subscriptions
+            }}
+          />
         )}
 
         {/* Filtered Timeline Content */}
@@ -328,20 +326,6 @@ export const GroupActivityTimeline: React.FC<GroupActivityTimelineProps> = ({
         />
       )}
 
-      {/* Create Update Overlay */}
-      {isCreateUpdateOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <CreateGroupUpdate
-            groupId={groupId}
-            onClose={handleCloseCreateUpdate}
-            onSuccess={() => {
-              handleCloseCreateUpdate();
-              // Refresh activities after successful creation
-              window.location.reload(); // Simple refresh for now
-            }}
-          />
-        </div>
-      )}
 
       {/* Update Detail Sheet */}
       {isUpdateSheetOpen && selectedUpdate && (
