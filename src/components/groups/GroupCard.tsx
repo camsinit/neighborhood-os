@@ -213,7 +213,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({
         </h3>
         
         {/* Description with improved contrast and readability */}
-        {group.description && <p className="text-base text-gray-800 line-clamp-2 leading-relaxed font-medium">
+        {group.description && <p className="text-base text-gray-800 line-clamp-2 leading-relaxed">
             {group.description}
           </p>}
 
