@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { AppSheetContent } from '@/components/ui/app-sheet-content';
-import { Users, Lock, Globe, Plus, Edit, MessageSquare, User, Share2 } from 'lucide-react';
+import { Users, Lock, Globe, Plus, Edit, MessageSquare, User, ExternalLink } from 'lucide-react';
 import { Group } from '@/types/groups';
 import { useJoinGroup, useLeaveGroup, useGroupMembers } from '@/hooks/useGroups';
 import { useGroupActivities } from '@/hooks/useGroupActivities';
@@ -181,7 +181,7 @@ const GroupSheetContent = ({
                   className="p-2 rounded-lg bg-purple-100 hover:bg-purple-200 text-purple-600 transition-colors" 
                   aria-label="Share group"
                 >
-                  <Share2 className="h-4 w-4" />
+                  <ExternalLink className="h-4 w-4" />
                 </button>
                 
                 {/* Edit button for group owners/moderators */}
