@@ -9,6 +9,7 @@ import EventOverviewCard from '@/components/share/EventOverviewCard';
 import SafetyOverviewCard from '@/components/share/SafetyOverviewCard';
 import SkillsOverviewCard from '@/components/share/SkillsOverviewCard';
 import GoodsOverviewCard from '@/components/share/GoodsOverviewCard';
+import GroupOverviewCard from '@/components/share/GroupOverviewCard';
 // Centralized routes for consistent paths
 import { BASE_ROUTES } from '@/utils/routes';
 
@@ -17,7 +18,7 @@ import { BASE_ROUTES } from '@/utils/routes';
  */
 interface SharedItemData {
   id: string;
-  content_type: 'events' | 'safety' | 'skills' | 'goods';
+  content_type: 'events' | 'safety' | 'skills' | 'goods' | 'groups';
   content_id: string;
   neighborhood_id: string;
   share_code: string;
@@ -190,6 +191,29 @@ const SharePage = () => {
           .single();
         break;
         
+      case 'groups':
+        query = supabase
+          .from('groups')
+          .select(`
+            *,
+            profiles:created_by (
+              id,
+              display_name,
+              avatar_url
+            ),
+            group_members (
+              id,
+              profiles (
+                id,
+                display_name,
+                avatar_url
+              )
+            )
+          `)
+          .eq('id', content_id)
+          .single();
+        break;
+        
       default:
         throw new Error(`Unknown content type: ${content_type}`);
     }
@@ -255,7 +279,8 @@ const SharePage = () => {
         events: BASE_ROUTES.calendar,
         safety: BASE_ROUTES.safety,
         skills: BASE_ROUTES.skills,
-        goods: BASE_ROUTES.goods
+        goods: BASE_ROUTES.goods,
+        groups: BASE_ROUTES.groups
       } as const;
       
       const route = routes[sharedItem!.content_type];
@@ -293,6 +318,8 @@ const SharePage = () => {
         return <SkillsOverviewCard {...commonProps} />;
       case 'goods':
         return <GoodsOverviewCard {...commonProps} />;
+      case 'groups':
+        return <GroupOverviewCard {...commonProps} />;
       default:
         return null;
     }

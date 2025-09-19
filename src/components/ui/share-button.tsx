@@ -9,7 +9,7 @@ import { useUser } from '@supabase/auth-helpers-react';
  * Interface for the ShareButton component props
  */
 interface ShareButtonProps {
-  contentType: 'events' | 'safety' | 'skills' | 'goods';
+  contentType: 'events' | 'safety' | 'skills' | 'goods' | 'groups';
   contentId: string;
   neighborhoodId: string;
   className?: string;
