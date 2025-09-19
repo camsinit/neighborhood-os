@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Plus, Users, MapPin, Heart, Shield, Book, Utensils, Baby } from 'lucide-react';
+import { Plus, Users, MapPin, Heart, Shield, Book, Utensils, Baby, Activity } from 'lucide-react';
 
 interface GroupsEmptyStateProps {
   onCreateGroup: (templateData?: { name: string; description: string }) => void;
@@ -10,12 +10,12 @@ interface GroupsEmptyStateProps {
 export const GroupsEmptyState: React.FC<GroupsEmptyStateProps> = ({ onCreateGroup }) => {
   // Popular group templates to suggest
   const groupTemplates = [
-    { icon: Book, name: 'Book Club', description: 'Share and discuss your favorite reads' },
-    { icon: Shield, name: 'Safety Watch', description: 'Keep your neighborhood safe together' },
-    { icon: Utensils, name: 'Cooking Circle', description: 'Share recipes and cooking tips' },
+    { icon: Book, name: 'Book Club', description: 'Monthly group of book lovers' },
+    { icon: Shield, name: 'Emergency Prep', description: 'We help each other stay safe.' },
+    { icon: Utensils, name: 'Cooking Circle', description: 'Weekly meal prep group' },
     { icon: Baby, name: 'Parent Connect', description: 'Support for parents and families' },
     { icon: Heart, name: 'Garden Club', description: 'Green thumbs unite for beautiful spaces' },
-    { icon: Users, name: 'Social Club', description: 'General socializing and fun activities' },
+    { icon: Activity, name: 'Soccer Club', description: 'Weekly soccer games for adults' },
   ];
 
   return (
