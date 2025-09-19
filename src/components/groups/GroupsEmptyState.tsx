@@ -27,12 +27,12 @@ export const GroupsEmptyState: React.FC<GroupsEmptyStateProps> = ({ onCreateGrou
           Popular Group Ideas
         </h4>
         {/* Reduced grid density and increased spacing for better readability */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
           {groupTemplates.map((template, index) => (
             <Button
               key={index}
               variant="outline"
-              className="h-auto px-[15px] py-6 flex flex-col items-center gap-3 hover:bg-gray-50 border-2 border-gray-300 hover:border-gray-400 rounded-xl transition-all duration-200 min-h-[120px]"
+              className="h-auto px-[15px] py-6 flex flex-col items-center gap-3 hover:bg-gray-50 border-2 border-purple-300 hover:border-purple-400 rounded-xl transition-all duration-200 min-h-[120px]"
               onClick={() => onCreateGroup({ name: template.name, description: template.description })}
             >
               {/* Icon and name on the same line */}
