@@ -27,8 +27,8 @@ export const GroupsEmptyState: React.FC<GroupsEmptyStateProps> = ({ onCreateGrou
           Popular Group Ideas
         </h4>
         {/* Moved instruction text to be under the heading */}
-        <p className="text-lg text-gray-700 font-medium text-center mb-8">
-          Click any suggestion to get started, or create a custom group
+        <p className="text-base text-gray-700 font-medium text-center mb-8">
+          Click any suggestion to get started, or create a custom group by tapping "New Group" above
         </p>
         {/* Reduced grid density and increased spacing for better readability */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
