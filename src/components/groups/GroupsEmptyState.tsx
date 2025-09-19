@@ -23,9 +23,13 @@ export const GroupsEmptyState: React.FC<GroupsEmptyStateProps> = ({ onCreateGrou
       {/* Popular group suggestions */}
       <div className="max-w-4xl mx-auto">
         {/* Enhanced heading with larger, bolder text for seniors */}
-        <h4 className="text-2xl font-bold text-gray-900 mb-8 text-center">
+        <h4 className="text-2xl font-bold text-gray-900 mb-4 text-center">
           Popular Group Ideas
         </h4>
+        {/* Moved instruction text to be under the heading */}
+        <p className="text-lg text-gray-700 font-medium text-center mb-8">
+          Click any suggestion to get started, or create a custom group
+        </p>
         {/* Reduced grid density and increased spacing for better readability */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
           {groupTemplates.map((template, index) => (
@@ -46,13 +50,6 @@ export const GroupsEmptyState: React.FC<GroupsEmptyStateProps> = ({ onCreateGrou
               </span>
             </Button>
           ))}
-        </div>
-        
-        <div className="text-center mt-8">
-          {/* Larger, more visible instruction text */}
-          <p className="text-lg text-gray-700 font-medium">
-            Click any suggestion to get started, or create a custom group
-          </p>
         </div>
       </div>
     </div>
