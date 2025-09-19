@@ -157,19 +157,7 @@ export const EditGroupForm: React.FC<EditGroupFormProps> = ({ onClose, group }) 
 
       {/* Privacy Setting section removed - not necessary yet */}
 
-      {/* Max Members Field */}
-      <div className="space-y-2">
-        <Label htmlFor="max_members">Maximum Members</Label>
-        <Input
-          id="max_members"
-          type="number"
-          value={formData.max_members}
-          onChange={(e) => updateFormData('max_members', parseInt(e.target.value))}
-          placeholder="100"
-          min="1"
-          max="1000"
-        />
-      </div>
+      {/* Max Members Field removed - not necessary yet */}
 
       {/* Delete Group Section */}
       <div className="pt-4 border-t border-gray-200">
