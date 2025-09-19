@@ -196,10 +196,6 @@ const GroupSheetContent = ({
 
           </div>
 
-          {/* Horizontal Separator Line */}
-          {isUserMember && (
-            <hr className="border-t border-gray-200" />
-          )}
 
           {/* Group Activity Timeline - Shows events and updates */}
           {isUserMember && (
