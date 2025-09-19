@@ -74,7 +74,7 @@ export const CoverPhotoUpload: React.FC<CoverPhotoUploadProps> = ({
   return <div className="space-y-4">
       {/* Header */}
       <div className="space-y-2">
-        <Label>Cover Photo</Label>
+        <Label className="text-lg font-bold">Cover Photo</Label>
         <p className="text-sm text-gray-600">
           Add a cover photo to make your group more appealing (optional)
         </p>

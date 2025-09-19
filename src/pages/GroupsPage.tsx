@@ -178,11 +178,6 @@ function GroupsPage() {
       {isCreateGroupSheetOpen && (
         <Sheet open={isCreateGroupSheetOpen} onOpenChange={(open) => !open && handleCloseCreateGroup()}>
           <SheetContent className="sm:max-w-md overflow-y-auto">
-            <SheetHeader className="mb-4">
-              <SheetTitle className="text-xl font-bold">
-                Create New Group
-              </SheetTitle>
-            </SheetHeader>
             <CreateGroupForm 
               onClose={handleCloseCreateGroup}
               initialData={groupTemplateData}
