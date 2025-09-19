@@ -13,6 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, MessageSquare, Clock, MapPin, Star } from 'lucide-react';
 import { formatDate } from '@/utils/date';
+import { formatCompactDate } from '@/utils/compactDate';
 
 interface GroupActivityCardProps {
   activity: GroupActivityItem;
@@ -39,35 +40,34 @@ export const GroupActivityCard: React.FC<GroupActivityCardProps> = ({
       role={activity.type === 'group_start' ? undefined : "button"}
       tabIndex={activity.type === 'group_start' ? undefined : 0}
     >
-      {/* Profile image replaces timeline icon */}
-      <div className="flex-shrink-0">
+      {/* Profile image with timestamp underneath */}
+      <div className="flex-shrink-0 flex flex-col items-center">
         <Avatar className="w-10 h-10">
           <AvatarImage src={avatarUrl} />
           <AvatarFallback className="text-sm">
             {displayName.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>
+        {/* Compact timestamp positioned under profile photo */}
+        <span className="text-xs text-muted-foreground mt-1">
+          {formatCompactDate(activity.created_at)}
+        </span>
       </div>
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        {/* Header with timestamp */}
-        <div className="flex items-center justify-between mb-1">
-          <div className="flex items-center space-x-2">
-            <span className="text-sm font-medium text-foreground">
-              {activity.title}
-            </span>
-            <Badge variant="outline" className={`text-xs ${
-              activity.type === 'event' ? 'text-blue-600 border-blue-200' : 
-              activity.type === 'group_start' ? 'text-purple-600 border-purple-200' :
-              'text-purple-600 border-purple-200'
-            }`}>
-              {activity.type === 'event' ? 'Event' : activity.type === 'group_start' ? 'Group Start' : 'Update'}
-            </Badge>
-          </div>
-          <span className="text-xs text-muted-foreground">
-            {formatDate(activity.created_at)}
+        {/* Header without timestamp (moved under profile photo) */}
+        <div className="flex items-center space-x-2 mb-1">
+          <span className="text-sm font-medium text-foreground">
+            {activity.title}
           </span>
+          <Badge variant="outline" className={`text-xs ${
+            activity.type === 'event' ? 'text-blue-600 border-blue-200' : 
+            activity.type === 'group_start' ? 'text-purple-600 border-purple-200' :
+            'text-purple-600 border-purple-200'
+          }`}>
+            {activity.type === 'event' ? 'Event' : activity.type === 'group_start' ? 'Group Start' : 'Update'}
+          </Badge>
         </div>
 
         {/* Author name moved here */}
