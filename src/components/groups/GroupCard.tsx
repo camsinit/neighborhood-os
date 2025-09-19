@@ -178,7 +178,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({
         </div>
         
         {/* Member count text with better contrast - use actual member count or avatar count */}
-        <span className="text-base font-bold text-gray-800 ml-1">
+        <span className="text-sm text-gray-800 ml-1">
           {Math.max(group.member_count || 0, memberAvatars.length)} {Math.max(group.member_count || 0, memberAvatars.length) === 1 ? 'Neighbor' : 'Neighbors'}
         </span>
       </div>;
