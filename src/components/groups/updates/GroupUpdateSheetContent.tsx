@@ -193,22 +193,11 @@ const GroupUpdateSheetContent = ({ update, onOpenChange }: GroupUpdateSheetConte
               {/* Compact Info Section */}
               <div className="flex-1 min-w-0">
                 <div className="space-y-2">
-                  {/* Name and You badge */}
+                  {/* Name */}
                   <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="text-lg font-bold text-gray-900">
                       {update.profiles?.display_name || 'Anonymous'}
                     </h3>
-                    {isCurrentUser && (
-                      <span 
-                        className="text-xs font-medium px-2 py-0.5 rounded-full"
-                        style={{ 
-                          backgroundColor: `${groupsTheme.primary}15`, 
-                          color: groupsTheme.primary 
-                        }}
-                      >
-                        You
-                      </span>
-                    )}
                   </div>
 
                   {/* Content section */}
