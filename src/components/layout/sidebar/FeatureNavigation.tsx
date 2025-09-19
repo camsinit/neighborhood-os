@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Calendar, Brain, Gift, Info, UsersRound } from 'lucide-react';
+import { Home, Calendar, Brain, UsersRound } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCurrentNeighborhood } from '@/hooks/useCurrentNeighborhood';
 // Use centralized routes to avoid hardcoding and ensure consistency
@@ -45,18 +45,6 @@ const FeatureNavigation = () => {
       activeColor: 'text-green-600'
     },
     {
-      basePath: BASE_ROUTES.goods,
-      label: 'Freebies',
-      icon: Gift,
-      activeColor: 'text-orange-600'
-    },
-    {
-      basePath: BASE_ROUTES.safety,
-      label: 'Updates',
-      icon: Info,
-      activeColor: 'text-red-600'
-    },
-    {
       basePath: BASE_ROUTES.neighbors,
       label: 'Groups',
       icon: UsersRound,
@@ -76,9 +64,6 @@ const FeatureNavigation = () => {
         
         return (
           <div key={item.basePath}>
-            {/* Add divider between Home and Calendar with matching spacing */}
-            {index === 1 && <div className="my-3 h-px bg-gray-100" />}
-            
             <NavLink
               to={fullPath}
               className={cn(
