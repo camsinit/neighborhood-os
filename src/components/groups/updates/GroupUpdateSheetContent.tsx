@@ -138,9 +138,17 @@ const GroupUpdateSheetContent = ({ update, onOpenChange }: GroupUpdateSheetConte
           >
             {/* Title and timestamp container */}
             <div className="flex items-start justify-between gap-4 mb-3">
-              <h1 className="text-xl font-bold text-gray-900 leading-tight flex-1">
-                {update.title}
-              </h1>
+              <div className="flex-1">
+                <h1 className="text-xl font-bold text-gray-900 leading-tight mb-2">
+                  {update.title}
+                </h1>
+                {/* Description moved here */}
+                {update.content && (
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap text-sm">
+                    {update.content}
+                  </p>
+                )}
+              </div>
               <div className="flex items-center gap-1 text-sm text-gray-600 flex-shrink-0">
                 <Calendar className="h-3.5 w-3.5" />
                 <span>{formatTimeAgo(new Date(update.created_at))}</span>
@@ -200,14 +208,6 @@ const GroupUpdateSheetContent = ({ update, onOpenChange }: GroupUpdateSheetConte
                     </h3>
                   </div>
 
-                  {/* Content section */}
-                  {update.content && (
-                    <div className="mt-4 space-y-2">
-                      <p className="text-gray-700 leading-relaxed whitespace-pre-wrap text-sm">
-                        {update.content}
-                      </p>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
