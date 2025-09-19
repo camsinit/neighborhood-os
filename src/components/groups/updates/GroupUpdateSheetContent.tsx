@@ -254,25 +254,38 @@ const GroupUpdateSheetContent = ({ update, onOpenChange }: GroupUpdateSheetConte
               borderColor: `${groupsTheme.primary}20`
             }}
           >
-            {/* Title and timestamp container */}
-            <div className="flex items-start justify-between gap-4 mb-3">
+            {/* Author info in top right corner */}
+            <div className="absolute top-4 right-4 flex items-center gap-2">
+              <span className="text-sm font-medium text-gray-700">
+                {/* TODO: Get actual author name from profiles */}
+                Author
+              </span>
+              <Avatar className="h-8 w-8">
+                <AvatarFallback className="text-xs">
+                  {/* TODO: Get actual author initials */}
+                  A
+                </AvatarFallback>
+              </Avatar>
+            </div>
+
+            {/* Title with time on the left */}
+            <div className="flex items-start gap-4 mb-3 pr-20"> {/* pr-20 to avoid overlap with author info */}
+              <div className="flex items-center gap-1 text-sm text-gray-600 flex-shrink-0 mt-1">
+                <Calendar className="h-3.5 w-3.5" />
+                <span>{formatTimeAgo(new Date(update.created_at))}</span>
+              </div>
               <div className="flex-1">
                 <h1 className="text-xl font-bold text-gray-900 leading-tight mb-2">
                   {update.title}
                 </h1>
-                {/* Description moved here */}
+                {/* Description */}
                 {update.content && (
                   <p className="text-gray-700 leading-relaxed whitespace-pre-wrap text-sm">
                     {update.content}
                   </p>
                 )}
               </div>
-              <div className="flex items-center gap-1 text-sm text-gray-600 flex-shrink-0">
-                <Calendar className="h-3.5 w-3.5" />
-                <span>{formatTimeAgo(new Date(update.created_at))}</span>
-              </div>
             </div>
-            
 
           </div>
         </div>
