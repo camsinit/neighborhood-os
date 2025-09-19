@@ -70,7 +70,7 @@ const QuickActions = () => {
   // Calendar/Events actions (blue theme)
   const calendarActions = [{
     icon: Calendar,
-    label: "Add Event",
+    label: "Add Gathering",
     onClick: () => {
       logger.info('Opening event sheet');
       setIsAddEventOpen(true);
@@ -180,7 +180,7 @@ const QuickActions = () => {
       
       {/* Three-column grid focused on core community features */}
       <div className="grid grid-cols-3 gap-6">
-        <ActionColumn title="Events" actions={calendarActions} moduleType="calendar" />
+        <ActionColumn title="Calendar" actions={calendarActions} moduleType="calendar" />
         <ActionColumn title="Skillsharing" actions={skillsActions} moduleType="skills" />
         <ActionColumn title="Community" actions={groupsActions} moduleType="neighbors" />
       </div>
