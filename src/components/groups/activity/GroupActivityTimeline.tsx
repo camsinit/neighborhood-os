@@ -18,10 +18,13 @@ import { CreateGroupUpdate } from './CreateGroupUpdate';
 import { GroupEventDetail } from './GroupEventDetail';
 import { GroupViewTabs, GroupViewType } from './GroupViewTabs';
 import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Plus, Calendar, MessageSquare } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { extractNeighborhoodId, neighborhoodPath, BASE_ROUTES } from '@/utils/routes';
+import GroupUpdateSheetContent from '../updates/GroupUpdateSheetContent';
+import { GroupUpdate } from '@/types/groupUpdates';
 
 interface GroupActivityTimelineProps {
   groupId: string;
@@ -44,6 +47,8 @@ export const GroupActivityTimeline: React.FC<GroupActivityTimelineProps> = ({
   // Component state for overlays, detail panels, and view type
   const [isCreateUpdateOpen, setIsCreateUpdateOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
+  const [selectedUpdate, setSelectedUpdate] = useState<GroupUpdate | null>(null);
+  const [isUpdateSheetOpen, setIsUpdateSheetOpen] = useState(false);
   const [activeView, setActiveView] = useState<GroupViewType>('timeline'); // Always default to timeline
 
   // Fetch unified group activities (events + updates + group start)
@@ -192,6 +197,24 @@ export const GroupActivityTimeline: React.FC<GroupActivityTimelineProps> = ({
     setSelectedEvent(null);
   };
 
+  // Handle update detail panel
+  const handleUpdateClick = async (updateId: string) => {
+    // Find the update from the activities list
+    const updateActivity = activities.find(activity => 
+      activity.type === 'update' && activity.update?.id === updateId
+    );
+    
+    if (updateActivity?.update) {
+      setSelectedUpdate(updateActivity.update);
+      setIsUpdateSheetOpen(true);
+    }
+  };
+
+  const handleCloseUpdateSheet = () => {
+    setSelectedUpdate(null);
+    setIsUpdateSheetOpen(false);
+  };
+
   // Filter activities based on current view
   const getFilteredActivities = () => {
     switch (activeView) {
@@ -281,15 +304,17 @@ export const GroupActivityTimeline: React.FC<GroupActivityTimelineProps> = ({
                 <div className="absolute left-5 top-12 bottom-0 w-px bg-border" />
               )}
               
-              <GroupActivityCard
-                activity={activity}
-                onClick={() => {
-                  if (activity.type === 'event' && activity.event) {
-                    handleEventClick(activity.event.id);
-                  }
-                  // For updates, they can be handled in the card component
-                }}
-              />
+                <GroupActivityCard
+                  activity={activity}
+                  onClick={() => {
+                    if (activity.type === 'event' && activity.event) {
+                      handleEventClick(activity.event.id);
+                    } else if (activity.type === 'update' && activity.update) {
+                      // Open update detail sheet
+                      handleUpdateClick(activity.update.id);
+                    }
+                  }}
+                />
             </div>
           ))}
         </div>
@@ -301,6 +326,31 @@ export const GroupActivityTimeline: React.FC<GroupActivityTimelineProps> = ({
           eventId={selectedEvent}
           onClose={handleCloseEventDetail}
         />
+      )}
+
+      {/* Create Update Overlay */}
+      {isCreateUpdateOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <CreateGroupUpdate
+            groupId={groupId}
+            onClose={handleCloseCreateUpdate}
+            onSuccess={() => {
+              handleCloseCreateUpdate();
+              // Refresh activities after successful creation
+              window.location.reload(); // Simple refresh for now
+            }}
+          />
+        </div>
+      )}
+
+      {/* Update Detail Sheet */}
+      {isUpdateSheetOpen && selectedUpdate && (
+        <Sheet open={isUpdateSheetOpen} onOpenChange={setIsUpdateSheetOpen}>
+          <GroupUpdateSheetContent
+            update={selectedUpdate}
+            onOpenChange={handleCloseUpdateSheet}
+          />
+        </Sheet>
       )}
     </div>
   );

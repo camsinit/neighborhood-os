@@ -36,6 +36,8 @@ export const GroupActivityCard: React.FC<GroupActivityCardProps> = ({
         'border-l-4 border-l-purple-500'
       }`}
       onClick={activity.type === 'group_start' ? undefined : onClick}
+      role={activity.type === 'group_start' ? undefined : "button"}
+      tabIndex={activity.type === 'group_start' ? undefined : 0}
     >
       {/* Timeline icon */}
       <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
