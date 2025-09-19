@@ -32,11 +32,11 @@ export const GroupsEmptyState: React.FC<GroupsEmptyStateProps> = ({ onCreateGrou
             <Button
               key={index}
               variant="outline"
-              className="h-auto p-8 flex flex-col items-center gap-4 hover:bg-gray-50 border-2 border-gray-300 hover:border-gray-400 rounded-xl transition-all duration-200 min-h-[140px]"
+              className="h-auto p-6 flex flex-col items-center gap-3 hover:bg-gray-50 border-2 border-gray-300 hover:border-gray-400 rounded-xl transition-all duration-200 min-h-[120px]"
               onClick={() => onCreateGroup({ name: template.name, description: template.description })}
             >
               {/* Larger icons for better visibility */}
-              <template.icon className="h-8 w-8 text-gray-700" />
+              <template.icon className="h-12 w-12 text-gray-700" />
               {/* Larger, bolder text for group names */}
               <span className="font-bold text-lg text-gray-900">{template.name}</span>
               {/* Improved contrast and larger description text */}
