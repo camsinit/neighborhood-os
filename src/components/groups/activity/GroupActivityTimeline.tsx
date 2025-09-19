@@ -46,11 +46,45 @@ export const GroupActivityTimeline: React.FC<GroupActivityTimelineProps> = ({
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<GroupViewType>('timeline'); // Always default to timeline
 
-  // Fetch unified group activities (events + updates)
+  // Fetch unified group activities (events + updates + group start)
   const { data: activities = [], isLoading, error } = useQuery({
     queryKey: ['group-timeline', groupId],
     queryFn: async (): Promise<GroupActivityItem[]> => {
       const items: GroupActivityItem[] = [];
+
+      // First, fetch group creation info for the "Group Start" card
+      const { data: groupData, error: groupError } = await supabase
+        .from('groups')
+        .select(`
+          id,
+          name,
+          created_at,
+          created_by
+        `)
+        .eq('id', groupId)
+        .single();
+
+      if (groupError) {
+        console.error('Error fetching group data:', groupError);
+      } else if (groupData) {
+        // Fetch creator profile separately
+        const { data: creatorProfile } = await supabase
+          .from('profiles')
+          .select('display_name, avatar_url')
+          .eq('id', groupData.created_by)
+          .single();
+
+        // Add the group start card
+        items.push({
+          id: `group-start-${groupData.id}`,
+          type: 'group_start',
+          title: `${groupData.name} was created`,
+          created_at: groupData.created_at,
+          user_id: groupData.created_by,
+          profiles: creatorProfile,
+          group: groupData
+        });
+      }
 
       // Fetch group events
       const { data: events, error: eventsError } = await supabase
@@ -251,41 +285,24 @@ export const GroupActivityTimeline: React.FC<GroupActivityTimelineProps> = ({
 
         {/* Filtered Timeline Content */}
         <div className="space-y-4">
-          {filteredActivities.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-                <Plus className="w-8 h-8 text-muted-foreground" />
-              </div>
-              <h3 className="text-lg font-medium mb-2">
-                {activeView === 'updates' ? 'No Updates Yet' : 
-                 activeView === 'events' ? 'No Events Yet' : 'No Activity Yet'}
-              </h3>
-              <p className="text-muted-foreground mb-4">
-                {activeView === 'updates' ? 'Be the first to share an update!' : 
-                 activeView === 'events' ? 'Be the first to create an event!' : 
-                 'Be the first to share an update or create an event!'}
-              </p>
+          {filteredActivities.map((activity, index) => (
+            <div key={activity.id} className="relative">
+              {/* Timeline connector line (except for last item) */}
+              {index < filteredActivities.length - 1 && (
+                <div className="absolute left-5 top-12 bottom-0 w-px bg-border" />
+              )}
+              
+              <GroupActivityCard
+                activity={activity}
+                onClick={() => {
+                  if (activity.type === 'event' && activity.event) {
+                    handleEventClick(activity.event.id);
+                  }
+                  // For updates, they can be handled in the card component
+                }}
+              />
             </div>
-          ) : (
-            filteredActivities.map((activity, index) => (
-              <div key={activity.id} className="relative">
-                {/* Timeline connector line (except for last item) */}
-                {index < filteredActivities.length - 1 && (
-                  <div className="absolute left-5 top-12 bottom-0 w-px bg-border" />
-                )}
-                
-                <GroupActivityCard
-                  activity={activity}
-                  onClick={() => {
-                    if (activity.type === 'event' && activity.event) {
-                      handleEventClick(activity.event.id);
-                    }
-                    // For updates, they can be handled in the card component
-                  }}
-                />
-              </div>
-            ))
-          )}
+          ))}
         </div>
       </GroupViewTabs>
 

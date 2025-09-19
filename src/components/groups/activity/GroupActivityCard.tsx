@@ -11,7 +11,7 @@ import React from 'react';
 import { GroupActivityItem } from '@/types/groupActivityTypes';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, MessageSquare, Clock, MapPin } from 'lucide-react';
+import { Calendar, MessageSquare, Clock, MapPin, Star } from 'lucide-react';
 import { formatDate } from '@/utils/date';
 
 interface GroupActivityCardProps {
@@ -28,19 +28,27 @@ export const GroupActivityCard: React.FC<GroupActivityCardProps> = ({
 
   return (
     <div
-      className={`flex items-start space-x-3 p-3 rounded-lg transition-colors cursor-pointer hover:bg-muted/50 ${
-        activity.type === 'event' ? 'border-l-4 border-l-blue-500' : 'border-l-4 border-l-purple-500'
+      className={`flex items-start space-x-3 p-3 rounded-lg transition-colors ${
+        activity.type === 'group_start' ? '' : 'cursor-pointer hover:bg-muted/50'
+      } ${
+        activity.type === 'event' ? 'border-l-4 border-l-blue-500' : 
+        activity.type === 'group_start' ? 'border-l-4 border-l-green-500' :
+        'border-l-4 border-l-purple-500'
       }`}
-      onClick={onClick}
+      onClick={activity.type === 'group_start' ? undefined : onClick}
     >
       {/* Timeline icon */}
       <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
         activity.type === 'event' 
           ? 'bg-blue-100 text-blue-600' 
+          : activity.type === 'group_start'
+          ? 'bg-green-100 text-green-600'
           : 'bg-purple-100 text-purple-600'
       }`}>
         {activity.type === 'event' ? (
           <Calendar className="w-5 h-5" />
+        ) : activity.type === 'group_start' ? (
+          <Star className="w-5 h-5" />
         ) : (
           <MessageSquare className="w-5 h-5" />
         )}
@@ -61,9 +69,11 @@ export const GroupActivityCard: React.FC<GroupActivityCardProps> = ({
               {displayName}
             </span>
             <Badge variant="outline" className={`text-xs ${
-              activity.type === 'event' ? 'text-blue-600 border-blue-200' : 'text-purple-600 border-purple-200'
+              activity.type === 'event' ? 'text-blue-600 border-blue-200' : 
+              activity.type === 'group_start' ? 'text-green-600 border-green-200' :
+              'text-purple-600 border-purple-200'
             }`}>
-              {activity.type === 'event' ? 'Event' : 'Update'}
+              {activity.type === 'event' ? 'Event' : activity.type === 'group_start' ? 'Group Start' : 'Update'}
             </Badge>
           </div>
           <span className="text-xs text-muted-foreground">

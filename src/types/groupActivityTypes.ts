@@ -9,7 +9,7 @@ import { GroupUpdate } from './groupUpdates';
 // Unified activity item for timeline display
 export interface GroupActivityItem {
   id: string;
-  type: 'event' | 'update';
+  type: 'event' | 'update' | 'group_start';
   title: string;
   created_at: string;
   user_id: string;
@@ -34,6 +34,14 @@ export interface GroupActivityItem {
   
   // Update-specific data  
   update?: GroupUpdate;
+  
+  // Group start data
+  group?: {
+    id: string;
+    name: string;
+    created_at: string;
+    created_by: string;
+  };
 }
 
 // Timeline view configuration
