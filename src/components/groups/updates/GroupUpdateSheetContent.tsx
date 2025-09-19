@@ -17,7 +17,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { useUser } from '@supabase/auth-helpers-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, useQuery, useMutation } from '@tanstack/react-query';
 import { moduleThemeColors } from '@/theme/moduleTheme';
 import { GroupUpdate } from '@/types/groupUpdates';
 
@@ -40,6 +40,124 @@ const GroupUpdateSheetContent = ({ update, onOpenChange }: GroupUpdateSheetConte
   
   // Groups theme colors for consistency
   const groupsTheme = moduleThemeColors.neighbors;
+  
+  // Fetch comments for this update
+  const { data: comments = [] } = useQuery({
+    queryKey: ['group-update-comments', update.id],
+    queryFn: async () => {
+      const { data: commentsData, error: commentsError } = await supabase
+        .from('group_update_comments')
+        .select('*')
+        .eq('update_id', update.id)
+        .eq('is_deleted', false)
+        .order('created_at', { ascending: true });
+
+      if (commentsError) throw commentsError;
+
+      if (!commentsData || commentsData.length === 0) {
+        return [];
+      }
+
+      // Get profiles for comment authors
+      const userIds = commentsData.map(comment => comment.user_id);
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, display_name, avatar_url')
+        .in('id', userIds);
+
+      if (profilesError) throw profilesError;
+
+      // Map comments with their profiles
+      const commentsWithProfiles = commentsData.map(comment => ({
+        ...comment,
+        profiles: profiles?.find(p => p.id === comment.user_id)
+      }));
+
+      return commentsWithProfiles || [];
+    },
+    enabled: !!update.id
+  });
+
+  // Comment mutation - properly handles both updateId and content parameters
+  const commentMutation = useMutation({
+    mutationFn: async ({ updateId, content }: { updateId: string; content: string }) => {
+      if (!user) throw new Error('User not authenticated');
+
+      const { error } = await supabase
+        .from('group_update_comments')
+        .insert({
+          update_id: updateId,
+          user_id: user.id,
+          content
+        });
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      // Invalidate the comments query to refresh the list
+      queryClient.invalidateQueries({ queryKey: ['group-update-comments', update.id] });
+      // Also invalidate group updates to update comment counts
+      queryClient.invalidateQueries({ queryKey: ['group-updates', update.group_id] });
+      queryClient.invalidateQueries({ queryKey: ['group-activities'] });
+    },
+    onError: (error) => {
+      console.error('Error adding comment:', error);
+      toast({
+        title: "Error adding comment",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // React mutation for reactions on updates
+  const reactMutation = useMutation({
+    mutationFn: async ({ updateId, emoji }: { updateId: string; emoji: string }) => {
+      if (!user) throw new Error('User not authenticated');
+
+      // Check if user already reacted with this emoji
+      const { data: existingReaction } = await supabase
+        .from('group_update_reactions')
+        .select('id')
+        .eq('update_id', updateId)
+        .eq('user_id', user.id)
+        .eq('emoji', emoji)
+        .single();
+
+      if (existingReaction) {
+        // Remove existing reaction
+        const { error } = await supabase
+          .from('group_update_reactions')
+          .delete()
+          .eq('id', existingReaction.id);
+        
+        if (error) throw error;
+      } else {
+        // Add new reaction
+        const { error } = await supabase
+          .from('group_update_reactions')
+          .insert({
+            update_id: updateId,
+            user_id: user.id,
+            emoji
+          });
+        
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['group-updates', update.group_id] });
+      queryClient.invalidateQueries({ queryKey: ['group-activities'] });
+    },
+    onError: (error) => {
+      console.error('Error adding reaction:', error);
+      toast({
+        title: "Error adding reaction",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    },
+  });
   
   /**
    * Handle delete functionality with proper error handling
@@ -190,14 +308,14 @@ const GroupUpdateSheetContent = ({ update, onOpenChange }: GroupUpdateSheetConte
             <div className="space-y-4">
               <GroupUpdateComments 
                 updateId={update.id}
-                comments={[]} // This will be handled by the component itself
+                comments={comments}
                 currentUserId={user?.id || ''}
                 isGroupManager={false} // TODO: Pass actual group manager status
-                onComment={async (content) => {
-                  // Handle comment creation - this will be managed by the GroupUpdateComments component
+                onComment={async (updateId, content) => {
+                  commentMutation.mutate({ updateId, content });
                 }}
-                onReact={async (emoji) => {
-                  // Handle reactions - this will be managed by the GroupUpdateComments component
+                onReact={async (updateId, emoji) => {
+                  reactMutation.mutate({ updateId, emoji });
                 }}
               />
             </div>
