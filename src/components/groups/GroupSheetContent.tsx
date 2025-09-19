@@ -142,6 +142,13 @@ const GroupSheetContent = ({
               {group.name}
             </h1>
             
+            {/* Group Description */}
+            {group.description && (
+              <p className="text-gray-600 leading-relaxed">
+                {group.description}
+              </p>
+            )}
+            
             {/* Privacy status and member count with profile images */}
             <div className="flex items-center gap-2 text-gray-600">
               {/* Profile images on the left */}
