@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import ModuleLayout from '@/components/layout/ModuleLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -26,7 +27,11 @@ import { useGroups } from '@/hooks/useGroups';
 function GroupsPage() {
   const { data: users } = useNeighborUsers();
   const { data: groups = [] } = useGroups({ includeCurrentUserMembership: true });
-  const [activeTab, setActiveTab] = useState('groups');
+  
+  // Use URL search parameters for tab state to enable direct linking
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlTab = searchParams.get('view');
+  const [activeTab, setActiveTab] = useState(urlTab || 'groups');
   
   // Universal page controller for sheet management (for neighbors tab)
   const {
@@ -66,9 +71,22 @@ function GroupsPage() {
   const [isCreateGroupSheetOpen, setIsCreateGroupSheetOpen] = useState(false);
   const [groupTemplateData, setGroupTemplateData] = useState<{ name: string; description: string } | undefined>(undefined);
 
+  // Update URL when tab changes to enable direct linking
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
+    // Update URL search params to persist tab state
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.set('view', tab);
+    setSearchParams(newSearchParams);
   };
+
+  // Sync activeTab with URL on initial load and URL changes
+  useEffect(() => {
+    const urlTab = searchParams.get('view');
+    if (urlTab && ['groups', 'units', 'directory'].includes(urlTab)) {
+      setActiveTab(urlTab);
+    }
+  }, [searchParams]);
 
   // Handle neighbor sheet opening
   const handleNeighborClick = (itemId: string, item?: any) => {
