@@ -57,9 +57,8 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
     inviteHeaderImageUrl: ''
   });
   
-  // State for physical units configuration
+  // State for physical units configuration - simplified to just label and units list
   const [physicalUnitsConfig, setPhysicalUnitsConfig] = useState({
-    physicalUnitType: 'street',
     physicalUnitLabel: '',
     physicalUnits: [] as string[]
   });
@@ -89,7 +88,7 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
         state: 'state',
         timezone: 'timezone',
         inviteHeaderImageUrl: 'invite_header_image_url',
-        physicalUnitType: 'physical_unit_type',
+        
         physicalUnitLabel: 'physical_unit_label',
         physicalUnits: 'physical_units'
       };
@@ -179,14 +178,12 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
       // Initialize physical units configuration
       logger.info('Loading physical units config from neighborhood', {
         neighborhoodId: neighborhood.id,
-        physicalUnitType: neighborhood.physical_unit_type,
         physicalUnitLabel: neighborhood.physical_unit_label,
         physicalUnits: neighborhood.physical_units,
         physicalUnitsLength: neighborhood.physical_units?.length || 0
       });
       
       setPhysicalUnitsConfig({
-        physicalUnitType: neighborhood.physical_unit_type || 'street',
         physicalUnitLabel: neighborhood.physical_unit_label || '',
         physicalUnits: Array.isArray(neighborhood.physical_units) ? neighborhood.physical_units : []
       });
@@ -207,8 +204,8 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
     // Update local state immediately for optimistic UI
     setPhysicalUnitsConfig(prev => ({ ...prev, [field]: value }));
     
-    // Auto-save all simple fields immediately (not the complex array)
-    if (field === 'physicalUnitType' || field === 'physicalUnitLabel') {
+    // Auto-save the label field immediately (not the complex array)
+    if (field === 'physicalUnitLabel') {
       debouncedAutoSave(field, value as string);
     }
   };
@@ -269,7 +266,7 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
       const { error } = await supabase
         .from('neighborhoods')
         .update({
-          physical_unit_type: physicalUnitsConfig.physicalUnitType,
+          physical_unit_type: 'custom', // Always use custom since user defines their own label
           physical_unit_label: physicalUnitsConfig.physicalUnitLabel || null,
           physical_units: uniqueUnits
         })
@@ -371,7 +368,7 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
           state: formData.state || null,
           timezone: formData.timezone,
           invite_header_image_url: formData.inviteHeaderImageUrl || null,
-          physical_unit_type: physicalUnitsConfig.physicalUnitType,
+          physical_unit_type: 'custom', // Always use custom since user defines their own label
           physical_unit_label: physicalUnitsConfig.physicalUnitLabel || null,
           physical_units: physicalUnitsConfig.physicalUnits.filter(unit => unit.trim() !== ''),
         })
@@ -774,46 +771,37 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
             Physical Groups
           </CardTitle>
           <CardDescription>
-            Define the physical grouping units for your neighborhood (e.g., streets, buildings, floors)
+            Define your neighborhood's physical groupings. Each unit you add will automatically create a group for residents to join.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="physical-unit-type">Physical Unit Type</Label>
-              <Select 
-                value={physicalUnitsConfig.physicalUnitType} 
-                onValueChange={(value) => handlePhysicalUnitsChange('physicalUnitType', value)}
-                disabled={isReadOnly}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="street">Street</SelectItem>
-                  <SelectItem value="floor">Floor</SelectItem>
-                  <SelectItem value="block">Block</SelectItem>
-                  <SelectItem value="custom">Custom</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            {physicalUnitsConfig.physicalUnitType === 'custom' && (
-              <div className="space-y-2">
-                <Label htmlFor="physical-unit-label">Custom Label</Label>
-                <Input
-                  id="physical-unit-label"
-                  value={physicalUnitsConfig.physicalUnitLabel}
-                  onChange={(e) => handlePhysicalUnitsChange('physicalUnitLabel', e.target.value)}
-                  placeholder="Enter custom unit name"
-                  disabled={isReadOnly}
-                />
-              </div>
-            )}
+        <CardContent className="space-y-6">
+          {/* Simple label input - what do you call these units? */}
+          <div className="space-y-2">
+            <Label htmlFor="physical-unit-label">
+              What do you call your neighborhood sections?
+            </Label>
+            <Input
+              id="physical-unit-label"
+              value={physicalUnitsConfig.physicalUnitLabel}
+              onChange={(e) => handlePhysicalUnitsChange('physicalUnitLabel', e.target.value)}
+              placeholder="e.g., Streets, Buildings, Floors, Blocks"
+              disabled={isReadOnly}
+              className="max-w-md"
+            />
+            <p className="text-xs text-muted-foreground">
+              This is what people will see when they join a group (e.g., "Oak Street Group")
+            </p>
           </div>
 
-          <div className="space-y-2">
+          {/* List of physical units - each creates a group */}
+          <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <Label>Physical Units List</Label>
+              <div className="space-y-1">
+                <Label>Physical Units</Label>
+                <p className="text-sm text-muted-foreground">
+                  Each unit you add will create a group that residents can join
+                </p>
+              </div>
               {!isReadOnly && (
                 <Button
                   type="button"
@@ -823,41 +811,46 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
                   className="flex items-center gap-1"
                 >
                   <Plus className="h-4 w-4" />
-                  Add
+                  Add Unit
                 </Button>
               )}
             </div>
-            <p className="text-sm text-muted-foreground">
-              Add the specific {physicalUnitsConfig.physicalUnitType}s in your neighborhood for group organization.
-            </p>
             
-            <div className="space-y-2 max-h-48 overflow-y-auto">
+            <div className="space-y-3 max-h-64 overflow-y-auto">
               {physicalUnitsConfig.physicalUnits.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <MapPin className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p>No physical units defined yet</p>
-                  <p className="text-sm">Click "Add" to get started</p>
+                <div className="text-center py-8 border-2 border-dashed border-muted rounded-lg">
+                  <MapPin className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-muted-foreground font-medium">No physical units yet</p>
+                  <p className="text-sm text-muted-foreground">
+                    Add your first unit to create groups for residents
+                  </p>
                 </div>
               ) : (
                 physicalUnitsConfig.physicalUnits.map((unit, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <Input
-                      value={unit}
-                      onChange={(e) => updatePhysicalUnit(index, e.target.value)}
-                      placeholder={`${physicalUnitsConfig.physicalUnitType.charAt(0).toUpperCase() + physicalUnitsConfig.physicalUnitType.slice(1)} Name`}
-                      disabled={isReadOnly}
-                    />
-                     {!isReadOnly && (
-                       <Button
-                         type="button"
-                         variant="ghost"
-                         size="sm"
-                         onClick={() => removePhysicalUnit(index)}
-                         className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                       >
-                         <Minus className="h-4 w-4" />
-                       </Button>
-                     )}
+                  <div key={index} className="flex items-center gap-3 p-3 border rounded-lg bg-muted/30">
+                    <div className="flex-1">
+                      <Input
+                        value={unit}
+                        onChange={(e) => updatePhysicalUnit(index, e.target.value)}
+                        placeholder={`Enter ${physicalUnitsConfig.physicalUnitLabel || 'unit'} name`}
+                        disabled={isReadOnly}
+                        className="border-0 bg-transparent px-0 focus-visible:ring-0 font-medium"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        → Creates "{unit || 'Unit Name'} Group" for residents
+                      </p>
+                    </div>
+                    {!isReadOnly && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removePhysicalUnit(index)}
+                        className="text-muted-foreground hover:text-destructive shrink-0"
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                 ))
               )}
