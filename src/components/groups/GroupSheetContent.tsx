@@ -178,7 +178,7 @@ const GroupSheetContent = ({
                     navigator.clipboard.writeText(groupUrl);
                     // TODO: Add toast notification for successful copy
                   }} 
-                  className="p-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-colors" 
+                  className="p-2 rounded-lg bg-purple-100 hover:bg-purple-200 text-purple-600 transition-colors" 
                   aria-label="Share group"
                 >
                   <Share2 className="h-4 w-4" />
