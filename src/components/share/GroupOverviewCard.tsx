@@ -69,7 +69,7 @@ const GroupOverviewCard: React.FC<GroupOverviewCardProps> = ({
           <CardTitle className="text-2xl font-bold text-gray-900">
             {group.name}
           </CardTitle>
-          {group.privacy_type === 'private' ? (
+          {group.is_private ? (
             <Shield className="h-5 w-5 text-gray-500" />
           ) : (
             <Globe className="h-5 w-5 text-gray-500" />
@@ -149,11 +149,11 @@ const GroupOverviewCard: React.FC<GroupOverviewCardProps> = ({
             </Badge>
           )}
           <Badge variant="outline" className="capitalize">
-            {group.privacy_type || 'Public'}
+            {group.is_private ? 'Private' : 'Public'}
           </Badge>
-          {group.category && (
+          {group.group_type && (
             <Badge variant="outline" className="capitalize">
-              {group.category}
+              {group.group_type.replace('_', ' ')}
             </Badge>
           )}
         </div>

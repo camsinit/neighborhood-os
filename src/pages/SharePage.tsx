@@ -280,7 +280,7 @@ const SharePage = () => {
         safety: BASE_ROUTES.safety,
         skills: BASE_ROUTES.skills,
         goods: BASE_ROUTES.goods,
-        groups: BASE_ROUTES.groups
+        groups: BASE_ROUTES.neighbors // Groups are served at the neighbors route
       } as const;
       
       const route = routes[sharedItem!.content_type];
