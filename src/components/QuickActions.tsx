@@ -116,7 +116,7 @@ const QuickActions = () => {
     moduleTheme: 'neighbors' as const
   }, {
     icon: UserPlus,
-    label: "Explore Neighbors",
+    label: "Find a Neighbor",
     onClick: () => {
       const neighborsPath = neighborhoodPath(BASE_ROUTES.neighbors, currentNeighborhood?.id);
       navigate(neighborsPath);
