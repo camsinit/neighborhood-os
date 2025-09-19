@@ -115,7 +115,7 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
       disabled={isSharing}
       size={size}
       variant={variant}
-      className={`h-10 w-10 p-0 rounded-full bg-muted hover:bg-muted/80 ${className}`}
+      className={`h-10 w-10 p-0 rounded-lg bg-purple-100 hover:bg-purple-200 text-purple-600 transition-colors ${className}`}
       title="Share this item"
       aria-label="Share this item"
     >

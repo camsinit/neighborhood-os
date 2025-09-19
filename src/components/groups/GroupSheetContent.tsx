@@ -185,7 +185,7 @@ const GroupSheetContent = ({
                 {canEditGroup && (
                   <button 
                     onClick={() => setIsEditGroupOpen(true)} 
-                  className="p-2 rounded-lg bg-purple-100 hover:bg-purple-200 text-purple-600 transition-colors"
+                    className="h-10 w-10 p-0 rounded-lg bg-purple-100 hover:bg-purple-200 text-purple-600 transition-colors flex items-center justify-center"
                     aria-label="Edit group"
                   >
                     <Edit className="h-4 w-4" />
