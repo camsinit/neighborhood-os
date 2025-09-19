@@ -197,10 +197,18 @@ const PhysicalUnitSheetContent = ({ unit, onOpenChange }: PhysicalUnitSheetConte
             unitLabel={unit.unit_label}
             neighborhoodId={neighborhoodId}
             isUnitResident={isUserResident}
+            onCreateEvent={() => {
+              // TODO: Implement create event functionality
+              console.log("Create event for unit");
+            }}
+            onCreateUpdate={() => {
+              // TODO: Implement create update functionality  
+              console.log("Create update for unit");
+            }}
             showInviteButton={isUserResident}
             onInvite={() => {
               // TODO: Implement invite functionality
-              console.log('Invite neighbors to unit');
+              console.log("Invite neighbors to unit");
             }}
           />
         )}
