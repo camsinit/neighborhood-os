@@ -231,7 +231,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({
                   ? "w-full bg-red-600 hover:bg-red-700 text-white font-bold text-base py-3"
                   : group.current_user_membership 
                     ? "w-full bg-white hover:bg-red-50 border-2 font-bold text-base py-3 hover:border-red-300" 
-                    : "w-full bg-gray-700 hover:bg-gray-800 text-white font-bold text-base py-3"
+                    : "w-full bg-purple-600 hover:bg-purple-700 text-white font-bold text-base py-3"
               }
               style={group.current_user_membership && !showLeaveConfirm ? {
                 color: showLeaveConfirm ? '#dc2626' : 'hsl(var(--neighbors-color))',
