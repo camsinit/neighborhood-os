@@ -182,10 +182,6 @@ const PhysicalUnitSheetContent = ({ unit, onOpenChange }: PhysicalUnitSheetConte
                 {unit.resident_count === 1 ? '1 resident' : `${unit.resident_count} residents`}
               </span>
               <span>•</span>
-              <span className="flex items-center gap-1">
-                🏠 Physical Unit
-              </span>
-              <span>•</span>
               <span>{unit.unit_label.slice(0, -1)}</span>
             </div>
           </div>
