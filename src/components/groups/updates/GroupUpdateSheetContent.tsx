@@ -174,43 +174,6 @@ const GroupUpdateSheetContent = ({ update, onOpenChange }: GroupUpdateSheetConte
               )}
             </div>
 
-            {/* Compact Author Info Layout */}
-            <div className="flex items-start gap-4">
-              {/* Avatar Section */}
-              <div className="flex-shrink-0">
-                <div className="relative">
-                  <Avatar className="h-12 w-12 border-2 border-white shadow-md">
-                    <AvatarImage src={update.profiles?.avatar_url || ''} />
-                    <AvatarFallback 
-                      className="text-sm"
-                      style={{ backgroundColor: `${groupsTheme.primary}15`, color: groupsTheme.primary }}
-                    >
-                      <User className="h-4 w-4" />
-                    </AvatarFallback>
-                  </Avatar>
-                  {/* Update indicator dot */}
-                  <div 
-                    className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border border-white flex items-center justify-center"
-                    style={{ backgroundColor: groupsTheme.primary }}
-                  >
-                    <MessageSquare className="w-2 h-2 text-white" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Compact Info Section */}
-              <div className="flex-1 min-w-0">
-                <div className="space-y-2">
-                  {/* Name */}
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-lg font-bold text-gray-900">
-                      {update.profiles?.display_name || 'Anonymous'}
-                    </h3>
-                  </div>
-
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
