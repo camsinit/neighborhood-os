@@ -466,14 +466,25 @@ export const useJoinGroup = () => {
         queryKey: groupQueryKeys.neighborhoods(neighborhood?.id || '')
       });
       
-      // Optimistically update member count
+      // Get current user for optimistic updates
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // Optimistically update member count and membership status
       const previousGroups = queryClient.getQueryData(
         groupQueryKeys.neighborhood(neighborhood?.id || '', {})
       ) as Group[] || [];
       
       const updatedGroups = previousGroups.map(group =>
         group.id === groupId
-          ? { ...group, member_count: (group.member_count || 0) + 1 }
+          ? { 
+              ...group, 
+              member_count: (group.member_count || 0) + 1,
+              // Add current user membership for immediate button state change
+              current_user_membership: user ? {
+                role: 'member',
+                joined_at: new Date().toISOString()
+              } : null
+            }
           : group
       );
       

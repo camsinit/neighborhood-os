@@ -8,6 +8,9 @@ import { Group, GroupMember } from '@/types/groups';
 import { cn } from '@/lib/utils';
 import { GroupService } from '@/services/groupService';
 import { useDataAttributes } from '@/utils/dataAttributes';
+import { useJoinGroup } from '@/hooks/useGroups';
+import { useUser } from '@supabase/auth-helpers-react';
+import { supabase } from '@/integrations/supabase/client';
 interface GroupCardProps {
   group: Group;
   className?: string;
@@ -22,10 +25,36 @@ export const GroupCard: React.FC<GroupCardProps> = ({
 }) => {
   // State to hold member avatars for the profile stack
   const [memberAvatars, setMemberAvatars] = useState<GroupMember[]>([]);
+  const [currentUserProfile, setCurrentUserProfile] = useState<any>(null);
+  
+  // Hooks for joining groups and getting current user
   const groupService = new GroupService();
+  const joinGroupMutation = useJoinGroup();
+  const user = useUser();
   
   // Add data attributes for highlighting support
   const dataAttributes = useDataAttributes('group', group.id);
+
+  // Fetch current user profile for optimistic updates
+  useEffect(() => {
+    const fetchCurrentUserProfile = async () => {
+      if (!user?.id) return;
+      
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('id, display_name, avatar_url')
+          .eq('id', user.id)
+          .single();
+        
+        setCurrentUserProfile(profile);
+      } catch (error) {
+        console.error('Error fetching current user profile:', error);
+      }
+    };
+    
+    fetchCurrentUserProfile();
+  }, [user?.id]);
 
   // Fetch group members to display profile images
   useEffect(() => {
@@ -39,13 +68,49 @@ export const GroupCard: React.FC<GroupCardProps> = ({
       }
     };
     fetchMembers();
-  }, [group.id]);
+  }, [group.id, group.member_count]); // Re-fetch when member count changes
   const handleCardClick = (e: React.MouseEvent) => {
     // Don't trigger card click if clicking on action buttons
     if ((e.target as HTMLElement).closest('button')) {
       return;
     }
     onClick?.(group);
+  };
+
+  /**
+   * Handle joining a group with optimistic updates
+   */
+  const handleJoinGroup = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
+    
+    if (!user?.id || group.current_user_membership) {
+      return; // Already joined or not authenticated
+    }
+
+    // Optimistically add current user to member avatars if there's space
+    if (currentUserProfile && memberAvatars.length < 4) {
+      const optimisticMember: GroupMember = {
+        id: `temp-${user.id}`,
+        group_id: group.id,
+        user_id: user.id,
+        role: 'member',
+        joined_at: new Date().toISOString(),
+        invited_by: null,
+        profile: currentUserProfile
+      };
+      
+      setMemberAvatars(prev => [...prev, optimisticMember]);
+    }
+
+    try {
+      await joinGroupMutation.mutateAsync(group.id);
+    } catch (error) {
+      // Revert optimistic update on error
+      if (currentUserProfile && memberAvatars.length < 4) {
+        setMemberAvatars(prev => prev.filter(member => member.id !== `temp-${user.id}`));
+      }
+      console.error('Failed to join group:', error);
+    }
   };
 
   // Function to render overlapping profile images
@@ -122,13 +187,16 @@ export const GroupCard: React.FC<GroupCardProps> = ({
                 color: 'hsl(var(--neighbors-color))',
                 borderColor: 'hsl(var(--neighbors-color))'
               } : {}}
-              onClick={handleCardClick}
+              onClick={group.current_user_membership ? handleCardClick : handleJoinGroup}
+              disabled={joinGroupMutation.isPending}
             >
-              {group.current_user_membership 
-                ? 'Joined' 
-                : group.is_private 
-                  ? 'Request to Join' 
-                  : 'Join Group'
+              {joinGroupMutation.isPending 
+                ? 'Joining...'
+                : group.current_user_membership 
+                  ? 'Joined' 
+                  : group.is_private 
+                    ? 'Request to Join' 
+                    : 'Join Group'
               }
             </Button>
           </div>}
