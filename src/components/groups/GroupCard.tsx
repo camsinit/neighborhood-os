@@ -71,7 +71,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({
       </div>;
   };
   return <Card 
-    className={cn("overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer", "bg-white border-2 border-gray-300 hover:border-gray-400 rounded-xl", className)} 
+    className={cn("overflow-hidden hover:shadow-lg hover:shadow-purple-200/50 transition-all duration-300 cursor-pointer", "bg-white border-2 border-gray-300 hover:border-purple-400 rounded-xl", className)}
     onClick={handleCardClick}
     {...dataAttributes}
   >
