@@ -198,13 +198,6 @@ const GroupUpdateSheetContent = ({ update, onOpenChange }: GroupUpdateSheetConte
                     <h3 className="text-lg font-bold text-gray-900">
                       {update.profiles?.display_name || 'Anonymous'}
                     </h3>
-                    <Badge 
-                      variant="outline" 
-                      className="bg-purple-100 text-purple-800 border-purple-200 font-medium border"
-                    >
-                      <MessageSquare className="w-3 h-3 mr-1.5" />
-                      Update
-                    </Badge>
                     {isCurrentUser && (
                       <span 
                         className="text-xs font-medium px-2 py-0.5 rounded-full"
