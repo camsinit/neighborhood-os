@@ -73,11 +73,6 @@ export const GroupActivityCard: React.FC<GroupActivityCardProps> = ({
           </span>
         </div>
 
-        {/* Author name moved here */}
-        <p className="text-xs text-muted-foreground mb-1">
-          by {displayName}
-        </p>
-
         {/* Event-specific details */}
         {activity.type === 'event' && activity.event && (
           <div className="space-y-1">
