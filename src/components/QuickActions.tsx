@@ -119,7 +119,7 @@ const QuickActions = () => {
     label: "Find a Neighbor",
     onClick: () => {
       const neighborsPath = neighborhoodPath(BASE_ROUTES.neighbors, currentNeighborhood?.id);
-      navigate(neighborsPath);
+      navigate(`${neighborsPath}?view=directory`);
     },
     moduleTheme: 'neighbors' as const
   }];
