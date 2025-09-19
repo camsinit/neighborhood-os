@@ -114,72 +114,68 @@ export const CreateGroupUpdate: React.FC<CreateGroupUpdateProps> = ({
 
   return (
     <div 
-      className="absolute top-0 left-0 right-0 bottom-0 bg-background border rounded-lg shadow-lg z-10 animate-in slide-in-from-top-4 duration-200 flex flex-col"
+      className="bg-background border-t p-3 space-y-3"
       onKeyDown={handleKeyDown}
     >
-      {/* Combined Header and Form Content */}
-      <div className="p-4 space-y-4 flex-1">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Create Update</h2>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="h-8 w-8"
-          >
-            <X className="w-4 h-4" />
-          </Button>
-        </div>
-
-        {/* Title Field */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="text-sm font-medium">Title</label>
-            <span className={`text-xs ${title.length > 20 ? 'text-destructive' : 'text-muted-foreground'}`}>
-              {title.length}/25
-            </span>
-          </div>
-          <Input
-            ref={titleRef}
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Brief title for your update..."
-            maxLength={25}
-            className="focus:ring-purple-500 focus:border-purple-500"
-          />
-        </div>
-
-        {/* Content Field */}
-        <div>
-          <label className="text-sm font-medium mb-2 block">Content</label>
-          <Textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="Share an update with the group..."
-            rows={4}
-            className="focus:ring-purple-500 focus:border-purple-500 resize-none"
-          />
-        </div>
-
-        {/* Submit Button */}
-        <div>
-          <Button
-            onClick={handleSubmit}
-            disabled={!title.trim() || !content.trim() || createUpdateMutation.isPending}
-            className="w-full bg-purple-600 hover:bg-purple-700 text-white"
-          >
-            {createUpdateMutation.isPending ? (
-              'Posting...'
-            ) : (
-              <div className="flex items-center justify-center">
-                <ArrowUp className="w-4 h-4 mr-2" />
-                Post Update
-              </div>
-            )}
-          </Button>
-        </div>
+      {/* Compact Header */}
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-medium">Create Update</h3>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onClose}
+          className="h-6 w-6 p-0"
+        >
+          <X className="w-3 h-3" />
+        </Button>
       </div>
+
+      {/* Compact Title Field */}
+      <div>
+        <div className="flex items-center justify-between mb-1">
+          <label className="text-xs font-medium">Title</label>
+          <span className={`text-xs ${title.length > 20 ? 'text-destructive' : 'text-muted-foreground'}`}>
+            {title.length}/25
+          </span>
+        </div>
+        <Input
+          ref={titleRef}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Brief title..."
+          maxLength={25}
+          className="h-8 text-sm focus:ring-purple-500 focus:border-purple-500"
+        />
+      </div>
+
+      {/* Compact Content Field */}
+      <div>
+        <label className="text-xs font-medium mb-1 block">Content</label>
+        <Textarea
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder="Share an update..."
+          rows={3}
+          className="text-sm focus:ring-purple-500 focus:border-purple-500 resize-none"
+        />
+      </div>
+
+      {/* Compact Submit Button */}
+      <Button
+        onClick={handleSubmit}
+        disabled={!title.trim() || !content.trim() || createUpdateMutation.isPending}
+        size="sm"
+        className="w-full bg-purple-600 hover:bg-purple-700 text-white h-8"
+      >
+        {createUpdateMutation.isPending ? (
+          'Posting...'
+        ) : (
+          <div className="flex items-center justify-center">
+            <ArrowUp className="w-3 h-3 mr-1" />
+            Post
+          </div>
+        )}
+      </Button>
     </div>
   );
 };
