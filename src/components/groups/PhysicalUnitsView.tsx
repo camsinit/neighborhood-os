@@ -115,8 +115,10 @@ const PhysicalUnitCard: React.FC<PhysicalUnitCardProps> = ({ unit, unitLabel, on
   const joinGroupMutation = useJoinGroup();
   const leaveGroupMutation = useLeaveGroup();
   
-  // Get all groups to find the matching physical group for this unit
-  const { data: allGroups = [] } = useGroups({});
+  // Get all groups with current user membership info for this neighborhood
+  const { data: allGroups = [] } = useGroups({
+    groupType: 'physical' // Only get physical groups for better performance
+  });
   
   // Find the group that matches this physical unit
   const matchingGroup = allGroups.find(group => 
@@ -126,6 +128,9 @@ const PhysicalUnitCard: React.FC<PhysicalUnitCardProps> = ({ unit, unitLabel, on
   
   // Check if user is already a member of this physical group
   const isUserMember = !!matchingGroup?.current_user_membership;
+  
+  // Get member count from the matching group (which gets real-time updates)
+  const memberCount = matchingGroup?.member_count || 0;
   
   // Reset leave confirm mode when user leaves successfully
   React.useEffect(() => {
@@ -178,13 +183,13 @@ const PhysicalUnitCard: React.FC<PhysicalUnitCardProps> = ({ unit, unitLabel, on
                 {unit.unit_name}
               </h3>
             </div>
-            {/* Resident count badge */}
+            {/* Member count badge - now uses real-time group member count */}
             <Badge variant="outline" className={
-              unit.resident_count === 0 
+              memberCount === 0 
                 ? "bg-gray-50 text-gray-500 border-gray-200"
                 : "bg-purple-50 text-purple-700 border-purple-200"
             }>
-              {unit.resident_count}
+              {memberCount}
             </Badge>
           </div>
 

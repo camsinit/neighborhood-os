@@ -7,6 +7,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import React from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useCurrentNeighborhood } from '@/hooks/useCurrentNeighborhood';
 import { groupService } from '@/services/groupService';
@@ -187,6 +188,42 @@ export const usePhysicalUnitsWithGroups = () => {
  */
 export const usePhysicalUnitsWithResidents = () => {
   const neighborhood = useCurrentNeighborhood();
+  const queryClient = useQueryClient();
+  
+  // Set up real-time subscription for group member changes
+  React.useEffect(() => {
+    if (!neighborhood?.id) return;
+    
+    // Subscribe to group_members table changes for real-time updates
+    const channel = supabase
+      .channel('physical-units-members')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'group_members'
+        },
+        (payload) => {
+          console.log('[Real-time] Group members changed:', payload);
+          
+          // Invalidate physical units query to refresh member counts
+          queryClient.invalidateQueries({
+            queryKey: ['physicalUnitsWithResidents', neighborhood.id]
+          });
+          
+          // Also invalidate groups queries to keep everything in sync
+          queryClient.invalidateQueries({
+            queryKey: groupQueryKeys.neighborhoods(neighborhood.id)
+          });
+        }
+      )
+      .subscribe();
+    
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [neighborhood?.id, queryClient]);
   
   return useQuery({
     queryKey: ['physicalUnitsWithResidents', neighborhood?.id],
