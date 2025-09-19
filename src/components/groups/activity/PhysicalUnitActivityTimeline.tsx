@@ -56,7 +56,7 @@ export const PhysicalUnitActivityTimeline: React.FC<PhysicalUnitActivityTimeline
         activities.push({
           id: `unit-start-${unitName}`,
           type: 'unit_start',
-          title: `${unitLabel.slice(0, -1)} created`,
+          title: "Group Created",
           created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days ago
           user_id: 'system',
           profiles: {
