@@ -219,6 +219,51 @@ export const NOTIFICATION_TEMPLATES: Record<string, NotificationTemplate> = {
     actionLabel: 'View Response',
     relevanceScore: 3, // High - direct help offered
     description: 'When someone responds to your care request'
+  },
+
+  // Groups Module - High-priority notifications only
+  group_member_joined: {
+    id: 'group_member_joined',
+    template: '{{actor}} joined {{groupName}}',
+    contentType: 'groups',
+    notificationType: 'groups',
+    actionType: 'view',
+    actionLabel: 'View Group',
+    relevanceScore: 2, // Medium - group management
+    description: 'When someone joins a group you manage'
+  },
+
+  group_update_posted: {
+    id: 'group_update_posted',
+    template: '{{actor}} posted an update in {{groupName}}',
+    contentType: 'group_updates',
+    notificationType: 'groups',
+    actionType: 'view',
+    actionLabel: 'View Update',
+    relevanceScore: 3, // High - direct group content
+    description: 'When someone posts an update in your group'
+  },
+
+  group_update_comment: {
+    id: 'group_update_comment',
+    template: '{{actor}} commented on your update in {{groupName}}',
+    contentType: 'group_update_comments',
+    notificationType: 'groups',
+    actionType: 'view',
+    actionLabel: 'View Comment',
+    relevanceScore: 3, // High - direct interaction
+    description: 'When someone comments on your group update'
+  },
+
+  group_event_created: {
+    id: 'group_event_created',
+    template: '{{actor}} created an event for {{groupName}}: {{eventTitle}}',
+    contentType: 'events',
+    notificationType: 'groups',
+    actionType: 'view',
+    actionLabel: 'View Event',
+    relevanceScore: 3, // High - group events are important
+    description: 'When someone creates an event for your group'
   }
 };
 

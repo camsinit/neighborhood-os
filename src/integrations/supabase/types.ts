@@ -1669,6 +1669,7 @@ export type Database = {
         | "care_requested"
         | "safety_update"
         | "neighbor_joined"
+        | "group_created"
       group_member_role: "owner" | "moderator" | "member"
       group_status: "active" | "archived" | "suspended"
       group_type: "physical" | "social"
@@ -1689,6 +1690,7 @@ export type Database = {
         | "goods"
         | "skills"
         | "neighbor_welcome"
+        | "groups"
       shareable_content_type: "events" | "safety" | "skills" | "goods"
       user_role:
         | "super_admin"
@@ -1835,6 +1837,7 @@ export const Constants = {
         "care_requested",
         "safety_update",
         "neighbor_joined",
+        "group_created",
       ],
       group_member_role: ["owner", "moderator", "member"],
       group_status: ["active", "archived", "suspended"],
@@ -1857,6 +1860,7 @@ export const Constants = {
         "goods",
         "skills",
         "neighbor_welcome",
+        "groups",
       ],
       shareable_content_type: ["events", "safety", "skills", "goods"],
       user_role: [

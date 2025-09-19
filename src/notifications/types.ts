@@ -13,7 +13,7 @@ export type NotificationInsert = Database['public']['Tables']['notifications']['
 export type NotificationUpdate = Database['public']['Tables']['notifications']['Update'];
 
 // Notification types supported by the system
-export type NotificationType = 'event' | 'safety' | 'care' | 'goods' | 'skills' | 'neighbor_welcome';
+export type NotificationType = 'event' | 'safety' | 'care' | 'goods' | 'skills' | 'neighbor_welcome' | 'groups';
 
 // Action types for notifications
 export type NotificationActionType = 'view' | 'respond' | 'schedule' | 'help' | 'learn' | 'rsvp' | 'comment' | 'share';
