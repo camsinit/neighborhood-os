@@ -8,7 +8,7 @@ import { Group, GroupMember } from '@/types/groups';
 import { cn } from '@/lib/utils';
 import { GroupService } from '@/services/groupService';
 import { useDataAttributes } from '@/utils/dataAttributes';
-import { useJoinGroup } from '@/hooks/useGroups';
+import { useJoinGroup, useLeaveGroup } from '@/hooks/useGroups';
 import { useUser } from '@supabase/auth-helpers-react';
 import { supabase } from '@/integrations/supabase/client';
 interface GroupCardProps {
@@ -27,10 +27,14 @@ export const GroupCard: React.FC<GroupCardProps> = ({
   const [memberAvatars, setMemberAvatars] = useState<GroupMember[]>([]);
   const [currentUserProfile, setCurrentUserProfile] = useState<any>(null);
   
-  // Hooks for joining groups and getting current user
+  // Hooks for joining/leaving groups and getting current user
   const groupService = new GroupService();
   const joinGroupMutation = useJoinGroup();
+  const leaveGroupMutation = useLeaveGroup();
   const user = useUser();
+  
+  // State for leave confirmation mode
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   
   // Add data attributes for highlighting support
   const dataAttributes = useDataAttributes('group', group.id);
@@ -113,6 +117,50 @@ export const GroupCard: React.FC<GroupCardProps> = ({
     }
   };
 
+  /**
+   * Handle leaving a group with optimistic updates
+   */
+  const handleLeaveGroup = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
+    
+    if (!user?.id || !group.current_user_membership) {
+      return; // Not joined or not authenticated
+    }
+
+    // Optimistically remove current user from member avatars
+    const originalAvatars = memberAvatars;
+    setMemberAvatars(prev => prev.filter(member => member.user_id !== user.id));
+    
+    // Reset leave confirmation state
+    setShowLeaveConfirm(false);
+
+    try {
+      await leaveGroupMutation.mutateAsync(group.id);
+    } catch (error) {
+      // Revert optimistic update on error
+      setMemberAvatars(originalAvatars);
+      console.error('Failed to leave group:', error);
+    }
+  };
+
+  /**
+   * Handle button click based on current state
+   */
+  const handleButtonClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
+    
+    if (!group.current_user_membership) {
+      // User not joined, handle join
+      handleJoinGroup(e);
+    } else if (!showLeaveConfirm) {
+      // User joined, show leave confirmation
+      setShowLeaveConfirm(true);
+    } else {
+      // User confirmed leave, handle leave
+      handleLeaveGroup(e);
+    }
+  };
+
   // Function to render overlapping profile images
   const renderMemberStack = () => {
     if (memberAvatars.length === 0) return null;
@@ -174,29 +222,39 @@ export const GroupCard: React.FC<GroupCardProps> = ({
           {renderMemberStack()}
         </div>
 
-        {/* Join/Joined Button with better sizing */}
+        {/* Join/Leave Button with better sizing */}
         {showJoinButton && <div className="pt-3">
             <Button 
               size="lg" 
               className={
-                group.current_user_membership 
-                  ? "w-full bg-white hover:bg-gray-50 border-2 font-bold text-base py-3" 
-                  : "w-full bg-gray-700 hover:bg-gray-800 text-white font-bold text-base py-3"
+                group.current_user_membership && showLeaveConfirm
+                  ? "w-full bg-red-600 hover:bg-red-700 text-white font-bold text-base py-3"
+                  : group.current_user_membership 
+                    ? "w-full bg-white hover:bg-red-50 border-2 font-bold text-base py-3 hover:border-red-300" 
+                    : "w-full bg-gray-700 hover:bg-gray-800 text-white font-bold text-base py-3"
               }
-              style={group.current_user_membership ? {
-                color: 'hsl(var(--neighbors-color))',
-                borderColor: 'hsl(var(--neighbors-color))'
+              style={group.current_user_membership && !showLeaveConfirm ? {
+                color: showLeaveConfirm ? '#dc2626' : 'hsl(var(--neighbors-color))',
+                borderColor: showLeaveConfirm ? '#dc2626' : 'hsl(var(--neighbors-color))'
               } : {}}
-              onClick={group.current_user_membership ? handleCardClick : handleJoinGroup}
-              disabled={joinGroupMutation.isPending}
+              onClick={handleButtonClick}
+              disabled={joinGroupMutation.isPending || leaveGroupMutation.isPending}
+              onMouseLeave={() => {
+                // Reset leave confirmation when mouse leaves if not clicked yet
+                if (group.current_user_membership && showLeaveConfirm && !leaveGroupMutation.isPending) {
+                  setShowLeaveConfirm(false);
+                }
+              }}
             >
               {joinGroupMutation.isPending 
                 ? 'Joining...'
-                : group.current_user_membership 
-                  ? 'Joined' 
-                  : group.is_private 
-                    ? 'Request to Join' 
-                    : 'Join Group'
+                : leaveGroupMutation.isPending
+                  ? 'Leaving...'
+                  : group.current_user_membership 
+                    ? (showLeaveConfirm ? 'Leave Group' : 'Joined')
+                    : group.is_private 
+                      ? 'Request to Join' 
+                      : 'Join Group'
               }
             </Button>
           </div>}

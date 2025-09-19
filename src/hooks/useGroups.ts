@@ -548,6 +548,36 @@ export const useLeaveGroup = () => {
       return groupService.leaveGroup(groupId, user.id);
     },
     
+    onMutate: async (groupId) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({
+        queryKey: groupQueryKeys.neighborhoods(neighborhood?.id || '')
+      });
+      
+      // Optimistically update member count and membership status
+      const previousGroups = queryClient.getQueryData(
+        groupQueryKeys.neighborhood(neighborhood?.id || '', {})
+      ) as Group[] || [];
+      
+      const updatedGroups = previousGroups.map(group =>
+        group.id === groupId
+          ? { 
+              ...group, 
+              member_count: Math.max((group.member_count || 1) - 1, 0),
+              // Remove current user membership for immediate button state change
+              current_user_membership: null
+            }
+          : group
+      );
+      
+      queryClient.setQueryData(
+        groupQueryKeys.neighborhood(neighborhood?.id || '', {}),
+        updatedGroups
+      );
+      
+      return { previousGroups };
+    },
+    
     onSuccess: (_, groupId) => {
       // Invalidate affected queries
       if (neighborhood?.id) {
@@ -569,10 +599,18 @@ export const useLeaveGroup = () => {
       toast.success('Successfully left group');
     },
     
-    onError: (error: unknown) => {
+    onError: (error: unknown, groupId, context) => {
+      // Revert optimistic update
+      if (context?.previousGroups && neighborhood?.id) {
+        queryClient.setQueryData(
+          groupQueryKeys.neighborhood(neighborhood.id, {}),
+          context.previousGroups
+        );
+      }
+      
       const message = error instanceof GroupError ? error.message : 'Failed to leave group';
       toast.error(message);
-      logger.error('Error leaving group', { error });
+      logger.error('Error leaving group', { error, groupId });
     }
   });
 };
