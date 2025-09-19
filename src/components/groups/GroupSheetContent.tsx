@@ -13,6 +13,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { EditGroupForm } from './EditGroupForm';
 import { GroupActivityTimeline } from './activity/GroupActivityTimeline';
 import { extractNeighborhoodId, neighborhoodPath, BASE_ROUTES } from '@/utils/routes';
+// Import the standardized share button component
+import { ShareButton } from '@/components/ui/share-button';
 
 /**
  * GroupSheetContent Component
@@ -170,56 +172,14 @@ const GroupSheetContent = ({
               
               {/* Action buttons container */}
               <div className="ml-auto flex items-center gap-2">
-                {/* Share button - visible to all users */}
-                <button 
-                  onClick={async () => {
-                    try {
-                      // Copy group URL to clipboard using proper route utilities
-                      const groupsPath = neighborhoodPath(BASE_ROUTES.groups, group.neighborhood_id);
-                      const groupUrl = `${window.location.origin}${groupsPath}?detail=${group.id}&type=group`;
-                      
-                      // Use modern clipboard API with proper error handling
-                      await navigator.clipboard.writeText(groupUrl);
-                      
-                      // Show success feedback (you can replace this with a toast later)
-                      console.log('Group URL copied to clipboard:', groupUrl);
-                      
-                      // Optional: Show a temporary visual feedback
-                      const button = event?.currentTarget as HTMLButtonElement;
-                      if (button) {
-                        const originalText = button.getAttribute('aria-label');
-                        button.setAttribute('aria-label', 'Copied!');
-                        setTimeout(() => {
-                          button.setAttribute('aria-label', originalText || 'Share group');
-                        }, 2000);
-                      }
-                      
-                    } catch (error) {
-                      console.error('Failed to copy group URL to clipboard:', error);
-                      
-                      // Fallback: Try using the older execCommand method
-                      try {
-                        const groupsPath = neighborhoodPath(BASE_ROUTES.groups, group.neighborhood_id);
-                        const groupUrl = `${window.location.origin}${groupsPath}?detail=${group.id}&type=group`;
-                        
-                        const textArea = document.createElement('textarea');
-                        textArea.value = groupUrl;
-                        document.body.appendChild(textArea);
-                        textArea.select();
-                        document.execCommand('copy');
-                        document.body.removeChild(textArea);
-                        
-                        console.log('Group URL copied to clipboard (fallback method):', groupUrl);
-                      } catch (fallbackError) {
-                        console.error('Fallback copy method also failed:', fallbackError);
-                      }
-                    }
-                  }} 
-                  className="p-2 rounded-lg bg-purple-100 hover:bg-purple-200 text-purple-600 transition-colors" 
-                  aria-label="Share group"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                </button>
+                {/* Share button - visible to all users, uses standardized ShareButton component */}
+                <ShareButton
+                  contentType="groups"
+                  contentId={group.id}
+                  neighborhoodId={group.neighborhood_id}
+                  size="sm"
+                  variant="ghost"
+                />
                 
                 {/* Edit button for group owners/moderators */}
                 {canEditGroup && (

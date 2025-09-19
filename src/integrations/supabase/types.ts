@@ -1691,7 +1691,12 @@ export type Database = {
         | "skills"
         | "neighbor_welcome"
         | "groups"
-      shareable_content_type: "events" | "safety" | "skills" | "goods"
+      shareable_content_type:
+        | "events"
+        | "safety"
+        | "skills"
+        | "goods"
+        | "groups"
       user_role:
         | "super_admin"
         | "admin"
@@ -1862,7 +1867,7 @@ export const Constants = {
         "neighbor_welcome",
         "groups",
       ],
-      shareable_content_type: ["events", "safety", "skills", "goods"],
+      shareable_content_type: ["events", "safety", "skills", "goods", "groups"],
       user_role: [
         "super_admin",
         "admin",
