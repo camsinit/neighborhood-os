@@ -55,6 +55,12 @@ export const getActivityIcon = (activityType: ActivityType | string) => {
     case 'profile_updated':
       return Users;
       
+    // Group activities - NEW
+    case 'group_created':
+    case 'group_member_joined':
+    case 'group_update_created':
+      return Users;
+      
     default:
       return Users; // Default fallback icon
   }
@@ -94,6 +100,12 @@ export const getActivityColor = (activityType: ActivityType | string): string =>
     case 'neighbor_joined':
     case 'profile_updated':
       return getModuleThemeColor('neighbors', 'primary');
+      
+    // Group activities - use neighbors theme color (purple) for consistency
+    case 'group_created':
+    case 'group_member_joined':
+    case 'group_update_created':
+      return getModuleThemeColor('neighbors', 'primary'); // Purple
       
     default:
       return '#6b7280'; // Gray fallback
@@ -139,6 +151,14 @@ export const getActivityDescription = (activityType: ActivityType | string): str
       return 'joined the neighborhood';
     case 'profile_updated':
       return 'updated their profile';
+      
+    // Group activities - NEW
+    case 'group_created':
+      return 'created a group';
+    case 'group_member_joined':
+      return 'joined a group';
+    case 'group_update_created':
+      return 'posted in a group';
       
     default:
       return 'performed an action';

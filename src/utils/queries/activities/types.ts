@@ -17,7 +17,9 @@ export type ActivityType =
   | 'care_requested'
   | 'neighbor_joined'  // NEW: For when neighbors join
   | 'profile_updated'  // For profile updates
-  | 'group_created';   // NEW: For when groups are created
+  | 'group_created'    // NEW: For when groups are created
+  | 'group_member_joined'  // NEW: For when members join groups
+  | 'group_update_created'; // NEW: For group updates/posts
 
 // Define valid content table names for type safety
 export type ContentTable = 'events' | 'safety_updates' | 'skills_exchange' | 'goods_exchange';
