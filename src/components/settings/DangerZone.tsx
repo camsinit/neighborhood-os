@@ -87,18 +87,8 @@ export const DangerZone: React.FC = () => {
       
       {/* Warning description */}
       <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-        <p className="text-sm text-red-800 mb-3">
-          Once you delete your account, there is no going back. This action will:
-        </p>
-        <ul className="text-sm text-red-700 space-y-1 ml-4 list-disc">
-          <li>Permanently delete your profile and all personal information</li>
-          <li>Remove all your posts, events, safety updates, and skill offerings</li>
-          <li>Delete your neighborhood memberships and created neighborhoods</li>
-          <li>Remove all your notifications and activity history</li>
-          <li>Cancel any pending skill offers or requests</li>
-        </ul>
-        <p className="text-sm text-red-800 mt-3 font-medium">
-          This action cannot be undone, but you can sign up again with the same email if desired.
+        <p className="text-sm text-red-800">
+          <strong>Warning:</strong> This permanently deletes your profile, posts, events, and neighborhood data. This action cannot be undone.
         </p>
       </div>
 
