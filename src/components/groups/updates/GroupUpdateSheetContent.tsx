@@ -243,13 +243,6 @@ const GroupUpdateSheetContent = ({ update, onOpenChange }: GroupUpdateSheetConte
 
             {/* Comments section */}
             <div className="space-y-4">
-              <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                <div 
-                  className="w-1 h-5 rounded-full"
-                  style={{ backgroundColor: groupsTheme.primary }}
-                />
-                Discussion
-              </h3>
               <GroupUpdateComments 
                 updateId={update.id}
                 comments={[]} // This will be handled by the component itself
