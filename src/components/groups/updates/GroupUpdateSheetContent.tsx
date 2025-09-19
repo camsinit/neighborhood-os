@@ -155,24 +155,6 @@ const GroupUpdateSheetContent = ({ update, onOpenChange }: GroupUpdateSheetConte
               </div>
             </div>
             
-            {/* Action buttons row */}
-            <div className="flex items-end justify-end gap-4 mb-3">
-              {/* Action buttons for owner */}
-              {user?.id === update.user_id && (
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleDelete}
-                    disabled={isDeleting}
-                    className="text-red-600 hover:text-red-800 h-8 px-3"
-                  >
-                    <Trash2 className="w-4 h-4 mr-1" />
-                    {isDeleting ? "Deleting..." : "Delete"}
-                  </Button>
-                </div>
-              )}
-            </div>
 
           </div>
         </div>
