@@ -836,9 +836,6 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
                         disabled={isReadOnly}
                         className="border-0 bg-transparent px-0 focus-visible:ring-0 font-medium"
                       />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        → Creates "{unit || 'Unit Name'} Group" for residents
-                      </p>
                     </div>
                     {!isReadOnly && (
                       <Button
