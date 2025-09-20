@@ -102,6 +102,18 @@ export async function createGroupEventNotification(
   try {
     logger.debug('Creating group event notifications for group:', groupId);
     
+    // Get group name
+    const { data: group, error: groupError } = await supabase
+      .from('groups')
+      .select('name')
+      .eq('id', groupId)
+      .single();
+    
+    if (groupError) {
+      logger.error('Error fetching group name:', groupError);
+      return null;
+    }
+    
     // Get all group members except the creator
     const { data: groupMembers, error } = await supabase
       .from('group_members')
@@ -128,7 +140,8 @@ export async function createGroupEventNotification(
         contentId: eventId,
         variables: {
           actor: creatorName,
-          title: eventTitle
+          eventTitle: eventTitle,
+          groupName: group?.name || 'Unknown Group'
         },
         metadata: {
           groupId,
