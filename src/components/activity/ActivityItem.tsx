@@ -290,12 +290,52 @@ const ActivityItem = ({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span className="truncate">
-                      {/* Just display the activity title as-is - it's already properly formatted */}
-                      {displayTitle}
+                      {/* Display name in color + action + content title */}
+                      <span style={{ color: activityColor, fontWeight: '600' }}>
+                        {activity.profiles.display_name || 'A neighbor'}
+                      </span>
+                      {' '}
+                      <span className="text-gray-700">
+                        {/* Convert activity type to readable action */}
+                        {activity.activity_type === 'event_created' 
+                          ? (isGroupEvent ? 'created group event' : 'created event') 
+                          : activity.activity_type === 'event_rsvp'
+                          ? 'RSVP\'d to'
+                          : activity.activity_type === 'skill_offered'
+                          ? 'offered skill'
+                          : activity.activity_type === 'skill_requested'
+                          ? 'requested skill'
+                          : activity.activity_type === 'good_shared'
+                          ? 'shared item'
+                          : activity.activity_type === 'good_requested'
+                          ? 'requested item'
+                          : activity.activity_type === 'safety_update'
+                          ? 'posted safety update'
+                          : activity.activity_type === 'neighbor_joined'
+                          ? 'joined'
+                          : activity.activity_type === 'profile_updated'
+                          ? 'updated profile'
+                          : 'updated'
+                        }
+                      </span>
+                      {/* Only show content title for activities that have specific content (not neighbor_joined) */}
+                      {activity.activity_type !== 'neighbor_joined' && (
+                        <>
+                          {' '}
+                          <span style={{ color: activityColor, fontWeight: '600' }}>
+                            {/* Extract just the content title from metadata or use a clean version */}
+                            {activity.metadata?.title || 
+                             (activity.title?.includes('created') ? 
+                               activity.title.split(' created ')[1] || activity.title.split(' shared ')[1] || activity.title.split(' offered ')[1] || activity.title.split(' requested ')[1] ||
+                               activity.title.split(' posted ')[1] || activity.title.split(' updated ')[1] || activity.title.split('RSVP\'d to ')[1] :
+                               activity.title)}
+                          </span>
+                        </>
+                      )}
                     </span>
                   </TooltipTrigger>
                   <TooltipContent className="bg-gray-800 text-white max-w-xs">
-                    <p>{displayTitle}</p>
+                    <p>{activity.profiles.display_name} - {activity.title}</p>
                   </TooltipContent>
                 </Tooltip>
               </div>
