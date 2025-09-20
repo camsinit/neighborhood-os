@@ -16,34 +16,36 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Calendar, MessageSquare, Clock, MapPin, Star } from 'lucide-react';
 import { formatDate } from '@/utils/date';
 import { formatCompactDate } from '@/utils/compactDate';
-import { extractNeighborhoodId, neighborhoodPath, BASE_ROUTES } from '@/utils/routes';
+import { createItemNavigationService } from '@/services/navigation/ItemNavigationService';
 
 interface GroupActivityCardProps {
   activity: GroupActivityItem;
   onClick?: () => void;
+  neighborhoodId: string;
 }
 
 export const GroupActivityCard: React.FC<GroupActivityCardProps> = ({
   activity,
-  onClick
+  onClick,
+  neighborhoodId
 }) => {
   const navigate = useNavigate();
   const displayName = activity.profiles?.display_name || 'Unknown User';
   const avatarUrl = activity.profiles?.avatar_url;
+  
+  // Create navigation service using the same pattern as ActivityItem
+  const navigationService = createItemNavigationService(navigate);
 
   /**
    * Handle clicking on the neighbor's avatar - navigate to their profile
    */
-  const handleAvatarClick = (e: React.MouseEvent) => {
+  const handleAvatarClick = async (e: React.MouseEvent) => {
     // Prevent the card's onClick from firing
     e.stopPropagation();
     
-    // Extract neighborhood ID from current location
-    const neighborhoodId = extractNeighborhoodId(window.location.pathname);
-    if (neighborhoodId && activity.user_id) {
-      // Navigate to the neighbors page with this user's profile open
-      const neighborsPath = neighborhoodPath(neighborhoodId, BASE_ROUTES.neighbors);
-      navigate(`${neighborsPath}?detail=${activity.user_id}&type=neighbor`);
+    // Use ItemNavigationService for consistent navigation behavior
+    if (activity.user_id) {
+      await navigationService.navigateToItem('neighbors', activity.user_id, { showToast: false }, neighborhoodId);
     }
   };
 

@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { GroupMember } from '@/types/groups';
-import { extractNeighborhoodId, neighborhoodPath, BASE_ROUTES } from '@/utils/routes';
+import { createItemNavigationService } from '@/services/navigation/ItemNavigationService';
 
 interface GroupMembersPopoverProps {
   /**
@@ -36,14 +36,16 @@ export const GroupMembersPopover: React.FC<GroupMembersPopoverProps> = ({
   neighborhoodId
 }) => {
   const navigate = useNavigate();
+  
+  // Create navigation service using the same pattern as ActivityItem
+  const navigationService = createItemNavigationService(navigate);
 
   /**
    * Handle clicking on a group member - navigate to their neighbor profile
    */
-  const handleMemberClick = (member: GroupMember) => {
-    // Navigate to the neighbors page with this member's profile open
-    const neighborsPath = neighborhoodPath(neighborhoodId, BASE_ROUTES.neighbors);
-    navigate(`${neighborsPath}?detail=${member.user_id}&type=neighbor`);
+  const handleMemberClick = async (member: GroupMember) => {
+    // Use ItemNavigationService for consistent navigation behavior
+    await navigationService.navigateToItem('neighbors', member.user_id, { showToast: false }, neighborhoodId);
   };
 
   /**

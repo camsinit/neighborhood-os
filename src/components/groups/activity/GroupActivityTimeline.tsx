@@ -44,6 +44,9 @@ export const GroupActivityTimeline: React.FC<GroupActivityTimelineProps> = ({
   // Navigation hook for routing to Calendar page
   const navigate = useNavigate();
   
+  // Extract neighborhood ID from current location for navigation
+  const neighborhoodId = extractNeighborhoodId(window.location.pathname);
+  
   // Component state for overlays, detail panels, and view type
   const [isCreateUpdateOpen, setIsCreateUpdateOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
@@ -304,6 +307,7 @@ export const GroupActivityTimeline: React.FC<GroupActivityTimelineProps> = ({
               
                 <GroupActivityCard
                   activity={activity}
+                  neighborhoodId={neighborhoodId || ''}
                   onClick={() => {
                     if (activity.type === 'event' && activity.event) {
                       handleEventClick(activity.event.id);
