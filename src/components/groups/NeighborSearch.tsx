@@ -61,9 +61,6 @@ export const NeighborSearch: React.FC<NeighborSearchProps> = ({
       {/* Header */}
       <div className="space-y-2">
         <Label className="text-lg font-bold">Invite Neighbors</Label>
-        <p className="text-sm text-gray-600">
-          Search and select neighbors to invite to your group when it's created
-        </p>
       </div>
 
       {/* Selected neighbors section with consistent search input placement */}
