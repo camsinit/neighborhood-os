@@ -170,11 +170,7 @@ const GroupSheetContent = ({
                 )}
               </div>
               <span className="text-sm text-gray-600">
-                {group.is_private ? (
-                  <>🔒 Private group • {group.member_count === 1 ? '1 neighbor' : `${group.member_count || 0} neighbors`}</>
-                ) : (
-                  <>🌐 Public group • {group.member_count === 1 ? '1 neighbor' : `${group.member_count || 0} neighbors`}</>
-                )}
+                {group.member_count === 1 ? '1 neighbor' : `${group.member_count || 0} neighbors`}
               </span>
               
               {/* Action buttons container */}
