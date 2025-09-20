@@ -238,10 +238,9 @@ const ActivityItem = ({
   return (
     <div className="mb-3">
       <div 
-        className="relative flex items-center py-3 px-4 rounded-lg hover:bg-gray-50 hover:shadow-sm transition-all cursor-pointer bg-white"
+        className="relative flex items-center py-3 px-4 rounded-lg border border-gray-100 hover:bg-gray-50 hover:shadow-sm transition-all cursor-pointer bg-white"
         style={{
-          borderLeft: `4px solid ${activityColor}`,
-          border: `1px solid ${activityColor}20`
+          borderLeft: `4px solid ${activityColor}`
         }}
         onClick={handleItemClick}
         {...dataAttributes} // Apply data attributes for highlighting
