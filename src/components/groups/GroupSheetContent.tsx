@@ -154,7 +154,7 @@ const GroupSheetContent = ({
               {/* Profile images on the left */}
               <div className="flex -space-x-1">
                 {memberAvatars.slice(0, 3).map((member, index) => (
-                  <Avatar key={member.user_id} className="h-10 w-10 border border-white">
+                  <Avatar key={member.user_id} className="h-7 w-7 border border-white">
                     <AvatarImage src={member.profile?.avatar_url || ''} />
                     <AvatarFallback className="text-xs">
                       {member.profile?.display_name?.[0]?.toUpperCase() || '?'}
@@ -162,7 +162,7 @@ const GroupSheetContent = ({
                   </Avatar>
                 ))}
                 {additionalMemberCount > 0 && (
-                  <div className="h-5 w-5 rounded-full bg-gray-100 border border-white flex items-center justify-center">
+                  <div className="h-7 w-7 rounded-full bg-gray-100 border border-white flex items-center justify-center">
                     <span className="text-xs font-medium text-gray-600">
                       +{additionalMemberCount}
                     </span>
