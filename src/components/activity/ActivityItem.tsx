@@ -312,7 +312,7 @@ const ActivityItem = ({
                           : activity.activity_type === 'safety_update'
                           ? 'posted safety update'
                           : activity.activity_type === 'neighbor_joined'
-                          ? 'joined'
+                          ? 'joined the neighborhood!'
                           : activity.activity_type === 'profile_updated'
                           ? 'updated profile'
                           : 'updated'
