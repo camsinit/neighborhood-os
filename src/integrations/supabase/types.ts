@@ -1670,6 +1670,7 @@ export type Database = {
         | "safety_update"
         | "neighbor_joined"
         | "group_created"
+        | "skill_update_created"
       group_member_role: "owner" | "moderator" | "member"
       group_status: "active" | "archived" | "suspended"
       group_type: "physical" | "social"
@@ -1843,6 +1844,7 @@ export const Constants = {
         "safety_update",
         "neighbor_joined",
         "group_created",
+        "skill_update_created",
       ],
       group_member_role: ["owner", "moderator", "member"],
       group_status: ["active", "archived", "suspended"],
