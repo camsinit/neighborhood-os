@@ -341,27 +341,11 @@ const ActivityItem = ({
               </div>
             </div>
             
-            {/* Time/Badge toggle on hover */}
-            <div className="flex-shrink-0 relative">
-              {/* Time - visible by default, hidden on hover */}
-              <span className="text-xs text-gray-500 font-medium group-hover:opacity-0 transition-opacity duration-200">
+            {/* Time display */}
+            <div className="flex-shrink-0">
+              <span className="text-xs text-gray-500 font-medium">
                 {timeAgo}
               </span>
-              
-              {/* Badge - hidden by default, visible on hover */}
-              <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                <Badge 
-                  variant="outline" 
-                  className="text-xs px-2 py-0.5 font-medium whitespace-nowrap" 
-                  style={{ 
-                    backgroundColor: `${activityColor}15`,
-                    color: activityColor,
-                    borderColor: `${activityColor}30`
-                  }}
-                >
-                  {getActivityBadgeLabel(activity.activity_type, activity.metadata)}
-                </Badge>
-              </div>
             </div>
           </div>
         </div>
