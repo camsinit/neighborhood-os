@@ -277,7 +277,7 @@ const ActivityItem = ({
           <div className="flex justify-between items-start gap-2">
             <div className="text-sm leading-tight flex-1 font-medium">
               {/* Activity title with icon inline - special handling for group events */}
-              <div className="flex items-center">
+              <div className="flex items-center min-h-[2rem]">{/* Ensure consistent height and vertical centering */}
                 {IconComponent && (
                   <IconComponent 
                     className="h-4 w-4 mr-2 flex-shrink-0" 
