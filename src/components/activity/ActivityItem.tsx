@@ -5,6 +5,7 @@ import { User, Trash2 } from "lucide-react";
 import { Activity } from "@/hooks/useActivities";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getActivityIcon, getActivityColor } from "./utils/activityHelpers";
+import { getModuleThemeColor } from "@/theme/moduleTheme";
 import { useNavigate } from "react-router-dom";
 import { createItemNavigationService } from "@/services/navigation/ItemNavigationService";
 import { HighlightableItemType } from "@/utils/highlight/types";
@@ -48,12 +49,14 @@ const getCompactTimeAgo = (date: Date): string => {
 /**
  * Get a concise action description for the activity badge
  * This maps activity types to short, action-focused labels
+ * Updated to support group events with special labeling
  */
-const getActivityBadgeLabel = (activityType: string): string => {
+const getActivityBadgeLabel = (activityType: string, metadata?: any): string => {
   switch (activityType) {
-    // Event activities
+    // Event activities - check if it's a group event
     case 'event_created':
-      return 'New Event';
+      // If the event has group_id in metadata, it's a group event
+      return metadata?.group_id ? 'New Group Event' : 'New Event';
     case 'event_rsvp':
       return 'Event RSVP';
       
@@ -121,22 +124,28 @@ const ActivityItem = ({
   // Logger scoped to ActivityItem for clear, filtered logs
   const logger = createLogger('ActivityItem');
   
+  // Get activity styling with special handling for group events
   const IconComponent = getActivityIcon(activity.activity_type);
-  const activityColor = getActivityColor(activity.activity_type);
+  const activityColor = getActivityColor(activity.activity_type, activity.metadata);
   const timeAgo = getCompactTimeAgo(new Date(activity.created_at));
+  
+  // Check if this is a group event for special handling
+  const isGroupEvent = activity.activity_type === 'event_created' && activity.metadata?.group_id;
   
   // Check if the content has been deleted
   const isDeleted = activity.metadata?.deleted === true;
 
   /**
    * Handle click on activity item - uses unified navigation service
+   * Special handling for group events to navigate to calendar side panel
    */
   const handleItemClick = async () => {
     logger.info('Activity item clicked', { 
       activityType: activity.activity_type, 
       contentId: activity.content_id,
       neighborhoodId: activity.neighborhood_id,
-      isDeleted: isDeleted
+      isDeleted: isDeleted,
+      isGroupEvent: isGroupEvent
     });
     
     if (isDeleted) {
@@ -146,7 +155,30 @@ const ActivityItem = ({
       return;
     }
     
-    // Get the item type and use unified navigation service
+    // Special handling for group events - navigate to calendar side panel
+    if (isGroupEvent) {
+      logger.info('Group event detected, navigating to calendar with side panel');
+      try {
+        // Navigate to calendar page and highlight the event
+        const result = await navigationService.navigateToItem(
+          'event', 
+          activity.content_id, 
+          { showToast: true },
+          activity.neighborhood_id
+        );
+        
+        logger.info('Group event navigation result:', result);
+        
+        if (!result.success) {
+          logger.error('Group event navigation failed', result.error as any);
+        }
+      } catch (error) {
+        logger.error('Error navigating to group event', error as any);
+      }
+      return;
+    }
+    
+    // Regular event handling
     const itemType = getHighlightableType(activity.activity_type);
     logger.info('Mapped to highlight type:', itemType);
     
@@ -237,12 +269,15 @@ const ActivityItem = ({
           {timeAgo}
         </span>
 
-        {/* Activity title with icon inline */}
+        {/* Activity title with icon inline - special handling for group events */}
         <div className="flex items-center flex-1 min-w-0">
           {IconComponent && (
             <IconComponent 
               className="h-4.5 w-4.5 mr-2 flex-shrink-0" 
-              style={{ color: activityColor }} 
+              style={{ 
+                // Group events use blue calendar icon, but purple border/badge
+                color: isGroupEvent ? getModuleThemeColor('calendar', 'primary') : activityColor 
+              }} 
             />
           )}
           <p className="text-base font-medium text-foreground truncate">
@@ -251,7 +286,7 @@ const ActivityItem = ({
           </p>
         </div>
 
-        {/* Activity action badge */}
+        {/* Activity action badge - purple for group events */}
         <Badge 
           variant="outline" 
           className="ml-auto flex-shrink-0 text-sm px-2.5 py-0.5 font-medium" 
@@ -261,7 +296,7 @@ const ActivityItem = ({
             borderColor: `${activityColor}30`
           }}
         >
-          {getActivityBadgeLabel(activity.activity_type)}
+          {getActivityBadgeLabel(activity.activity_type, activity.metadata)}
         </Badge>
 
         {/* Debug delete button - only visible in debug mode */}

@@ -69,13 +69,15 @@ export const getActivityIcon = (activityType: ActivityType | string) => {
 /**
  * Gets the appropriate color for each activity type
  * Updated to use module theme colors for consistency across the app
+ * Special handling for group events to use purple accent
  */
-export const getActivityColor = (activityType: ActivityType | string): string => {
+export const getActivityColor = (activityType: ActivityType | string, metadata?: any): string => {
   switch (activityType) {
-    // Event activities - use calendar theme color
+    // Event activities - use purple for group events, blue for regular events
     case 'event_created':
     case 'event_rsvp':
-      return getModuleThemeColor('calendar', 'primary');
+      // If the event has group_id in metadata, use neighbors (purple) theme
+      return metadata?.group_id ? getModuleThemeColor('neighbors', 'primary') : getModuleThemeColor('calendar', 'primary');
       
     // Safety activities - use safety theme color
     case 'safety_update':
