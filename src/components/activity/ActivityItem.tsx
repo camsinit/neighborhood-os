@@ -238,7 +238,7 @@ const ActivityItem = ({
   return (
     <div className="mb-3">
       <div 
-        className="relative flex items-center py-3 px-4 rounded-lg border border-gray-100 hover:bg-gray-50 hover:shadow-sm transition-all cursor-pointer bg-white"
+        className="group relative flex items-center py-3 px-4 rounded-lg border border-gray-100 hover:bg-gray-50 hover:shadow-sm transition-all cursor-pointer bg-white"
         style={{
           borderLeft: `4px solid ${activityColor}`
         }}
@@ -296,7 +296,7 @@ const ActivityItem = ({
         {/* Activity action badge - purple for group events */}
         <Badge 
           variant="outline" 
-          className="ml-auto flex-shrink-0 text-sm px-2.5 py-0.5 font-medium" 
+          className="ml-auto flex-shrink-0 text-sm px-2.5 py-0.5 font-medium group-hover:opacity-0 transition-opacity duration-200" 
           style={{ 
             backgroundColor: `${activityColor}15`,
             color: activityColor,
