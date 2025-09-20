@@ -10,6 +10,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS, getInvalidationKeys } from '@/utils/queryKeys';
 import ShareButton from '@/components/ui/share-button';
 import SkillEditDialog from '../form/SkillEditDialog';
+import SkillRequestDetailSheet from '../SkillRequestDetailSheet';
 
 interface SkillRequestCardProps {
   skill: SkillWithProfile;
@@ -31,6 +32,7 @@ const SkillRequestCard = ({ skill }: SkillRequestCardProps) => {
   // State for managing dialogs
   const [isContributeDialogOpen, setIsContributeDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDetailSheetOpen, setIsDetailSheetOpen] = useState(false);
   // Add state to track hover for share button
   const [isHovering, setIsHovering] = useState(false);
 
@@ -78,7 +80,7 @@ const SkillRequestCard = ({ skill }: SkillRequestCardProps) => {
     <div 
       data-skill-id={skill.id}
       className="flex items-center p-2 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer relative group"
-      onClick={() => !isOwner && setIsContributeDialogOpen(true)}
+      onClick={() => setIsDetailSheetOpen(true)}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
@@ -158,6 +160,24 @@ const SkillRequestCard = ({ skill }: SkillRequestCardProps) => {
         onOpenChange={setIsEditDialogOpen}
         onSuccess={() => {
           // Invalidate queries to refresh the skill list
+          const invalidationKeys = getInvalidationKeys('SKILLS');
+          invalidationKeys.forEach(key => {
+            queryClient.invalidateQueries({ queryKey: [key] });
+          });
+        }}
+      />
+
+      {/* Skill Request Detail Sheet */}
+      <SkillRequestDetailSheet
+        skillRequest={skill}
+        open={isDetailSheetOpen}
+        onOpenChange={setIsDetailSheetOpen}
+        onEdit={(skillRequest) => {
+          setIsDetailSheetOpen(false);
+          setIsEditDialogOpen(true);
+        }}
+        onDelete={() => {
+          // Invalidate queries to refresh the skill list after deletion
           const invalidationKeys = getInvalidationKeys('SKILLS');
           invalidationKeys.forEach(key => {
             queryClient.invalidateQueries({ queryKey: [key] });
