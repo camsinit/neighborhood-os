@@ -11,6 +11,12 @@ import { NotificationWithProfile } from './types';
 import { createLogger } from '@/utils/logger';
 import { useEffect } from 'react';
 import { useCurrentNeighborhood } from '@/hooks/useCurrentNeighborhood';
+import { 
+  buildJoinClause, 
+  buildOrCondition, 
+  getContentTypeConfig, 
+  getSupportedContentTypes 
+} from './contentTypeConfig';
 
 const logger = createLogger('useNotifications');
 
@@ -39,21 +45,16 @@ export function useNotifications() {
         return [];
       }
 
-      // Step 1: Fetch notifications filtered by neighborhood
-      // We need to join with content tables to filter by their neighborhood_id
+      // Step 1: Fetch notifications filtered by neighborhood using dynamic config
+      const joinClause = buildJoinClause();
+      const orCondition = buildOrCondition(currentNeighborhood.id);
+
       const { data: notifications, error: notificationsError } = await supabase
         .from('notifications')
-        .select(`
-          *,
-          events!inner(neighborhood_id),
-          safety_updates!inner(neighborhood_id),
-          skills_exchange!inner(neighborhood_id),
-          goods_exchange!inner(neighborhood_id),
-          group_updates!inner(groups!inner(neighborhood_id))
-        `)
+        .select(`*,${joinClause}`)
         .eq('user_id', user.id)
         .eq('is_archived', false)
-        .or(`events.neighborhood_id.eq.${currentNeighborhood.id},safety_updates.neighborhood_id.eq.${currentNeighborhood.id},skills_exchange.neighborhood_id.eq.${currentNeighborhood.id},goods_exchange.neighborhood_id.eq.${currentNeighborhood.id},group_updates.groups.neighborhood_id.eq.${currentNeighborhood.id}`)
+        .or(orCondition)
         .order('created_at', { ascending: false })
         .limit(50);
 
@@ -143,84 +144,46 @@ async function filterNotificationsByNeighborhood(
   if (!notifications.length) return [];
 
   const contentTypeQueries = [];
-  const contentIds = {
-    events: [],
-    safety: [],
-    skills: [],
-    goods: [],
-    group_updates: []
-  };
+  // Group content IDs by type using dynamic config
+  const contentIds: Record<string, string[]> = {};
+  getSupportedContentTypes().forEach(type => {
+    contentIds[type] = [];
+  });
 
   // Group content IDs by type
   for (const notification of notifications) {
-    switch (notification.content_type) {
-      case 'events':
-        contentIds.events.push(notification.content_id);
-        break;
-      case 'safety':
-      case 'safety_updates':
-        contentIds.safety.push(notification.content_id);
-        break;
-      case 'skills':
-      case 'skills_exchange':
-        contentIds.skills.push(notification.content_id);
-        break;
-      case 'goods':
-      case 'goods_exchange':
-        contentIds.goods.push(notification.content_id);
-        break;
-      case 'group_updates':
-        contentIds.group_updates.push(notification.content_id);
-        break;
+    const contentType = notification.content_type;
+    if (contentIds[contentType]) {
+      contentIds[contentType].push(notification.content_id);
     }
   }
 
-  // Query each content type for neighborhood associations
+  // Query each content type for neighborhood associations using dynamic config
   const validContentIds = new Set();
 
-  if (contentIds.events.length > 0) {
-    const { data } = await supabase
-      .from('events')
-      .select('id')
-      .in('id', contentIds.events)
-      .eq('neighborhood_id', neighborhoodId);
-    data?.forEach(item => validContentIds.add(item.id));
-  }
+  for (const contentType of getSupportedContentTypes()) {
+    const ids = contentIds[contentType];
+    const config = getContentTypeConfig(contentType);
+    
+    if (ids && ids.length > 0 && config) {
+      let query = supabase
+        .from(config.table as any)
+        .select('id' + (config.join ? `, ${config.join}` : ''))
+        .in('id', ids);
 
-  if (contentIds.safety.length > 0) {
-    const { data } = await supabase
-      .from('safety_updates')
-      .select('id')
-      .in('id', contentIds.safety)
-      .eq('neighborhood_id', neighborhoodId);
-    data?.forEach(item => validContentIds.add(item.id));
-  }
+      // Handle different neighborhood key patterns
+      if (config.neighborhoodKey.includes('.')) {
+        // For nested keys like 'groups.neighborhood_id'
+        const [table, key] = config.neighborhoodKey.split('.');
+        query = query.eq(`${table}.${key}`, neighborhoodId);
+      } else {
+        // For direct keys like 'neighborhood_id'
+        query = query.eq(config.neighborhoodKey, neighborhoodId);
+      }
 
-  if (contentIds.skills.length > 0) {
-    const { data } = await supabase
-      .from('skills_exchange')
-      .select('id')
-      .in('id', contentIds.skills)
-      .eq('neighborhood_id', neighborhoodId);
-    data?.forEach(item => validContentIds.add(item.id));
-  }
-
-  if (contentIds.goods.length > 0) {
-    const { data } = await supabase
-      .from('goods_exchange')
-      .select('id')
-      .in('id', contentIds.goods)
-      .eq('neighborhood_id', neighborhoodId);
-    data?.forEach(item => validContentIds.add(item.id));
-  }
-
-  if (contentIds.group_updates.length > 0) {
-    const { data } = await supabase
-      .from('group_updates')
-      .select('id, groups!inner(neighborhood_id)')
-      .in('id', contentIds.group_updates)
-      .eq('groups.neighborhood_id', neighborhoodId);
-    data?.forEach(item => validContentIds.add(item.id));
+      const { data } = await query;
+      data?.forEach((item: any) => validContentIds.add(item.id));
+    }
   }
 
   // Filter notifications to only include those with valid content IDs
