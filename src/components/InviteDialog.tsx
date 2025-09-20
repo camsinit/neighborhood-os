@@ -241,10 +241,7 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
     refreshNeighborhoodData();
     setLoadingTooLong(false);
     
-    // Brief informational toast for this action
-    toast("Refreshing neighborhood data", {
-      description: "Please wait while we reconnect to your neighborhood..."
-    });
+    // Refreshing neighborhood data silently
   };
 
   /**
@@ -270,10 +267,7 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
       
       logger.info("Diagnostics results", diagnosticInfo);
       
-      // Brief informational toast
-      toast("Diagnostic Information", {
-        description: `Found ${Array.isArray(createdNeighborhoods) ? createdNeighborhoods.length : 0} created neighborhoods.`
-      });
+      // Diagnostic information logged to console - no toast needed
       
       if (!createdNeighborhoods || (Array.isArray(createdNeighborhoods) && createdNeighborhoods.length === 0)) {
         toast.error("No neighborhood association found. You don't appear to be connected to any neighborhood. Try joining with an invite link or creating a new neighborhood.");

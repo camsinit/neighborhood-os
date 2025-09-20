@@ -124,10 +124,7 @@ const CommunityCalendar = ({ onAddEvent }: CommunityCalendarProps) => {
           }
         }, 100);
 
-        // Show toast using Sonner directly
-        toast("Event Located", {
-          description: `Navigated to "${event.title}"`
-        });
+        // Event location found - no toast needed
       }
     };
 

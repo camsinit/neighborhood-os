@@ -192,7 +192,7 @@ export const NotificationSettingsTab: React.FC = () => {
    * Show coming soon message for email features
    */
   const handleEmailComingSoon = () => {
-    showInfoToast("Email notifications aren't ready yet but are coming soon!");
+    // Email notifications feature is disabled - no toast needed
   };
 
   /**

@@ -117,7 +117,7 @@ const ActivityFeed = () => {
     logger.info("Manual refresh triggered");
     refetch();
     setLastRefresh(new Date());
-    toast(`Feed refreshed - Last updated: ${new Date().toLocaleTimeString()}`);
+    
   };
 
   // Handler for individual activity actions
