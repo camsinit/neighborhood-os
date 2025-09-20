@@ -223,7 +223,7 @@ export function GroupUpdateComments({
                       </div>
                     </div>
                   ) : (
-                    <div className="text-sm text-muted-foreground bg-muted/30 rounded-lg px-3 py-2">
+                    <div className="text-sm text-gray-600 bg-muted/30 rounded-lg px-3 py-2">
                       {comment.content}
                     </div>
                   )}
