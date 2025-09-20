@@ -280,10 +280,17 @@ const ActivityItem = ({
               }} 
             />
           )}
-          <p className="text-base font-medium text-foreground truncate">
-            {/* Append '!' for neighbor join to add excitement, without changing DB data */}
-            {displayTitle}
-          </p>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <p className="text-base font-medium text-foreground truncate">
+                {/* Append '!' for neighbor join to add excitement, without changing DB data */}
+                {displayTitle}
+              </p>
+            </TooltipTrigger>
+            <TooltipContent className="bg-gray-800 text-white max-w-xs">
+              <p>{displayTitle}</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
 
         {/* Activity action badge - purple for group events */}
