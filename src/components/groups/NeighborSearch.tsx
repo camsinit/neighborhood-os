@@ -66,53 +66,42 @@ export const NeighborSearch: React.FC<NeighborSearchProps> = ({
         </p>
       </div>
 
-      {/* Selected neighbors display */}
-      {selectedNeighbors.length > 0 && (
-        <div className="space-y-3">
-          <Label className="text-sm font-medium">Selected neighbors to invite:</Label>
-          <div className="flex flex-wrap gap-2">
-            {selectedNeighbors.map(neighbor => (
-              <Badge 
-                key={neighbor.user_id} 
-                variant="secondary" 
-                className="flex items-center gap-2 px-3 py-1"
-              >
-                <Avatar className="h-5 w-5">
-                  <AvatarImage src={neighbor.avatar_url || undefined} />
-                  <AvatarFallback className="text-xs">
-                    {neighbor.display_name?.[0] || '?'}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-sm">{neighbor.display_name || 'Anonymous'}</span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="h-auto p-0 ml-1"
-                  onClick={() => onNeighborRemove(neighbor.user_id)}
+      {/* Selected neighbors section with consistent search input placement */}
+      <div className="space-y-3">
+        {/* Show label and badges only when neighbors are selected */}
+        {selectedNeighbors.length > 0 && (
+          <>
+            <Label className="text-sm font-medium">Selected neighbors to invite:</Label>
+            <div className="flex flex-wrap gap-2">
+              {selectedNeighbors.map(neighbor => (
+                <Badge 
+                  key={neighbor.user_id} 
+                  variant="secondary" 
+                  className="flex items-center gap-2 px-3 py-1"
                 >
-                  <X className="h-3 w-3" />
-                </Button>
-              </Badge>
-            ))}
-          </div>
-          
-          {/* Search input - positioned under selected neighbors */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              type="text"
-              placeholder="Search neighbors by name..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Search input when no neighbors selected - positioned after header */}
-      {selectedNeighbors.length === 0 && (
+                  <Avatar className="h-5 w-5">
+                    <AvatarImage src={neighbor.avatar_url || undefined} />
+                    <AvatarFallback className="text-xs">
+                      {neighbor.display_name?.[0] || '?'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm">{neighbor.display_name || 'Anonymous'}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-auto p-0 ml-1"
+                    onClick={() => onNeighborRemove(neighbor.user_id)}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </Badge>
+              ))}
+            </div>
+          </>
+        )}
+        
+        {/* Search input - always positioned directly under "Selected neighbors to invite:" text */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
@@ -123,7 +112,7 @@ export const NeighborSearch: React.FC<NeighborSearchProps> = ({
             className="pl-10"
           />
         </div>
-      )}
+      </div>
 
       {/* Search results */}
       {searchTerm && (
