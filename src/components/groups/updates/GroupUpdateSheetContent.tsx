@@ -295,7 +295,7 @@ const GroupUpdateSheetContent = ({ update, onOpenChange }: GroupUpdateSheetConte
             {/* Title with profile image on the left */}
             <div className="mb-3 pr-20"> {/* pr-20 to avoid overlap with time */}
               <div className="flex items-start gap-3">
-                <Avatar className="h-8 w-8 mt-1 flex-shrink-0">
+                <Avatar className="h-6 w-6 mt-1 flex-shrink-0">
                   <AvatarImage src={authorProfile?.avatar_url || ""} />
                   <AvatarFallback className="text-xs">
                     {authorInitials}
