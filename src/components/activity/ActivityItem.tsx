@@ -265,7 +265,7 @@ const ActivityItem = ({
         </TooltipProvider>
 
         {/* Time elapsed */}
-        <span className="text-sm text-gray-500 mr-2 min-w-8 font-medium">
+        <span className="text-sm text-gray-500 mr-3 min-w-12 font-medium">
           {timeAgo}
         </span>
 
