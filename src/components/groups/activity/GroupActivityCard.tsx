@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { GroupActivityItem } from '@/types/groupActivityTypes';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +16,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Calendar, MessageSquare, Clock, MapPin, Star } from 'lucide-react';
 import { formatDate } from '@/utils/date';
 import { formatCompactDate } from '@/utils/compactDate';
+import { extractNeighborhoodId, neighborhoodPath, BASE_ROUTES } from '@/utils/routes';
 
 interface GroupActivityCardProps {
   activity: GroupActivityItem;
@@ -25,8 +27,25 @@ export const GroupActivityCard: React.FC<GroupActivityCardProps> = ({
   activity,
   onClick
 }) => {
+  const navigate = useNavigate();
   const displayName = activity.profiles?.display_name || 'Unknown User';
   const avatarUrl = activity.profiles?.avatar_url;
+
+  /**
+   * Handle clicking on the neighbor's avatar - navigate to their profile
+   */
+  const handleAvatarClick = (e: React.MouseEvent) => {
+    // Prevent the card's onClick from firing
+    e.stopPropagation();
+    
+    // Extract neighborhood ID from current location
+    const neighborhoodId = extractNeighborhoodId(window.location.pathname);
+    if (neighborhoodId && activity.user_id) {
+      // Navigate to the neighbors page with this user's profile open
+      const neighborsPath = neighborhoodPath(neighborhoodId, BASE_ROUTES.neighbors);
+      navigate(`${neighborsPath}?detail=${activity.user_id}&type=neighbor`);
+    }
+  };
 
   return (
     <div
@@ -56,15 +75,20 @@ export const GroupActivityCard: React.FC<GroupActivityCardProps> = ({
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Avatar className="w-10 h-10 hover-scale cursor-help">
-                <AvatarImage src={avatarUrl} />
-                <AvatarFallback className="text-sm">
-                  {displayName.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
+              <div
+                onClick={handleAvatarClick}
+                className="cursor-pointer"
+              >
+                <Avatar className="w-10 h-10 hover-scale">
+                  <AvatarImage src={avatarUrl} />
+                  <AvatarFallback className="text-sm">
+                    {displayName.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
             </TooltipTrigger>
             <TooltipContent>
-              <p className="text-sm">{displayName}</p>
+              <p className="text-sm">Click to view {displayName}'s profile</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
