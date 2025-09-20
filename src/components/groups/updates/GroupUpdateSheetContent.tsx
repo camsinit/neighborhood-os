@@ -288,9 +288,6 @@ const GroupUpdateSheetContent = ({ update, onOpenChange }: GroupUpdateSheetConte
           >
             {/* Author info in top right corner */}
             <div className="absolute top-4 right-4 flex items-center gap-2">
-              <span className="text-sm font-medium text-gray-700">
-                {authorDisplayName}
-              </span>
               <Avatar className="h-8 w-8">
                 <AvatarImage src={authorProfile?.avatar_url || ""} />
                 <AvatarFallback className="text-xs">
