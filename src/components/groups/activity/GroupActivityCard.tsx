@@ -11,6 +11,7 @@ import React from 'react';
 import { GroupActivityItem } from '@/types/groupActivityTypes';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Calendar, MessageSquare, Clock, MapPin, Star } from 'lucide-react';
 import { formatDate } from '@/utils/date';
 import { formatCompactDate } from '@/utils/compactDate';
@@ -52,12 +53,21 @@ export const GroupActivityCard: React.FC<GroupActivityCardProps> = ({
       </div>
       {/* Profile image with timestamp underneath */}
       <div className="flex-shrink-0 flex flex-col items-center">
-        <Avatar className="w-10 h-10">
-          <AvatarImage src={avatarUrl} />
-          <AvatarFallback className="text-sm">
-            {displayName.charAt(0).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Avatar className="w-10 h-10 hover-scale cursor-help">
+                <AvatarImage src={avatarUrl} />
+                <AvatarFallback className="text-sm">
+                  {displayName.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="text-sm">{displayName}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         {/* Compact timestamp positioned under profile photo */}
         <span className="text-xs text-muted-foreground mt-1">
           {formatCompactDate(activity.created_at)}
