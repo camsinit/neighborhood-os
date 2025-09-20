@@ -290,38 +290,8 @@ const ActivityItem = ({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span className="truncate">
-                      {/* Display name and action */}
-                      <span style={{ color: activityColor, fontWeight: '600' }}>
-                        {activity.profiles.display_name || 'A neighbor'}
-                      </span>
-                      {' '}
-                      <span className="text-gray-700">
-                        {/* Convert activity type to readable action */}
-                        {activity.activity_type === 'event_created' 
-                          ? (isGroupEvent ? 'created group event' : 'created event') 
-                          : activity.activity_type === 'event_rsvp'
-                          ? 'RSVP\'d to'
-                          : activity.activity_type === 'skill_offered'
-                          ? 'offered skill'
-                          : activity.activity_type === 'skill_requested'
-                          ? 'requested skill'
-                          : activity.activity_type === 'good_shared'
-                          ? 'shared item'
-                          : activity.activity_type === 'good_requested'
-                          ? 'requested item'
-                          : activity.activity_type === 'safety_update'
-                          ? 'posted safety update'
-                          : activity.activity_type === 'neighbor_joined'
-                          ? 'joined'
-                          : activity.activity_type === 'profile_updated'
-                          ? 'updated profile'
-                          : 'updated'
-                        }
-                      </span>
-                      {' '}
-                      <span style={{ color: activityColor, fontWeight: '600' }}>
-                        {displayTitle}
-                      </span>
+                      {/* Just display the activity title as-is - it's already properly formatted */}
+                      {displayTitle}
                     </span>
                   </TooltipTrigger>
                   <TooltipContent className="bg-gray-800 text-white max-w-xs">
