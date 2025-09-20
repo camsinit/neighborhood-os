@@ -41,6 +41,38 @@ const GroupUpdateSheetContent = ({ update, onOpenChange }: GroupUpdateSheetConte
   // Groups theme colors for consistency
   const groupsTheme = moduleThemeColors.neighbors;
   
+  // Fetch author profile for the update
+  const { data: authorProfile } = useQuery({
+    queryKey: ['profile', update.user_id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, display_name, avatar_url')
+        .eq('id', update.user_id)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!update.user_id
+  });
+
+  // Helper function to get author initials from display name
+  const getAuthorInitials = (displayName?: string): string => {
+    if (!displayName) return 'N'; // Default fallback for 'Neighbor'
+    
+    const names = displayName.trim().split(' ');
+    if (names.length === 1) {
+      return names[0].charAt(0).toUpperCase();
+    } else {
+      return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
+    }
+  };
+
+  // Get author display name with fallback
+  const authorDisplayName = authorProfile?.display_name || 'A neighbor';
+  const authorInitials = getAuthorInitials(authorProfile?.display_name);
+
   // Fetch comments for this update
   const { data: comments = [] } = useQuery({
     queryKey: ['group-update-comments', update.id],
@@ -257,13 +289,12 @@ const GroupUpdateSheetContent = ({ update, onOpenChange }: GroupUpdateSheetConte
             {/* Author info in top right corner */}
             <div className="absolute top-4 right-4 flex items-center gap-2">
               <span className="text-sm font-medium text-gray-700">
-                {/* TODO: Get actual author name from profiles */}
-                Author
+                {authorDisplayName}
               </span>
               <Avatar className="h-8 w-8">
+                <AvatarImage src={authorProfile?.avatar_url || ""} />
                 <AvatarFallback className="text-xs">
-                  {/* TODO: Get actual author initials */}
-                  A
+                  {authorInitials}
                 </AvatarFallback>
               </Avatar>
             </div>
