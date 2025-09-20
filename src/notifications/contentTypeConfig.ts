@@ -55,6 +55,15 @@ export const CONTENT_TYPE_CONFIG: Record<string, ContentTypeConfig> = {
     },
     notificationTemplate: 'goods_exchange'
   },
+  groups: { 
+    table: 'groups', 
+    neighborhoodKey: 'neighborhood_id',
+    actorField: 'created_by',
+    activityTypes: {
+      create: 'group_created'
+    },
+    notificationTemplate: 'group_invitation'
+  },
   group_updates: { 
     table: 'group_updates', 
     neighborhoodKey: 'groups.neighborhood_id',
