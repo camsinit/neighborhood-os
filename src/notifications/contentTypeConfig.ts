@@ -74,6 +74,25 @@ export const CONTENT_TYPE_CONFIG: Record<string, ContentTypeConfig> = {
     },
     notificationTemplate: 'group_update_posted'
   },
+  skill_sessions: {
+    table: 'skill_sessions',
+    neighborhoodKey: 'neighborhood_id', 
+    actorField: 'user_id',
+    activityTypes: {
+      create: 'skill_session_created'
+    },
+    notificationTemplate: 'skill_session_request'
+  },
+  group_update_comments: {
+    table: 'group_update_comments',
+    neighborhoodKey: 'group_updates.groups.neighborhood_id',
+    join: 'group_updates!inner(id, group_id, groups!inner(neighborhood_id))',
+    actorField: 'user_id', 
+    activityTypes: {
+      create: 'group_comment_created'
+    },
+    notificationTemplate: 'group_update_comment'
+  },
 };
 
 /**
