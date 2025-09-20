@@ -19,6 +19,8 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 interface GroupUpdateCommentsProps {
   updateId: string;
@@ -45,6 +47,36 @@ export function GroupUpdateComments({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState('');
+
+  // Fetch current user's profile for comment form avatar
+  const { data: currentUserProfile } = useQuery({
+    queryKey: ['profile', currentUserId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, display_name, avatar_url')
+        .eq('id', currentUserId)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!currentUserId
+  });
+
+  // Helper function to get user initials from display name
+  const getUserInitials = (displayName?: string): string => {
+    if (!displayName) return 'U'; // Default fallback for 'User'
+    
+    const names = displayName.trim().split(' ');
+    if (names.length === 1) {
+      return names[0].charAt(0).toUpperCase();
+    } else {
+      return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
+    }
+  };
+
+  const currentUserInitials = getUserInitials(currentUserProfile?.display_name);
 
   // Auto-resize textarea for new comment
   const { textareaRef: newCommentRef, adjustHeight: adjustNewHeight } = useAutoResizeTextarea({
@@ -205,10 +237,9 @@ export function GroupUpdateComments({
       {/* New comment form */}
       <div className="flex gap-3">
         <Avatar className="h-8 w-8 mt-1">
-          <AvatarImage src={""} /> {/* TODO: Add current user's profile image */}
+          <AvatarImage src={currentUserProfile?.avatar_url || ""} />
           <AvatarFallback className="text-xs">
-            {/* TODO: Add current user's initials */}
-            U
+            {currentUserInitials}
           </AvatarFallback>
         </Avatar>
 
