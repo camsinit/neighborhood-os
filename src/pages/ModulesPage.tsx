@@ -2,7 +2,7 @@
 import React from 'react';
 import ModuleLayout from '@/components/layout/ModuleLayout';
 import ModuleCard from '@/components/modules/ModuleCard';
-import { AlertTriangle, Building, Clock, Wrench, Wallet, Phone } from 'lucide-react';
+import { AlertTriangle, Building, Clock, Wrench, Wallet, Phone, Heart } from 'lucide-react';
 
 /**
  * ModulesPage Component
@@ -68,6 +68,15 @@ const modules = [
     description: 'A module to help you call your local, state, and federal representatives. Easy civic engagement tools.',
     icon: Phone,
     accentColor: 'teal',
+    status: 'coming-soon'
+  },
+  {
+    id: 'volunteering',
+    name: 'Volunteering',
+    tagline: 'Give Back Together',
+    description: 'Connect with local volunteer opportunities and organize community service projects. Make a difference in your neighborhood.',
+    icon: Heart,
+    accentColor: 'purple',
     status: 'coming-soon'
   }
 ];
