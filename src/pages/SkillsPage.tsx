@@ -10,11 +10,10 @@ import {
 } from '@/utils/skillsPageHandlers';
 import ModuleLayout from '@/components/layout/ModuleLayout';
 import SkillsPageContent from '@/components/skills/SkillsPageContent';
-import SkillsSidePanelSelector from '@/components/skills/SkillsSidePanelSelector';
-import { Sheet, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { AppSheetContent } from '@/components/ui/app-sheet-content';
+import { Sheet } from '@/components/ui/sheet';
 import SkillSheetContent from '@/components/skills/SkillSheetContent';
 import SkillRequestSheet from '@/components/skills/SkillRequestSheet';
+import SkillOfferSheet from '@/components/skills/SkillOfferSheet';
 import { SkillsProvider } from '@/contexts/SkillsContext';
 import { moduleThemeColors } from '@/theme/moduleTheme';
 import { useSkillsOnboarding } from '@/hooks/useSkillsOnboarding';
@@ -46,8 +45,8 @@ function SkillsPage() {
   // Get search query from URL params
   const searchQuery = searchParams.get('search') || '';
   
-  // Local state for skill add dialog
-  const [isSkillDialogOpen, setIsSkillDialogOpen] = useState(false);
+  // Local state for skill offer sheet
+  const [isSkillOfferSheetOpen, setIsSkillOfferSheetOpen] = useState(false);
   // Local state for skill request sheet
   const [isSkillRequestSheetOpen, setIsSkillRequestSheetOpen] = useState(false);
 
@@ -120,30 +119,18 @@ function SkillsPage() {
             handleBackToCategories={handleBackToCategories}
             getTypedCategory={getTypedCategory}
             setSearchParams={setSearchParams}
-            setIsSkillDialogOpen={setIsSkillDialogOpen}
+            setIsSkillOfferSheetOpen={setIsSkillOfferSheetOpen}
             setIsSkillRequestSheetOpen={setIsSkillRequestSheetOpen}
           />
         </div>
       </ModuleLayout>
       
-      {/* Sheet for adding skills - consistent with other pages */}
-      <Sheet open={isSkillDialogOpen} onOpenChange={setIsSkillDialogOpen}>
-        <AppSheetContent 
-          side="right" 
-          moduleTheme="skills"
-        >
-          <SheetHeader>
-          </SheetHeader>
-          <div className="mt-6">
-            <SkillsSidePanelSelector 
-              selectedCategory={getTypedCategory(category)} 
-              onSkillAdded={handleSkillAdded} 
-              multiCategoryMode={!category}
-              onClose={() => setIsSkillDialogOpen(false)}
-            />
-          </div>
-        </AppSheetContent>
-      </Sheet>
+      {/* Sheet for offering skills - form-based experience */}
+      <SkillOfferSheet 
+        open={isSkillOfferSheetOpen}
+        onOpenChange={setIsSkillOfferSheetOpen}
+        onSkillAdded={handleSkillAdded}
+      />
 
       {/* Skill Request Sheet - For requesting help from neighbors */}
       <SkillRequestSheet 

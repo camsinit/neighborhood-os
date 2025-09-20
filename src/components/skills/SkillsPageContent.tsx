@@ -16,7 +16,7 @@ interface SkillsPageContentProps {
   handleBackToCategories: () => void;
   getTypedCategory: (categoryString: string | null) => SkillCategory | undefined;
   setSearchParams: (searchParams: URLSearchParams) => void;
-  setIsSkillDialogOpen: (open: boolean) => void;
+  setIsSkillOfferSheetOpen: (open: boolean) => void;
   // Function to open the skill request sheet
   setIsSkillRequestSheetOpen?: (open: boolean) => void;
 }
@@ -31,7 +31,7 @@ const SkillsPageContent: React.FC<SkillsPageContentProps> = ({
   handleBackToCategories,
   getTypedCategory,
   setSearchParams,
-  setIsSkillDialogOpen,
+  setIsSkillOfferSheetOpen,
   setIsSkillRequestSheetOpen
 }) => {
   return (
@@ -42,7 +42,7 @@ const SkillsPageContent: React.FC<SkillsPageContentProps> = ({
         <CategorySkillsView 
           category={getTypedCategory(category)!} 
           onBack={handleBackToCategories}
-          onAddSkill={() => setIsSkillDialogOpen(true)}
+          onAddSkill={() => setIsSkillOfferSheetOpen(true)}
         />
       )}
 
@@ -56,7 +56,7 @@ const SkillsPageContent: React.FC<SkillsPageContentProps> = ({
             searchParams={searchParams}
             handleTabChange={handleTabChange}
             setSearchParams={setSearchParams}
-            setIsSkillDialogOpen={setIsSkillDialogOpen}
+            setIsSkillOfferSheetOpen={setIsSkillOfferSheetOpen}
             setIsSkillRequestSheetOpen={setIsSkillRequestSheetOpen}
           />
 

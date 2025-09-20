@@ -20,7 +20,7 @@ interface SkillsPageNavigationProps {
   searchParams: URLSearchParams;
   handleTabChange: (value: string) => void;
   setSearchParams: (params: URLSearchParams) => void;
-  setIsSkillDialogOpen: (open: boolean) => void;
+  setIsSkillOfferSheetOpen: (open: boolean) => void;
   // Function to open the skill request sheet
   setIsSkillRequestSheetOpen?: (open: boolean) => void;
 }
@@ -31,7 +31,7 @@ const SkillsPageNavigation: React.FC<SkillsPageNavigationProps> = ({
   searchParams,
   handleTabChange,
   setSearchParams,
-  setIsSkillDialogOpen,
+  setIsSkillOfferSheetOpen,
   setIsSkillRequestSheetOpen
 }) => {
   return (
@@ -92,7 +92,7 @@ const SkillsPageNavigation: React.FC<SkillsPageNavigationProps> = ({
         {/* Add Skill button - allows users to offer skills to neighbors */}
         <Button 
           className="whitespace-nowrap flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white"
-          onClick={() => setIsSkillDialogOpen(true)}
+          onClick={() => setIsSkillOfferSheetOpen(true)}
         >
           <PlusCircle className="h-4 w-4" />
           <span>Add Skill</span>
