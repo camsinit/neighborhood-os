@@ -13,6 +13,7 @@ export type ActivityType =
   | 'good_requested'   // For goods requests
   | 'skill_offered'
   | 'skill_requested'
+  | 'skill_update_created' // NEW: For skill updates
   | 'care_offered'
   | 'care_requested'
   | 'neighbor_joined'  // NEW: For when neighbors join
