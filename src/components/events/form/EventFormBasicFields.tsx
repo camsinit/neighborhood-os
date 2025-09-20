@@ -53,6 +53,7 @@ const EventFormBasicFields = ({
           onChange={(e) => setTitle(e.target.value)}
           required
           placeholder="Enter event title"
+          maxLength={35}
         />
       </div>
       
