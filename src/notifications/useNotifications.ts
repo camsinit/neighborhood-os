@@ -48,11 +48,12 @@ export function useNotifications() {
           events!inner(neighborhood_id),
           safety_updates!inner(neighborhood_id),
           skills_exchange!inner(neighborhood_id),
-          goods_exchange!inner(neighborhood_id)
+          goods_exchange!inner(neighborhood_id),
+          group_updates!inner(groups!inner(neighborhood_id))
         `)
         .eq('user_id', user.id)
         .eq('is_archived', false)
-        .or(`events.neighborhood_id.eq.${currentNeighborhood.id},safety_updates.neighborhood_id.eq.${currentNeighborhood.id},skills_exchange.neighborhood_id.eq.${currentNeighborhood.id},goods_exchange.neighborhood_id.eq.${currentNeighborhood.id}`)
+        .or(`events.neighborhood_id.eq.${currentNeighborhood.id},safety_updates.neighborhood_id.eq.${currentNeighborhood.id},skills_exchange.neighborhood_id.eq.${currentNeighborhood.id},goods_exchange.neighborhood_id.eq.${currentNeighborhood.id},group_updates.groups.neighborhood_id.eq.${currentNeighborhood.id}`)
         .order('created_at', { ascending: false })
         .limit(50);
 
@@ -146,7 +147,8 @@ async function filterNotificationsByNeighborhood(
     events: [],
     safety: [],
     skills: [],
-    goods: []
+    goods: [],
+    group_updates: []
   };
 
   // Group content IDs by type
@@ -166,6 +168,9 @@ async function filterNotificationsByNeighborhood(
       case 'goods':
       case 'goods_exchange':
         contentIds.goods.push(notification.content_id);
+        break;
+      case 'group_updates':
+        contentIds.group_updates.push(notification.content_id);
         break;
     }
   }
@@ -206,6 +211,15 @@ async function filterNotificationsByNeighborhood(
       .select('id')
       .in('id', contentIds.goods)
       .eq('neighborhood_id', neighborhoodId);
+    data?.forEach(item => validContentIds.add(item.id));
+  }
+
+  if (contentIds.group_updates.length > 0) {
+    const { data } = await supabase
+      .from('group_updates')
+      .select('id, groups!inner(neighborhood_id)')
+      .in('id', contentIds.group_updates)
+      .eq('groups.neighborhood_id', neighborhoodId);
     data?.forEach(item => validContentIds.add(item.id));
   }
 
