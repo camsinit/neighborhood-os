@@ -30,15 +30,19 @@ interface SkillRequestSheetProps {
 }
 
 // Generate skill categories from the onboarding system
-const SKILL_CATEGORY_OPTIONS: { value: SkillCategory; label: string }[] = 
-  Object.entries(SKILL_CATEGORIES).map(([key, categoryData]) => ({
-    value: key as SkillCategory,
-    label: categoryData.title
-  }));
-
-const SkillRequestSheet: React.FC<SkillRequestSheetProps> = ({ open, onOpenChange }) => {
+const SKILL_CATEGORY_OPTIONS: {
+  value: SkillCategory;
+  label: string;
+}[] = Object.entries(SKILL_CATEGORIES).map(([key, categoryData]) => ({
+  value: key as SkillCategory,
+  label: categoryData.title
+}));
+const SkillRequestSheet: React.FC<SkillRequestSheetProps> = ({
+  open,
+  onOpenChange
+}) => {
   const user = useUser();
-  
+
   // Form state management
   const [skillTitle, setSkillTitle] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -65,12 +69,10 @@ const SkillRequestSheet: React.FC<SkillRequestSheetProps> = ({ open, onOpenChang
       toast.error('Please enter a skill title');
       return;
     }
-
     if (!selectedCategory) {
       toast.error('Please select a category');
       return;
     }
-
     if (!skillDetails.trim()) {
       toast.error('Please provide details about what you need help with');
       return;
@@ -88,18 +90,13 @@ const SkillRequestSheet: React.FC<SkillRequestSheetProps> = ({ open, onOpenChang
       toast.error('Please log in to request skills');
       return;
     }
-
     setIsSubmitting(true);
-
     try {
       // Get user's neighborhood from membership table
-      const { data: userNeighborhood, error: neighborhoodError } = await supabase
-        .from('neighborhood_members')
-        .select('neighborhood_id')
-        .eq('user_id', user.id)
-        .eq('status', 'active')
-        .single();
-
+      const {
+        data: userNeighborhood,
+        error: neighborhoodError
+      } = await supabase.from('neighborhood_members').select('neighborhood_id').eq('user_id', user.id).eq('status', 'active').single();
       if (neighborhoodError || !userNeighborhood) {
         toast.error('Unable to find your neighborhood. Please ensure you\'re a member of a neighborhood.');
         return;
@@ -107,18 +104,18 @@ const SkillRequestSheet: React.FC<SkillRequestSheetProps> = ({ open, onOpenChang
 
       // Create the skill request in the database
       // Using 'need' as request_type to match database constraints
-      const { error: insertError } = await supabase
-        .from('skills_exchange')
-        .insert({
-          user_id: user.id,
-          neighborhood_id: userNeighborhood.neighborhood_id,
-          title: skillTitle.trim(),
-          skill_category: selectedCategory as SkillCategory,
-          request_type: 'need', // Database expects 'need' for skill requests
-          description: skillDetails.trim(),
-          valid_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days from now
-        });
-
+      const {
+        error: insertError
+      } = await supabase.from('skills_exchange').insert({
+        user_id: user.id,
+        neighborhood_id: userNeighborhood.neighborhood_id,
+        title: skillTitle.trim(),
+        skill_category: selectedCategory as SkillCategory,
+        request_type: 'need',
+        // Database expects 'need' for skill requests
+        description: skillDetails.trim(),
+        valid_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days from now
+      });
       if (insertError) {
         console.error('Error creating skill request:', insertError);
         toast.error('Failed to create skill request. Please try again.');
@@ -129,7 +126,6 @@ const SkillRequestSheet: React.FC<SkillRequestSheetProps> = ({ open, onOpenChang
       toast.success('Skill request created successfully! Your neighbors will be notified.');
       resetForm();
       onOpenChange(false);
-
     } catch (error) {
       console.error('Unexpected error creating skill request:', error);
       toast.error('An unexpected error occurred. Please try again.');
@@ -147,16 +143,13 @@ const SkillRequestSheet: React.FC<SkillRequestSheetProps> = ({ open, onOpenChang
     }
     onOpenChange(open);
   };
-
-  return (
-    <Sheet open={open} onOpenChange={handleClose}>
-      <AppSheetContent 
-        side="right" 
-        moduleTheme="skills"
-      >
+  return <Sheet open={open} onOpenChange={handleClose}>
+      <AppSheetContent side="right" moduleTheme="skills">
         <SheetHeader className="border-b border-border/40 pb-4">
           <SheetTitle className="text-xl font-semibold text-foreground flex items-center gap-2">
-            <MessageSquare className="h-5 w-5" style={{ color: moduleThemeColors.skills.primary }} />
+            <MessageSquare className="h-5 w-5" style={{
+            color: moduleThemeColors.skills.primary
+          }} />
             Request Help from Neighbors
           </SheetTitle>
         </SheetHeader>
@@ -169,16 +162,8 @@ const SkillRequestSheet: React.FC<SkillRequestSheetProps> = ({ open, onOpenChang
           <div className="w-full max-w-sm mx-auto">
             <form onSubmit={handleSubmit} className="space-y-3">
             <div className="space-y-1">
-              <Label htmlFor="skill-title">What do you need help with?</Label>
-              <Input
-                id="skill-title"
-                value={skillTitle}
-                onChange={(e) => setSkillTitle(e.target.value)}
-                placeholder="e.g., Computer repair, Garden help"
-                maxLength={50}
-                required
-                className="w-full"
-              />
+              <Label htmlFor="skill-title">I could use help with...</Label>
+              <Input id="skill-title" value={skillTitle} onChange={e => setSkillTitle(e.target.value)} placeholder="e.g., Computer repair, Garden help" maxLength={50} required className="w-full" />
             </div>
 
             {/* Category selection using compact styling */}
@@ -189,11 +174,9 @@ const SkillRequestSheet: React.FC<SkillRequestSheetProps> = ({ open, onOpenChang
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                 <SelectContent className="z-[200]">
-                  {SKILL_CATEGORY_OPTIONS.map((category) => (
-                    <SelectItem key={category.value} value={category.value}>
+                  {SKILL_CATEGORY_OPTIONS.map(category => <SelectItem key={category.value} value={category.value}>
                       {category.label}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -201,15 +184,7 @@ const SkillRequestSheet: React.FC<SkillRequestSheetProps> = ({ open, onOpenChang
             {/* Details section with compact styling */}
             <div className="space-y-1">
               <Label htmlFor="skill-details">Details</Label>
-              <Textarea
-                id="skill-details"
-                value={skillDetails}
-                onChange={(e) => setSkillDetails(e.target.value)}
-                placeholder="Describe what you need help with, any time constraints, level of expertise needed, etc."
-                className="min-h-[80px] w-full resize-none"
-                maxLength={1000}
-                required
-              />
+              <Textarea id="skill-details" value={skillDetails} onChange={e => setSkillDetails(e.target.value)} placeholder="Describe what you need help with, any time constraints, level of expertise needed, etc." className="min-h-[80px] w-full resize-none" maxLength={1000} required />
               <div className="text-xs text-gray-500 text-right">
                 {skillDetails.length}/1000
               </div>
@@ -217,23 +192,13 @@ const SkillRequestSheet: React.FC<SkillRequestSheetProps> = ({ open, onOpenChang
 
             {/* Form action buttons - matching goods form style */}
             <div className="flex justify-end gap-3 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => handleClose(false)}
-                disabled={isSubmitting}
-              >
+              <Button type="button" variant="outline" onClick={() => handleClose(false)} disabled={isSubmitting}>
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting || !skillTitle.trim() || !selectedCategory || !skillDetails.trim()}
-                style={{ 
-                  backgroundColor: moduleThemeColors.skills.primary,
-                  borderColor: moduleThemeColors.skills.primary 
-                }}
-                className="hover:opacity-90 text-white"
-              >
+              <Button type="submit" disabled={isSubmitting || !skillTitle.trim() || !selectedCategory || !skillDetails.trim()} style={{
+                backgroundColor: moduleThemeColors.skills.primary,
+                borderColor: moduleThemeColors.skills.primary
+              }} className="hover:opacity-90 text-white">
                 {isSubmitting ? 'Creating Request...' : 'Request Help'}
               </Button>
             </div>
@@ -241,8 +206,6 @@ const SkillRequestSheet: React.FC<SkillRequestSheetProps> = ({ open, onOpenChang
         </div>
       </div>
     </AppSheetContent>
-    </Sheet>
-  );
+    </Sheet>;
 };
-
 export default SkillRequestSheet;
