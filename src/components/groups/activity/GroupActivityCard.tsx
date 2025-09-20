@@ -37,6 +37,28 @@ export const GroupActivityCard: React.FC<GroupActivityCardProps> = ({
   const navigationService = createItemNavigationService(navigate);
 
   /**
+   * Handle clicking on the card - navigate to appropriate detail view
+   */
+  const handleCardClick = async () => {
+    if (activity.type === 'event' && activity.event) {
+      // Navigate to event side-panel using ItemNavigationService
+      try {
+        await navigationService.navigateToItem(
+          'event', 
+          activity.event.id, 
+          { showToast: true },
+          neighborhoodId
+        );
+      } catch (error) {
+        console.error('Error navigating to event:', error);
+      }
+    } else if (onClick) {
+      // Fallback to provided onClick for other types
+      onClick();
+    }
+  };
+
+  /**
    * Handle clicking on the neighbor's avatar - navigate to their profile
    */
   const handleAvatarClick = async (e: React.MouseEvent) => {
@@ -58,7 +80,7 @@ export const GroupActivityCard: React.FC<GroupActivityCardProps> = ({
         activity.type === 'group_start' ? 'border-l-4 border-l-purple-500' :
         'border-l-4 border-l-purple-500'
       }`}
-      onClick={activity.type === 'group_start' ? undefined : onClick}
+      onClick={activity.type === 'group_start' ? undefined : handleCardClick}
       role={activity.type === 'group_start' ? undefined : "button"}
       tabIndex={activity.type === 'group_start' ? undefined : 0}
     >
