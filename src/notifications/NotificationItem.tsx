@@ -11,7 +11,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Archive, User } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+import { differenceInHours, differenceInDays, differenceInWeeks, differenceInMonths } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { NotificationWithProfile } from './types';
@@ -25,6 +25,29 @@ interface NotificationItemProps {
   notification: NotificationWithProfile;
   variant?: 'popover' | 'drawer';
 }
+
+/**
+ * Helper function to format time since notification in a compact way
+ * Same format as used in ActivityItem for consistency
+ */
+const getCompactTimeAgo = (date: Date): string => {
+  // This function formats the timestamp into a human-readable format
+  const now = new Date();
+  const hours = differenceInHours(now, date);
+  const days = differenceInDays(now, date);
+  const weeks = differenceInWeeks(now, date);
+  const months = differenceInMonths(now, date);
+
+  if (hours < 24) {
+    return `${hours}hr`;
+  } else if (days < 7) {
+    return `${days}d`;
+  } else if (weeks < 4) {
+    return `${weeks}w`;
+  } else {
+    return `${months}mo`;
+  }
+};
 
 // Simplified color mapping - direct lookup table for better performance
 const CONTENT_TYPE_COLORS: Record<string, string> = {
@@ -103,8 +126,8 @@ export function NotificationItem({ notification, variant = 'drawer' }: Notificat
   const actorName = notification.profiles?.display_name || 'A neighbor';
   const avatarUrl = notification.profiles?.avatar_url;
 
-  // Format time ago
-  const timeAgo = formatDistanceToNow(new Date(notification.created_at), { addSuffix: true });
+  // Format time ago using compact format like in activity feed
+  const timeAgo = getCompactTimeAgo(new Date(notification.created_at));
 
   // Get theme color for this notification's content type
   const themeColor = getThemeColor(notification.content_type);
@@ -193,7 +216,7 @@ export function NotificationItem({ notification, variant = 'drawer' }: Notificat
             <div className="flex-shrink-0 relative">
               {/* Date - visible by default, hidden on hover */}
               <span className="text-xs text-gray-500 font-medium group-hover:opacity-0 transition-opacity duration-200">
-                {timeAgo.replace(' ago', '').replace('about ', '')}
+                {timeAgo}
               </span>
               
               {/* Archive button - hidden by default, visible on hover */}
