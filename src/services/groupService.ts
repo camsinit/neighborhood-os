@@ -401,7 +401,7 @@ export class GroupService {
    * Join a group
    */
   async joinGroup(data: JoinGroupData): Promise<void> {
-    logger.info('User joining group', { groupId: data.group_id, userId: data.user_id });
+    logger.info('=== GROUP JOIN STARTED ===', { groupId: data.group_id, userId: data.user_id });
 
     // Check if user is already a member
     const { data: existingMember } = await (supabase as any)
@@ -415,6 +415,7 @@ export class GroupService {
       throw new GroupError('You are already a member of this group', GroupErrorCodes.ALREADY_MEMBER);
     }
 
+    logger.info('GROUP JOIN: Inserting group membership record');
     // Add user to group
     const { error } = await (supabase as any)
       .from('group_members')
@@ -426,11 +427,15 @@ export class GroupService {
       });
 
     if (error) {
-      logger.error('Error joining group', { error, data });
+      logger.error('=== GROUP JOIN FAILED ===', { error, data });
       throw new GroupError('Failed to join group', GroupErrorCodes.PERMISSION_DENIED);
     }
 
-    logger.info('Successfully joined group', { groupId: data.group_id, userId: data.user_id });
+    logger.info('=== GROUP JOIN SUCCESS ===', { 
+      groupId: data.group_id, 
+      userId: data.user_id,
+      message: 'Database triggers should now create activity + notifications'
+    });
   }
 
   /**

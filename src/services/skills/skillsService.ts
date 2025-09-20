@@ -85,13 +85,22 @@ export const createSkill = async (
   };
 
   try {
+    logger.info('=== SKILL CREATION STARTED ===', {
+      title: formData.title,
+      mode,
+      category: formData.category,
+      userId,
+      neighborhoodId
+    });
+
+    logger.info('SKILL CREATE: Inserting skill record');
     // Insert the skill into the database
     // The database trigger will handle creating the activity
     const { error, data } = await supabase.from('skills_exchange').insert(insertData).select();
 
     if (error) {
       // Detailed error logging
-      logger.error('Error creating skill:', {
+      logger.error('=== SKILL CREATION FAILED ===', {
         error: {
           message: error.message,
           details: error.details,
@@ -107,10 +116,11 @@ export const createSkill = async (
     }
 
     // Log success data
-    logger.info('Skill created successfully:', {
+    logger.info('=== SKILL CREATION SUCCESS ===', {
       skillId: data?.[0]?.id,
       title: formData.title,
       userId,
+      message: 'Database triggers should now create activity + notifications',
       timestamp: new Date().toISOString()
     });
 

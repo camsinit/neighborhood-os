@@ -26,8 +26,14 @@ export const rsvpService = {
     neighborhoodId?: string,
     transactionId?: string
   ): Promise<any> {
-    logger.debug(`[${transactionId || 'RSVP'}] Adding RSVP for event ${eventId} by user ${userId}`);
+    logger.info(`=== RSVP CREATION STARTED ===`, { 
+      eventId, 
+      userId, 
+      neighborhoodId,
+      transactionId: transactionId || 'RSVP'
+    });
     
+    logger.info('RSVP CREATE: Inserting RSVP record');
     const { data, error } = await supabase
       .from('event_rsvps')
       .insert({
@@ -38,11 +44,21 @@ export const rsvpService = {
       .select();
     
     if (error) {
-      logger.error(`[${transactionId || 'RSVP'}] Error adding RSVP:`, error);
+      logger.error(`=== RSVP CREATION FAILED ===`, { 
+        error, 
+        eventId, 
+        userId,
+        transactionId: transactionId || 'RSVP'
+      });
       throw error;
     }
     
-    logger.debug(`[${transactionId || 'RSVP'}] Successfully added RSVP`);
+    logger.info(`=== RSVP CREATION SUCCESS ===`, {
+      eventId,
+      userId,
+      message: 'Database triggers should now create notifications',
+      transactionId: transactionId || 'RSVP'
+    });
     return data;
   },
   

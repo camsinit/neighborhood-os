@@ -19,9 +19,14 @@ export const createEvent = async (
   userId: string,
   eventTitle: string
 ): Promise<any> => {
-  // Log event creation attempt
-  logger.debug("Creating event:", { title: eventTitle, userId });
+  logger.info("=== EVENT CREATION STARTED ===", { 
+    title: eventTitle, 
+    userId,
+    groupId: eventData.group_id,
+    neighborhoodId: eventData.neighborhood_id
+  });
 
+  logger.info("EVENT CREATE: Inserting event record");
   // Insert the event into the database - triggers handle everything else
   const { data, error } = await supabase
     .from('events')
@@ -30,13 +35,14 @@ export const createEvent = async (
 
   // Handle any database errors
   if (error) {
-    logger.error("Error creating event:", error);
+    logger.error("=== EVENT CREATION FAILED ===", { error, eventTitle, userId });
     throw error;
   }
 
-  logger.info("Event created successfully:", {
+  logger.info("=== EVENT CREATION SUCCESS ===", {
     eventId: data?.[0]?.id,
-    title: eventTitle
+    title: eventTitle,
+    message: 'Database triggers should now create activity + notifications'
   });
   
   return data;
