@@ -205,7 +205,11 @@ export function GroupUpdateComments({
       {/* New comment form */}
       <div className="flex gap-3">
         <Avatar className="h-8 w-8 mt-1">
-          <AvatarFallback className="text-xs">You</AvatarFallback>
+          <AvatarImage src={""} /> {/* TODO: Add current user's profile image */}
+          <AvatarFallback className="text-xs">
+            {/* TODO: Add current user's initials */}
+            U
+          </AvatarFallback>
         </Avatar>
 
         <div className="flex-1 space-y-2">
