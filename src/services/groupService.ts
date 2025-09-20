@@ -401,8 +401,7 @@ export class GroupService {
    * Join a group
    */
   async joinGroup(data: JoinGroupData): Promise<void> {
-    const joinId = Math.random().toString(36).substring(7);
-    logger.info(`[GROUP_JOIN_${joinId}] User joining group`, { groupId: data.group_id, userId: data.user_id });
+    logger.info('User joining group', { groupId: data.group_id, userId: data.user_id });
 
     // Check if user is already a member
     const { data: existingMember } = await (supabase as any)
@@ -413,11 +412,8 @@ export class GroupService {
       .maybeSingle();
 
     if (existingMember) {
-      logger.warn(`[GROUP_JOIN_${joinId}] User already member of group`, { groupId: data.group_id, userId: data.user_id });
       throw new GroupError('You are already a member of this group', GroupErrorCodes.ALREADY_MEMBER);
     }
-
-    logger.info(`[GROUP_JOIN_${joinId}] Adding user to group_members table`, { groupId: data.group_id, userId: data.user_id });
 
     // Add user to group
     const { error } = await (supabase as any)
@@ -430,22 +426,11 @@ export class GroupService {
       });
 
     if (error) {
-      logger.error(`[GROUP_JOIN_${joinId}] Error joining group`, { error, data });
+      logger.error('Error joining group', { error, data });
       throw new GroupError('Failed to join group', GroupErrorCodes.PERMISSION_DENIED);
     }
 
-    logger.info(`[GROUP_JOIN_${joinId}] Successfully joined group - triggers should fire now`, { groupId: data.group_id, userId: data.user_id });
-    
-    // Give triggers time to execute, then check what was created
-    setTimeout(async () => {
-      try {
-        // Import the debug function dynamically to avoid circular dependencies
-        const { debugGroupJoin } = await import('@/utils/activityDebugUtils');
-        await debugGroupJoin(data.group_id, data.user_id);
-      } catch (debugError) {
-        logger.error(`[GROUP_JOIN_${joinId}] Error running debug check:`, debugError);
-      }
-    }, 2000); // Wait 2 seconds for triggers to complete
+    logger.info('Successfully joined group', { groupId: data.group_id, userId: data.user_id });
   }
 
   /**
