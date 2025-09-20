@@ -4,6 +4,7 @@ import { differenceInHours, differenceInDays, differenceInWeeks, differenceInMon
 import { User, Trash2 } from "lucide-react";
 import { Activity } from "@/hooks/useActivities";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card } from "@/components/ui/card";
 import { getActivityIcon, getActivityColor } from "./utils/activityHelpers";
 import { getModuleThemeColor } from "@/theme/moduleTheme";
 import { useNavigate } from "react-router-dom";
@@ -236,27 +237,27 @@ const ActivityItem = ({
   }
   
   return (
-    <div className="mb-3">
-      <div 
-        className="group relative flex items-center py-3 px-4 rounded-lg border border-gray-100 hover:bg-gray-50 hover:shadow-sm transition-all cursor-pointer bg-white"
-        style={{
-          borderLeft: `4px solid ${activityColor}`
-        }}
-        onClick={handleItemClick}
-        {...dataAttributes} // Apply data attributes for highlighting
-      >
-        {/* Profile avatar with hover tooltip showing name */}
+    <Card 
+      className="relative p-3 transition-all duration-200 hover:shadow-md cursor-pointer border-l-4 group bg-white mb-3"
+      style={{
+        borderLeftColor: activityColor
+      }}
+      onClick={handleItemClick}
+      {...dataAttributes} // Apply data attributes for highlighting
+    >
+      <div className="flex items-start space-x-3">
+        {/* Avatar */}
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <div 
-                className="flex-shrink-0 mr-3 cursor-pointer" 
+                className="cursor-pointer" 
                 onClick={(e) => {
                   e.stopPropagation(); // Prevent triggering the activity item click
                   navigate(`/n/${activity.neighborhood_id}/neighbors`);
                 }}
               >
-                <Avatar className="h-8 w-8 hover:ring-2 hover:ring-primary/20 transition-all">
+                <Avatar className="h-8 w-8 flex-shrink-0 hover:ring-2 hover:ring-primary/20 transition-all">
                   <AvatarImage src={activity.profiles.avatar_url} />
                   <AvatarFallback>
                     <User className="h-4 w-4" />
@@ -269,48 +270,91 @@ const ActivityItem = ({
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-
-        {/* Time elapsed */}
-        <span className="text-sm text-gray-500 mr-3 min-w-8 font-medium">
-          {timeAgo}
-        </span>
-
-        {/* Activity title with icon inline - special handling for group events */}
-        <div className="flex items-center flex-1 min-w-0">
-          {IconComponent && (
-            <IconComponent 
-              className="h-4.5 w-4.5 mr-2 flex-shrink-0" 
-              style={{ 
-                // Group events use blue calendar icon, but purple border/badge
-                color: isGroupEvent ? getModuleThemeColor('calendar', 'primary') : activityColor 
-              }} 
-            />
-          )}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <p className="text-base font-medium text-foreground truncate">
-                {/* Append '!' for neighbor join to add excitement, without changing DB data */}
-                {displayTitle}
-              </p>
-            </TooltipTrigger>
-            <TooltipContent className="bg-gray-800 text-white max-w-xs">
-              <p>{displayTitle}</p>
-            </TooltipContent>
-          </Tooltip>
+        
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          {/* Title and Time/Badge */}
+          <div className="flex justify-between items-start gap-2">
+            <div className="text-sm leading-tight flex-1 font-medium">
+              {/* Activity title with icon inline - special handling for group events */}
+              <div className="flex items-center">
+                {IconComponent && (
+                  <IconComponent 
+                    className="h-4 w-4 mr-2 flex-shrink-0" 
+                    style={{ 
+                      // Group events use blue calendar icon, but purple border/badge
+                      color: isGroupEvent ? getModuleThemeColor('calendar', 'primary') : activityColor 
+                    }} 
+                  />
+                )}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="truncate">
+                      {/* Display name and action */}
+                      <span style={{ color: activityColor, fontWeight: '600' }}>
+                        {activity.profiles.display_name || 'A neighbor'}
+                      </span>
+                      {' '}
+                      <span className="text-gray-700">
+                        {/* Convert activity type to readable action */}
+                        {activity.activity_type === 'event_created' 
+                          ? (isGroupEvent ? 'created group event' : 'created event') 
+                          : activity.activity_type === 'event_rsvp'
+                          ? 'RSVP\'d to'
+                          : activity.activity_type === 'skill_offered'
+                          ? 'offered skill'
+                          : activity.activity_type === 'skill_requested'
+                          ? 'requested skill'
+                          : activity.activity_type === 'good_shared'
+                          ? 'shared item'
+                          : activity.activity_type === 'good_requested'
+                          ? 'requested item'
+                          : activity.activity_type === 'safety_update'
+                          ? 'posted safety update'
+                          : activity.activity_type === 'neighbor_joined'
+                          ? 'joined'
+                          : activity.activity_type === 'profile_updated'
+                          ? 'updated profile'
+                          : 'updated'
+                        }
+                      </span>
+                      {' '}
+                      <span style={{ color: activityColor, fontWeight: '600' }}>
+                        {displayTitle}
+                      </span>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent className="bg-gray-800 text-white max-w-xs">
+                    <p>{displayTitle}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            </div>
+            
+            {/* Time/Badge toggle on hover */}
+            <div className="flex-shrink-0 relative">
+              {/* Time - visible by default, hidden on hover */}
+              <span className="text-xs text-gray-500 font-medium group-hover:opacity-0 transition-opacity duration-200">
+                {timeAgo}
+              </span>
+              
+              {/* Badge - hidden by default, visible on hover */}
+              <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <Badge 
+                  variant="outline" 
+                  className="text-xs px-2 py-0.5 font-medium whitespace-nowrap" 
+                  style={{ 
+                    backgroundColor: `${activityColor}15`,
+                    color: activityColor,
+                    borderColor: `${activityColor}30`
+                  }}
+                >
+                  {getActivityBadgeLabel(activity.activity_type, activity.metadata)}
+                </Badge>
+              </div>
+            </div>
+          </div>
         </div>
-
-        {/* Activity action badge - purple for group events */}
-        <Badge 
-          variant="outline" 
-          className="ml-auto flex-shrink-0 text-sm px-2.5 py-0.5 font-medium group-hover:opacity-0 transition-opacity duration-200" 
-          style={{ 
-            backgroundColor: `${activityColor}15`,
-            color: activityColor,
-            borderColor: `${activityColor}30`
-          }}
-        >
-          {getActivityBadgeLabel(activity.activity_type, activity.metadata)}
-        </Badge>
 
         {/* Debug delete button - only visible in debug mode */}
         {debugDeleteMode && onDelete && (
@@ -325,7 +369,7 @@ const ActivityItem = ({
           </Button>
         )}
       </div>
-    </div>
+    </Card>
   );
 };
 
