@@ -76,10 +76,10 @@ const SkillRequestSheet: React.FC<SkillRequestSheetProps> = ({ open, onOpenChang
       return;
     }
 
-    // Validate skill title length (2-5 words for brevity)
+    // Validate skill title length (1-5 words for requests to allow simple needs)
     const wordCount = skillTitle.trim().split(/\s+/).length;
-    if (wordCount < 2 || wordCount > 5) {
-      toast.error('Skill title should be 2-5 words');
+    if (wordCount < 1 || wordCount > 5) {
+      toast.error('Skill title should be 1-5 words');
       return;
     }
 
