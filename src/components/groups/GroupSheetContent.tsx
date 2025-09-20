@@ -15,6 +15,7 @@ import { GroupActivityTimeline } from './activity/GroupActivityTimeline';
 import { extractNeighborhoodId, neighborhoodPath, BASE_ROUTES } from '@/utils/routes';
 // Import the standardized share button component
 import { ShareButton } from '@/components/ui/share-button';
+import { GroupMembersPopover } from './GroupMembersPopover';
 
 /**
  * GroupSheetContent Component
@@ -151,27 +152,35 @@ const GroupSheetContent = ({
             
             {/* Privacy status and member count with profile images */}
             <div className="flex items-center gap-2 text-gray-600">
-              {/* Profile images on the left */}
-              <div className="flex -space-x-1">
-                {memberAvatars.slice(0, 3).map((member, index) => (
-                  <Avatar key={member.user_id} className="h-7 w-7 border border-white">
-                    <AvatarImage src={member.profile?.avatar_url || ''} />
-                    <AvatarFallback className="text-xs">
-                      {member.profile?.display_name?.[0]?.toUpperCase() || '?'}
-                    </AvatarFallback>
-                  </Avatar>
-                ))}
-                {additionalMemberCount > 0 && (
-                  <div className="h-7 w-7 rounded-full bg-gray-100 border border-white flex items-center justify-center">
-                    <span className="text-xs font-medium text-gray-600">
-                      +{additionalMemberCount}
-                    </span>
+              {/* Wrap profile images and member count in popover */}
+              <GroupMembersPopover 
+                members={groupMembers || []} 
+                neighborhoodId={group.neighborhood_id}
+              >
+                <div className="flex items-center gap-2 cursor-pointer hover:opacity-75 transition-opacity">
+                  {/* Profile images on the left */}
+                  <div className="flex -space-x-1">
+                    {memberAvatars.slice(0, 3).map((member, index) => (
+                      <Avatar key={member.user_id} className="h-7 w-7 border border-white">
+                        <AvatarImage src={member.profile?.avatar_url || ''} />
+                        <AvatarFallback className="text-xs">
+                          {member.profile?.display_name?.[0]?.toUpperCase() || '?'}
+                        </AvatarFallback>
+                      </Avatar>
+                    ))}
+                    {additionalMemberCount > 0 && (
+                      <div className="h-7 w-7 rounded-full bg-gray-100 border border-white flex items-center justify-center">
+                        <span className="text-xs font-medium text-gray-600">
+                          +{additionalMemberCount}
+                        </span>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-              <span className="text-sm text-gray-600">
-                {group.member_count === 1 ? '1 neighbor' : `${group.member_count || 0} neighbors`}
-              </span>
+                  <span className="text-sm text-gray-600">
+                    {group.member_count === 1 ? '1 neighbor' : `${group.member_count || 0} neighbors`}
+                  </span>
+                </div>
+              </GroupMembersPopover>
               
               {/* Action buttons container */}
               <div className="ml-auto flex items-center gap-2">
