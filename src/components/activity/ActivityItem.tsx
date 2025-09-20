@@ -289,7 +289,7 @@ const ActivityItem = ({
                 )}
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <span className="truncate">
+                    <span className="break-words leading-relaxed">
                       {/* Display name in color + action + content title */}
                       <span style={{ color: activityColor, fontWeight: '600' }}>
                         {activity.profiles.display_name || 'A neighbor'}
