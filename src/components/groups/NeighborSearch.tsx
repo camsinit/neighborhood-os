@@ -68,7 +68,7 @@ export const NeighborSearch: React.FC<NeighborSearchProps> = ({
 
       {/* Selected neighbors display */}
       {selectedNeighbors.length > 0 && (
-        <div className="space-y-2">
+        <div className="space-y-3">
           <Label className="text-sm font-medium">Selected neighbors to invite:</Label>
           <div className="flex flex-wrap gap-2">
             {selectedNeighbors.map(neighbor => (
@@ -96,20 +96,34 @@ export const NeighborSearch: React.FC<NeighborSearchProps> = ({
               </Badge>
             ))}
           </div>
+          
+          {/* Search input - positioned under selected neighbors */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="Search neighbors by name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
         </div>
       )}
 
-      {/* Search input */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-        <Input
-          type="text"
-          placeholder="Search neighbors by name..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
-        />
-      </div>
+      {/* Search input when no neighbors selected - positioned after header */}
+      {selectedNeighbors.length === 0 && (
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            type="text"
+            placeholder="Search neighbors by name..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+      )}
 
       {/* Search results */}
       {searchTerm && (
