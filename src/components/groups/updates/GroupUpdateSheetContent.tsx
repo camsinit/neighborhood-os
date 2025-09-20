@@ -286,33 +286,33 @@ const GroupUpdateSheetContent = ({ update, onOpenChange }: GroupUpdateSheetConte
               borderColor: `${groupsTheme.primary}20`
             }}
           >
-            {/* Author info in top right corner */}
-            <div className="absolute top-4 right-4 flex items-center gap-2">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={authorProfile?.avatar_url || ""} />
-                <AvatarFallback className="text-xs">
-                  {authorInitials}
-                </AvatarFallback>
-              </Avatar>
+            {/* Time in top right corner */}
+            <div className="absolute top-4 right-4 flex items-center gap-1 text-sm text-gray-600">
+              <Calendar className="h-3.5 w-3.5" />
+              <span>{formatTimeAgo(new Date(update.created_at))}</span>
             </div>
 
-            {/* Title with time on the right */}
-            <div className="mb-3 pr-20"> {/* pr-20 to avoid overlap with author info */}
-              <div className="flex items-start justify-between gap-4">
-                <h1 className="text-xl font-bold text-gray-900 leading-tight mb-2 flex-1">
-                  {update.title}
-                </h1>
-                <div className="flex items-center gap-1 text-sm text-gray-600 flex-shrink-0 mt-1">
-                  <Calendar className="h-3.5 w-3.5" />
-                  <span>{formatTimeAgo(new Date(update.created_at))}</span>
+            {/* Title with profile image on the left */}
+            <div className="mb-3 pr-20"> {/* pr-20 to avoid overlap with time */}
+              <div className="flex items-start gap-3">
+                <Avatar className="h-8 w-8 mt-1 flex-shrink-0">
+                  <AvatarImage src={authorProfile?.avatar_url || ""} />
+                  <AvatarFallback className="text-xs">
+                    {authorInitials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <h1 className="text-xl font-bold text-gray-900 leading-tight mb-2">
+                    {update.title}
+                  </h1>
+                  {/* Description */}
+                  {update.content && (
+                    <p className="text-gray-700 leading-relaxed whitespace-pre-wrap text-sm">
+                      {update.content}
+                    </p>
+                  )}
                 </div>
               </div>
-              {/* Description */}
-              {update.content && (
-                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap text-sm">
-                  {update.content}
-                </p>
-              )}
             </div>
 
           </div>
