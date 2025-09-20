@@ -280,7 +280,7 @@ export const GroupActivityTimeline: React.FC<GroupActivityTimelineProps> = ({
             variant="outline"
           >
             <Calendar className="w-4 h-4 mr-2 text-blue-600" />
-            New Event
+            Add a Gathering
           </Button>
         </div>
 
