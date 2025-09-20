@@ -161,7 +161,8 @@ export class GroupService {
         physical_unit_value: data.physical_unit_value,
         created_by: data.created_by,
         is_private: data.is_private || false,
-        max_members: data.max_members || 100
+        max_members: data.max_members || 100,
+        banner_image_url: data.banner_image_url || null
       };
       logger.info('Insert data prepared:', insertData);
 
