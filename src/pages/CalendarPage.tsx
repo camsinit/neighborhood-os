@@ -40,14 +40,21 @@ function CalendarPage() {
   // State management for add event sheet
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [initialEventDate, setInitialEventDate] = useState<Date | null>(null);
+  const [preSelectedGroupId, setPreSelectedGroupId] = useState<string | undefined>(undefined);
   const [neighborhoodTimezone, setNeighborhoodTimezone] = useState<string>('America/Los_Angeles');
   
   // Handle URL parameters to auto-open add event sheet
   useEffect(() => {
     const action = searchParams.get('action');
     const dateParam = searchParams.get('date');
+    const groupIdParam = searchParams.get('groupId');
     
     if (action === 'add' || action === 'add_event') {
+      // Capture the group ID before clearing URL params
+      if (groupIdParam) {
+        setPreSelectedGroupId(groupIdParam);
+      }
+      
       // Set initial date if provided
       if (dateParam) {
         try {
@@ -95,6 +102,7 @@ function CalendarPage() {
   const closeAddEventSheet = () => {
     setIsAddEventOpen(false);
     setInitialEventDate(null);
+    setPreSelectedGroupId(undefined); // Clear pre-selected group when closing
   };
   
   // Handler for when event is successfully added
@@ -150,7 +158,7 @@ function CalendarPage() {
               initialValues={{
                 date: initialEventDate ? initialEventDate.toISOString().split('T')[0] : '',
                 time: initialEventDate ? initialEventDate.toTimeString().slice(0, 5) : '',
-                groupId: searchParams.get('groupId') || undefined // Pre-select group from URL
+                groupId: preSelectedGroupId // Use captured group ID from URL
               }}
               neighborhoodTimezone={neighborhoodTimezone}
             />
