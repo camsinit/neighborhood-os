@@ -249,8 +249,14 @@ const ActivityItem = ({
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="flex-shrink-0 mr-3">
-                <Avatar className="h-8 w-8">
+              <div 
+                className="flex-shrink-0 mr-3 cursor-pointer" 
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent triggering the activity item click
+                  navigate(`/n/${activity.neighborhood_id}/neighbors`);
+                }}
+              >
+                <Avatar className="h-8 w-8 hover:ring-2 hover:ring-primary/20 transition-all">
                   <AvatarImage src={activity.profiles.avatar_url} />
                   <AvatarFallback>
                     <User className="h-4 w-4" />
@@ -259,7 +265,7 @@ const ActivityItem = ({
               </div>
             </TooltipTrigger>
             <TooltipContent className="bg-gray-800 text-white">
-              <p>{activity.profiles.display_name || "Neighbor"}</p>
+              <p>Click to view {activity.profiles.display_name || "Neighbor"}&apos;s profile</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
