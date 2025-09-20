@@ -271,7 +271,7 @@ export const GroupActivityTimeline: React.FC<GroupActivityTimelineProps> = ({
             variant="outline"
           >
             <MessageSquare className="w-4 h-4 mr-2 text-purple-600" />
-            New Update
+            Share an Update
           </Button>
           
           <Button
