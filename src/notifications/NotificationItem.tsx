@@ -115,6 +115,93 @@ const getHighlightType = (contentType: string): HighlightableItemType | null => 
   }
 };
 
+/**
+ * Helper function to render notification title with name highlighting
+ * Similar to how ActivityItem highlights actor names in the theme color
+ */
+const renderHighlightedNotificationTitle = (title: string, actorName: string, themeColor: string): React.ReactNode => {
+  // Find the actor name in the title and highlight it
+  const actorIndex = title.indexOf(actorName);
+  
+  if (actorIndex === -1) {
+    // Actor name not found in title, just return the title as-is
+    return title;
+  }
+  
+  // Split the title into parts: before name, name, after name
+  const beforeName = title.substring(0, actorIndex);
+  const afterNameStart = actorIndex + actorName.length;
+  const afterName = title.substring(afterNameStart);
+  
+  // Now check if there's content after the actor that should also be highlighted
+  // Look for patterns like quoted text, text after "to", etc.
+  const remainingText = afterName;
+  
+  // Pattern for content that should be highlighted (event titles, skill names, etc.)
+  let contentMatch = null;
+  
+  // Pattern 1: Text after "to" (e.g., "RSVP'd to Event Title")
+  const toPattern = /\s+to\s+(.+?)(?:\s+(?:event|skill|session))?$/i;
+  contentMatch = remainingText.match(toPattern);
+  
+  // Pattern 2: Text after quotes around a title
+  if (!contentMatch) {
+    const quotePattern = /\s+(.+?)"/;
+    contentMatch = remainingText.match(quotePattern);
+  }
+  
+  // Pattern 3: Text after "with" (e.g., "is hosting Event Title with Group Name")
+  if (!contentMatch) {
+    const withPattern = /\s+(.+?)\s+with\s+(.+)$/i;
+    const withMatch = remainingText.match(withPattern);
+    if (withMatch) {
+      // For group events, highlight both the event title and group name
+      const eventTitle = withMatch[1];
+      const groupName = withMatch[2];
+      
+      return React.createElement(
+        React.Fragment,
+        null,
+        beforeName,
+        React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, actorName),
+        " is hosting ",
+        React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, eventTitle),
+        " with ",
+        React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, groupName)
+      );
+    }
+  }
+  
+  if (contentMatch && contentMatch[1]) {
+    const contentPart = contentMatch[1].trim();
+    const contentIndex = remainingText.indexOf(contentPart);
+    
+    if (contentIndex !== -1) {
+      const beforeContent = remainingText.substring(0, contentIndex);
+      const afterContent = remainingText.substring(contentIndex + contentPart.length);
+      
+      return React.createElement(
+        React.Fragment,
+        null,
+        beforeName,
+        React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, actorName),
+        beforeContent,
+        React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, contentPart),
+        afterContent
+      );
+    }
+  }
+  
+  // Fallback: just highlight the actor name
+  return React.createElement(
+    React.Fragment,
+    null,
+    beforeName,
+    React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, actorName),
+    afterName
+  );
+}
+
 export function NotificationItem({ notification, variant = 'drawer' }: NotificationItemProps) {
   const navigate = useNavigate();
   const { markAsRead, archive } = useNotificationActions();
@@ -202,14 +289,8 @@ export function NotificationItem({ notification, variant = 'drawer' }: Notificat
           {/* Title and Time/Archive */}
           <div className="flex justify-between items-start gap-2">
             <div className={`text-sm leading-tight flex-1 ${!notification.is_read ? 'font-semibold' : 'font-medium'}`}>
-              {/* Special handling for neighbor notifications to show name in purple */}
-              {notification.content_type === 'neighbors' && notification.notification_type === 'neighbor_welcome' ? (
-                <span>
-                  <span style={{ color: '#8B5FFF', fontWeight: '600' }}>{actorName}</span> joined
-                </span>
-              ) : (
-                highlightTitleContent(notification.title, notification.content_type)
-              )}
+              {/* Parse and highlight the notification title similar to how ActivityItem works */}
+              {renderHighlightedNotificationTitle(notification.title, actorName, themeColor)}
             </div>
             
             {/* Date/Archive toggle on hover */}
