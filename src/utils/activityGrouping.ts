@@ -85,7 +85,7 @@ export const getGroupedActivityText = (group: ActivityGroup): string => {
   
   switch (activity_type) {
     case 'skill_offered':
-      return `offered some new skills`;
+      return `offered ${count} Skills`;
     case 'skill_requested':
       return `requested help with ${count} skills`;
     case 'good_shared':
