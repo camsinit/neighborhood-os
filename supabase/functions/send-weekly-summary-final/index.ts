@@ -38,9 +38,9 @@ async function generateAIContent(
     console.log('No Claude API key found, using default content');
     return {
       weekInReview: `Calvin and Mac have been the community champions this week, keeping their groups active and our skill-sharing network buzzing. It's been one of those weeks where you can really feel the neighborly energy - people stepping up to help, offering what they know, and keeping our little corner of the world connected.`,
-      skillsExchange: `Fresh offers from your neighbors this week, from tech security to yard work to professional services. Plus someone's looking for carpentry help - perfect chance to be the hero of someone's home project.`,
-      communityGroups: `Calvin's Group and Mac's Group are both going strong with 2 members each, keeping the community spirit alive with regular updates and welcoming new faces.`,
-      weekAhead: `The week ahead is full of possibility! Perfect timing for someone to organize a neighborhood walk, start a group for a shared interest, or offer to help with something they're good at. Sometimes the best connections start with the simplest gestures.`
+      skillsExchange: `Fresh offers from your neighbors this week, from tech security to yard work to professional services. Plus someone's looking for carpentry help!`,
+      communityGroups: `Calvin's Group and Mac's Group are both going strong with 2 members each. Keep the community spirit alive!`,
+      weekAhead: `The week ahead is full of possibility! Perfect timing for someone to organize a neighborhood walk, start a group for a shared interest, or offer to help with something they're good at.`
     };
   }
 
@@ -122,9 +122,9 @@ Generate content in this EXACT format structure:
 {
   "weekInReview": "Write a 2-3 sentence intro that mentions the most active neighbors by name and describes the community energy. NO bold formatting (**). Example: 'Calvin and Mac have been the community champions this week, keeping their groups active and our skill-sharing network buzzing. It's been one of those weeks where you can really feel the neighborly energy - people stepping up to help, offering what they know, and keeping our little corner of the world connected.'",
   
-  "skillsExchange": "Write intro text for skills section. NO bold formatting. Do NOT include individual skill listings - those will be generated separately with proper links and context.",
+  "skillsExchange": "Write 2 sentences maximum intro text for skills section. NO bold formatting. Do NOT include individual skill listings - those will be generated separately with neighbor names and proper links.",
   
-  "communityGroups": "Write intro text for groups section. NO bold formatting. Do NOT include individual group listings - those will be generated separately with proper links and recent updates.",
+  "communityGroups": "Write 2 sentences maximum intro text for groups section. NO bold formatting. Do NOT include individual group listings - those will be generated separately with proper links and recent updates.",
   
   "weekAhead": "Write a 2-3 sentence forward-looking section about upcoming opportunities and suggestions for neighbors to populate the dashboard next week. Focus on encouraging participation in events, skills sharing, and group activities."
 }
@@ -272,10 +272,18 @@ const handler = async (req: Request): Promise<Response> => {
         .order('time', { ascending: false })
         .limit(10),
 
-      // Current available skills (recent posts)
+      // Current available skills (recent posts) with user profiles
       supabase
         .from('skills_exchange')
-        .select('id, title, skill_category, request_type, created_at')
+        .select(`
+          id, 
+          title, 
+          skill_category, 
+          request_type, 
+          created_at,
+          user_id,
+          profiles(display_name, user_id)
+        `)
         .eq('neighborhood_id', neighborhoodId)
         .eq('is_archived', false)
         .gte('created_at', weekAgoISO)
@@ -459,7 +467,10 @@ const handler = async (req: Request): Promise<Response> => {
         title: skill.title,
         url: getSkillURL(neighborhoodId, skill.id),
         category: skill.skill_category,
-        requestType: skill.request_type
+        requestType: skill.request_type,
+        neighborName: skill.profiles?.display_name || 'A neighbor',
+        neighborUserId: skill.profiles?.user_id || skill.user_id,
+        neighborProfileUrl: getProfileURL(neighborhoodId, skill.profiles?.user_id || skill.user_id)
       })) || [],
 
       activeGroups: activeGroups
@@ -483,7 +494,10 @@ const handler = async (req: Request): Promise<Response> => {
         id: skill.id,
         title: skill.title,
         category: skill.category,
-        requestType: skill.requestType
+        requestType: skill.requestType,
+        neighborName: skill.neighborName,
+        neighborUserId: skill.neighborUserId,
+        neighborProfileUrl: skill.neighborProfileUrl
       })),
       groups: {
         newGroups: newGroups.slice(0, 5),

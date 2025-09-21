@@ -12,23 +12,27 @@ import {
 } from 'npm:@react-email/components@0.0.22'
 import * as React from 'npm:react@18.3.1'
 
-// Helper function to add context about how skills are useful
-const getSkillContext = (skillTitle: string, category: string): string => {
+// Helper function to add context about how skills are useful with neighbor names
+const getSkillContext = (skillTitle: string, category: string, neighborName: string, requestType: string): string => {
   const contexts = {
-    'Internet Safety': 'Perfect for protecting against online scams and keeping your digital life secure',
-    'Transportation': 'Rides available when you need them, from grocery runs to appointments',
-    'Gardening/Landscaping': 'Transform your outdoor space with expert guidance from a neighbor',
-    'Notary Public': 'Official document services right in the neighborhood, no downtown trips needed',
-    'Crisis Management': 'Emergency planning expertise to keep your family prepared',
-    'Smart Home Setup': 'Tech installation help to modernize your home',
-    'Chucking Wood': 'Firewood prep services for cozy winter evenings',
-    'Computer Troubleshooting': 'Tech support from a neighbor who actually knows what they\'re doing',
-    'Photography': 'Capture life\'s moments with professional guidance',
-    'Carpentry': 'Handy skills for home projects and repairs',
-    'Search and Rescue Experience': 'Safety expertise for outdoor adventures and emergency preparedness'
+    'Internet Safety': `is offering their skills to help protect against online scams and keep your digital life secure`,
+    'Transportation': `is available for rides when you need them, from grocery runs to appointments`,
+    'Gardening/Landscaping': `can help transform your outdoor space with expert guidance`,
+    'Notary Public': `offers official document services right in the neighborhood, no downtown trips needed`,
+    'Crisis Management': `provides emergency planning expertise to keep your family prepared`,
+    'Smart Home Setup': `offers tech installation help to modernize your home`,
+    'Chucking Wood': `provides firewood prep services for cozy winter evenings`,
+    'Computer Troubleshooting': `offers tech support from someone who actually knows what they're doing`,
+    'Photography': `can help capture life's moments with professional guidance`,
+    'Carpentry': `offers handy skills for home projects and repairs`,
+    'Search and Rescue Experience': `provides safety expertise for outdoor adventures and emergency preparedness`
   };
   
-  return contexts[skillTitle] || `${category} expertise available when you need it`;
+  if (requestType === 'offer') {
+    return contexts[skillTitle] || `offers ${category} expertise when you need it`;
+  } else {
+    return `needs ${category} help! This could be your moment to shine`;
+  }
 };
 
 interface WeeklySummaryEmailProps {
@@ -54,9 +58,13 @@ interface WeeklySummaryEmailProps {
       isGroupEvent?: boolean
     }>
     skills: Array<{
+      id: string
       title: string
       category: string
       requestType: string
+      neighborName: string
+      neighborUserId: string
+      neighborProfileUrl: string
     }>
     groups: {
       newGroups: Array<{
@@ -130,7 +138,8 @@ export const WeeklySummaryEmail = ({
                   <Link href={`${baseUrl}/n/${neighborhoodId}/skills?highlight=skill&type=skills_exchange&id=${skill.id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_skill`} style={skillNameLink}>
                     {skill.title}
                   </Link>
-                  {' '}- {getSkillContext(skill.title, skill.category)}
+                  {' '}- <Link href={skill.neighborProfileUrl} style={neighborNameLink}><strong>{skill.neighborName}</strong></Link>{' '}
+                  {getSkillContext(skill.title, skill.category, skill.neighborName, skill.requestType)}
                 </Text>
               ))}
             </div>
@@ -148,7 +157,8 @@ export const WeeklySummaryEmail = ({
                   <Link href={`${baseUrl}/n/${neighborhoodId}/skills?highlight=skill&type=skills_exchange&id=${skill.id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_skill`} style={skillNameLink}>
                     {skill.title}
                   </Link>
-                  {' '}- Someone needs {skill.category} help! This could be your moment to shine
+                  {' '}- <Link href={skill.neighborProfileUrl} style={neighborNameLink}><strong>{skill.neighborName}</strong></Link>{' '}
+                  {getSkillContext(skill.title, skill.category, skill.neighborName, skill.requestType)}
                 </Text>
               ))}
             </div>
@@ -206,6 +216,36 @@ export const WeeklySummaryEmail = ({
             Visit Your Neighborhood Dashboard
           </Link>
         </Text>
+
+        {/* Quick Actions Section */}
+        <Text style={quickActionsHeader}>🚀 WAYS TO GET INVOLVED THIS WEEK</Text>
+        <div style={quickActionsList}>
+          <Text style={quickActionItem}>
+            • <Link href={`${baseUrl}/n/${neighborhoodId}/calendar?create=true&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_create_event`} style={eventActionLink}>
+              Organize a neighborhood coffee meetup this Saturday morning
+            </Link>
+          </Text>
+          <Text style={quickActionItem}>
+            • <Link href={`${baseUrl}/n/${neighborhoodId}/skills?create=true&type=offer&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_offer_skill`} style={skillActionLink}>
+              Share a skill you're good at (cooking, tech help, gardening tips)
+            </Link>
+          </Text>
+          <Text style={quickActionItem}>
+            • <Link href={`${baseUrl}/n/${neighborhoodId}/skills?create=true&type=request&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_request_skill`} style={skillActionLink}>
+              Ask for help with a home project or learning something new
+            </Link>
+          </Text>
+          <Text style={quickActionItem}>
+            • <Link href={`${baseUrl}/n/${neighborhoodId}/groups?create=true&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_create_group`} style={groupActionLink}>
+              Start a group for dog walkers, book club, or weekend hikers
+            </Link>
+          </Text>
+          <Text style={quickActionItem}>
+            • <Link href={`${baseUrl}/n/${neighborhoodId}/groups?utm_source=email&utm_medium=email&utm_campaign=weekly_summary_join_group`} style={groupActionLink}>
+              Post an update or event idea in one of your existing groups
+            </Link>
+          </Text>
+        </div>
 
         <Text style={signoff}>
           Stay neighborly,<br />
@@ -404,6 +444,13 @@ const skillNameLink = {
   fontWeight: '600',
 };
 
+// NEW: Neighbor name links (green theme, bold)
+const neighborNameLink = {
+  color: '#059669',
+  textDecoration: 'none',
+  fontWeight: '700',
+};
+
 const requestsTitle = {
   color: '#1a1a1a',
   fontSize: '16px',
@@ -453,4 +500,42 @@ const signoff = {
   fontSize: '16px',
   margin: '20px 0',
   fontStyle: 'italic',
+};
+
+// Quick Actions Styles
+const quickActionsHeader = {
+  color: '#1a1a1a',
+  fontSize: '18px',
+  fontWeight: 'bold',
+  margin: '24px 0 16px 0',
+};
+
+const quickActionsList = {
+  margin: '0 0 20px 0',
+};
+
+const quickActionItem = {
+  color: '#404040',
+  fontSize: '15px',
+  lineHeight: '24px',
+  margin: '0 0 8px 0',
+};
+
+// Color-coordinated action links
+const eventActionLink = {
+  color: '#2563eb', // Blue for events/calendar
+  textDecoration: 'none',
+  fontWeight: '500',
+};
+
+const skillActionLink = {
+  color: '#059669', // Green for skills
+  textDecoration: 'none',
+  fontWeight: '500',
+};
+
+const groupActionLink = {
+  color: '#7c3aed', // Purple for groups
+  textDecoration: 'none',
+  fontWeight: '500',
 };
