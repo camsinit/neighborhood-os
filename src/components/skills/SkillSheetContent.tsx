@@ -199,12 +199,7 @@ const SkillSheetContent = ({
 
         {/* Skill Providers Section */}
         <div>
-          <h3 className="font-semibold text-lg mb-4 flex items-center gap-2" style={{
-          color: 'hsl(var(--skills-color))'
-        }}>
-            <Users className="w-5 h-5" />
-            Neighbors with this skill
-          </h3>
+          
           
           {loading ? <div className="text-center py-8 text-gray-500">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-300 mx-auto mb-4"></div>
