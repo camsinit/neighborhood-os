@@ -20,7 +20,7 @@ interface GroupsContainerProps {
 /**
  * GroupsContainer Component
  * 
- * Main container for the Groups page, structured similarly to GoodsPageContainer.
+ * Main container for the Groups page.
  * Handles the toggle between Groups and Directory views with consistent styling.
  */
 export const GroupsContainer: React.FC<GroupsContainerProps> = ({

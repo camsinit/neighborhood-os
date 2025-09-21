@@ -17,10 +17,10 @@ export const BASE_ROUTES = {
   home: '/home',
   calendar: '/calendar',
   skills: '/skills',
-  goods: '/goods',
-  safety: '/safety',
   neighbors: '/neighbors',
   groups: '/groups',
+  goods: '/goods',
+  safety: '/safety',
 } as const;
 
 /**
@@ -29,9 +29,7 @@ export const BASE_ROUTES = {
  */
 export const ROUTE_MAP: Record<HighlightableItemType, string> = {
   event: BASE_ROUTES.calendar,
-  safety: BASE_ROUTES.safety,
   skills: BASE_ROUTES.skills,
-  goods: BASE_ROUTES.goods,
   neighbors: BASE_ROUTES.neighbors,
   group: BASE_ROUTES.neighbors, // Groups are served at the neighbors route
 };

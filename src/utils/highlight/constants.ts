@@ -22,10 +22,8 @@ export const routeMap: Record<HighlightableItemType, string> = ROUTE_MAP;
  * Maps item types to their data attributes for DOM selection
  */
 export const dataAttributeMap: Record<HighlightableItemType, string> = {
-  safety: "data-safety-id",
-  event: "data-event-id", 
-  skills: "data-skill-id", 
-  goods: "data-goods-id",
+  event: "data-event-id",
+  skills: "data-skill-id",
   neighbors: "data-neighbor-id",
   group: "data-group-id"
 };
@@ -34,10 +32,8 @@ export const dataAttributeMap: Record<HighlightableItemType, string> = {
  * Maps item types to readable names for error messages
  */
 export const readableTypeNames: Record<HighlightableItemType, string> = {
-  safety: "Safety Update",
-  event: "Event", 
+  event: "Event",
   skills: "Skill",
-  goods: "Goods Item",
   neighbors: "Neighbor Profile",
   group: "Group"
 };

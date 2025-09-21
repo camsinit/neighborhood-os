@@ -28,15 +28,6 @@ export const CONTENT_TYPE_CONFIG: Record<string, ContentTypeConfig> = {
     },
     notificationTemplate: 'event_created'
   },
-  safety_updates: { 
-    table: 'safety_updates', 
-    neighborhoodKey: 'neighborhood_id',
-    actorField: 'author_id',
-    activityTypes: {
-      create: 'safety_update'
-    },
-    notificationTemplate: 'safety_update'
-  },
   skills_exchange: { 
     table: 'skills_exchange', 
     neighborhoodKey: 'neighborhood_id',
@@ -45,15 +36,6 @@ export const CONTENT_TYPE_CONFIG: Record<string, ContentTypeConfig> = {
       create: 'skill_offered' // This will be determined dynamically based on request_type
     },
     notificationTemplate: 'skill_exchange'
-  },
-  goods_exchange: { 
-    table: 'goods_exchange', 
-    neighborhoodKey: 'neighborhood_id',
-    actorField: 'user_id',
-    activityTypes: {
-      create: 'good_shared' // This will be determined dynamically based on request_type
-    },
-    notificationTemplate: 'goods_exchange'
   },
   groups: { 
     table: 'groups', 
