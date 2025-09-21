@@ -116,8 +116,9 @@ const getHighlightType = (contentType: string): HighlightableItemType | null => 
 };
 
 /**
- * Helper function to render notification title with name highlighting
- * Similar to how ActivityItem highlights actor names in the theme color
+ * Helper function to render notification title with comprehensive highlighting
+ * Ensures both actor name and subject content are ALWAYS highlighted in theme color
+ * Handles all notification patterns to guarantee at least 2 highlighted elements
  */
 const renderHighlightedNotificationTitle = (title: string, actorName: string, themeColor: string): React.ReactNode => {
   // Find the actor name in the title and highlight it
@@ -133,66 +134,213 @@ const renderHighlightedNotificationTitle = (title: string, actorName: string, th
   const afterNameStart = actorIndex + actorName.length;
   const afterName = title.substring(afterNameStart);
   
-  // Now check if there's content after the actor that should also be highlighted
-  // Look for patterns like quoted text, text after "to", etc.
-  const remainingText = afterName;
+  // Comprehensive pattern matching for all notification types
   
-  // Pattern for content that should be highlighted (event titles, skill names, etc.)
-  let contentMatch = null;
-  
-  // Pattern 1: Text after "to" (e.g., "RSVP'd to Event Title")
-  const toPattern = /\s+to\s+(.+?)(?:\s+(?:event|skill|session))?$/i;
-  contentMatch = remainingText.match(toPattern);
-  
-  // Pattern 2: Text after quotes around a title
-  if (!contentMatch) {
-    const quotePattern = /\s+(.+?)"/;
-    contentMatch = remainingText.match(quotePattern);
+  // Pattern 1: "is hosting [Event Title] with [Group Name]" - group events
+  const groupEventPattern = /\s+is hosting\s+(.+?)\s+with\s+(.+)$/i;
+  const groupEventMatch = afterName.match(groupEventPattern);
+  if (groupEventMatch) {
+    const eventTitle = groupEventMatch[1];
+    const groupName = groupEventMatch[2];
+    return React.createElement(
+      React.Fragment,
+      null,
+      beforeName,
+      React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, actorName),
+      " is hosting ",
+      React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, eventTitle),
+      " with ",
+      React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, groupName)
+    );
   }
   
-  // Pattern 3: Text after "with" (e.g., "is hosting Event Title with Group Name")
-  if (!contentMatch) {
-    const withPattern = /\s+(.+?)\s+with\s+(.+)$/i;
-    const withMatch = remainingText.match(withPattern);
-    if (withMatch) {
-      // For group events, highlight both the event title and group name
-      const eventTitle = withMatch[1];
-      const groupName = withMatch[2];
-      
-      return React.createElement(
-        React.Fragment,
-        null,
-        beforeName,
-        React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, actorName),
-        " is hosting ",
-        React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, eventTitle),
-        " with ",
-        React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, groupName)
-      );
-    }
+  // Pattern 2: "created an event for [Group Name]: [Event Title]" - group events
+  const createdGroupEventPattern = /\s+created an event for\s+(.+?):\s*(.+)$/i;
+  const createdGroupEventMatch = afterName.match(createdGroupEventPattern);
+  if (createdGroupEventMatch) {
+    const groupName = createdGroupEventMatch[1];
+    const eventTitle = createdGroupEventMatch[2];
+    return React.createElement(
+      React.Fragment,
+      null,
+      beforeName,
+      React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, actorName),
+      " created an event for ",
+      React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, groupName),
+      ": ",
+      React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, eventTitle)
+    );
   }
   
-  if (contentMatch && contentMatch[1]) {
-    const contentPart = contentMatch[1].trim();
-    const contentIndex = remainingText.indexOf(contentPart);
-    
-    if (contentIndex !== -1) {
-      const beforeContent = remainingText.substring(0, contentIndex);
-      const afterContent = remainingText.substring(contentIndex + contentPart.length);
-      
-      return React.createElement(
-        React.Fragment,
-        null,
-        beforeName,
-        React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, actorName),
-        beforeContent,
-        React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, contentPart),
-        afterContent
-      );
-    }
+  // Pattern 3: "joined [Group Name]" - group membership
+  const joinedGroupPattern = /\s+joined\s+(.+)$/i;
+  const joinedGroupMatch = afterName.match(joinedGroupPattern);
+  if (joinedGroupMatch) {
+    const groupName = joinedGroupMatch[1];
+    return React.createElement(
+      React.Fragment,
+      null,
+      beforeName,
+      React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, actorName),
+      " joined ",
+      React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, groupName)
+    );
   }
   
-  // Fallback: just highlight the actor name
+  // Pattern 4: "RSVP'd to [Event Title]" - event RSVPs
+  const rsvpPattern = /\s+RSVP'd to\s+(.+)$/i;
+  const rsvpMatch = afterName.match(rsvpPattern);
+  if (rsvpMatch) {
+    const eventTitle = rsvpMatch[1];
+    return React.createElement(
+      React.Fragment,
+      null,
+      beforeName,
+      React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, actorName),
+      " RSVP'd to ",
+      React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, eventTitle)
+    );
+  }
+  
+  // Pattern 5: "needs your help with [Skill Title]" - skill session requests
+  const skillHelpPattern = /\s+needs your help with\s+(.+)$/i;
+  const skillHelpMatch = afterName.match(skillHelpPattern);
+  if (skillHelpMatch) {
+    const skillTitle = skillHelpMatch[1];
+    return React.createElement(
+      React.Fragment,
+      null,
+      beforeName,
+      React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, actorName),
+      " needs your help with ",
+      React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, skillTitle)
+    );
+  }
+  
+  // Pattern 6: "posted an update in [Group Name]" - group updates
+  const groupUpdatePattern = /\s+posted an update in\s+(.+)$/i;
+  const groupUpdateMatch = afterName.match(groupUpdatePattern);
+  if (groupUpdateMatch) {
+    const groupName = groupUpdateMatch[1];
+    return React.createElement(
+      React.Fragment,
+      null,
+      beforeName,
+      React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, actorName),
+      " posted an update in ",
+      React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, groupName)
+    );
+  }
+  
+  // Pattern 7: "commented on your update in [Group Name]" - group comments
+  const groupCommentPattern = /\s+commented on your update in\s+(.+)$/i;
+  const groupCommentMatch = afterName.match(groupCommentPattern);
+  if (groupCommentMatch) {
+    const groupName = groupCommentMatch[1];
+    return React.createElement(
+      React.Fragment,
+      null,
+      beforeName,
+      React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, actorName),
+      " commented on your update in ",
+      React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, groupName)
+    );
+  }
+  
+  // Pattern 8: "invited you to join [Group Name]" - group invitations
+  const groupInvitePattern = /\s+invited you to join\s+(.+)$/i;
+  const groupInviteMatch = afterName.match(groupInvitePattern);
+  if (groupInviteMatch) {
+    const groupName = groupInviteMatch[1];
+    return React.createElement(
+      React.Fragment,
+      null,
+      beforeName,
+      React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, actorName),
+      " invited you to join ",
+      React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, groupName)
+    );
+  }
+  
+  // Pattern 9: Generic content after colon - "[Actor] [action]: [Content]"
+  const colonPattern = /\s*:\s*(.+)$/;
+  const colonMatch = afterName.match(colonPattern);
+  if (colonMatch) {
+    const content = colonMatch[1];
+    const beforeColon = afterName.substring(0, afterName.indexOf(':'));
+    return React.createElement(
+      React.Fragment,
+      null,
+      beforeName,
+      React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, actorName),
+      beforeColon,
+      ": ",
+      React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, content)
+    );
+  }
+  
+  // Pattern 10: Text in quotes - highlight quoted content
+  const quotePattern = /"([^"]+)"/;
+  const quoteMatch = afterName.match(quotePattern);
+  if (quoteMatch) {
+    const quotedContent = quoteMatch[1];
+    const beforeQuote = afterName.substring(0, afterName.indexOf('"'));
+    const afterQuote = afterName.substring(afterName.indexOf('"') + quotedContent.length + 2);
+    return React.createElement(
+      React.Fragment,
+      null,
+      beforeName,
+      React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, actorName),
+      beforeQuote,
+      '"',
+      React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, quotedContent),
+      '"',
+      afterQuote
+    );
+  }
+  
+  // Pattern 11: Content after common prepositions "to", "with", "for", "from"
+  const prepositionPattern = /\s+(to|with|for|from)\s+(.+?)(?:\s+(?:event|skill|session|item|group))?$/i;
+  const prepositionMatch = afterName.match(prepositionPattern);
+  if (prepositionMatch) {
+    const preposition = prepositionMatch[1];
+    const content = prepositionMatch[2];
+    const beforePreposition = afterName.substring(0, afterName.indexOf(preposition));
+    const afterContent = afterName.substring(afterName.indexOf(content) + content.length);
+    return React.createElement(
+      React.Fragment,
+      null,
+      beforeName,
+      React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, actorName),
+      beforePreposition,
+      preposition,
+      " ",
+      React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, content),
+      afterContent
+    );
+  }
+  
+  // Fallback: Try to find any capitalized content that looks like a title/name
+  // This catches cases we might have missed
+  const titlePattern = /\s+([A-Z][^,.!?]*[a-z][^,.!?]*)/;
+  const titleMatch = afterName.match(titlePattern);
+  if (titleMatch) {
+    const possibleTitle = titleMatch[1];
+    const titleIndex = afterName.indexOf(possibleTitle);
+    const beforeTitle = afterName.substring(0, titleIndex);
+    const afterTitle = afterName.substring(titleIndex + possibleTitle.length);
+    return React.createElement(
+      React.Fragment,
+      null,
+      beforeName,
+      React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, actorName),
+      beforeTitle,
+      React.createElement("span", { style: { color: themeColor, fontWeight: '600' } }, possibleTitle),
+      afterTitle
+    );
+  }
+  
+  // Final fallback: just highlight the actor name (but this should rarely happen)
   return React.createElement(
     React.Fragment,
     null,
