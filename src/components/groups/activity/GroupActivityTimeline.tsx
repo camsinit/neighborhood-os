@@ -298,14 +298,9 @@ export const GroupActivityTimeline: React.FC<GroupActivityTimelineProps> = ({
 
         {/* Filtered Timeline Content */}
         <div className="space-y-4">
-          {filteredActivities.map((activity, index) => (
+          {filteredActivities.map((activity) => (
             <div key={activity.id} className="relative">
-              {/* Timeline connector line (except for last item) */}
-              {index < filteredActivities.length - 1 && (
-                <div className="absolute left-5 top-12 bottom-0 w-px bg-border" />
-              )}
-              
-                <GroupActivityCard
+              <GroupActivityCard
                   activity={activity}
                   neighborhoodId={neighborhoodId || ''}
                   onClick={() => {
