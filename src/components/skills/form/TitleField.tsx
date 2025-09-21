@@ -21,7 +21,7 @@ const TitleField = ({ mode, value, onChange, duplicateWarning, error }: TitleFie
     : 'e.g., Learn Python, Guitar Basics';
   
   const label = mode === 'offer' 
-    ? 'What skill can you teach?' 
+    ? 'What would you enjoy helping a neighbor with?' 
     : 'What would you like to learn?';
   
   return (
