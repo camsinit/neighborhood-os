@@ -1,4 +1,3 @@
-
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import ModuleButton from "@/components/ui/module-button";
@@ -8,7 +7,6 @@ import { MessageSquare, Plus, Users, Star, Clock, Lightbulb, Copy, Trash2 } from
 import { useState, useEffect } from "react";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
-
 import ShareButton from "@/components/ui/share-button";
 import { SkillCategory } from "./types/skillTypes";
 import { useSkillProviders, SkillProvider } from "./hooks/useSkillProviders";
@@ -28,7 +26,6 @@ interface SkillSheetContentProps {
   skillCategory: SkillCategory;
   onOpenChange?: (open: boolean) => void;
 }
-
 const SkillSheetContent = ({
   skillTitle,
   skillCategory,
@@ -44,7 +41,10 @@ const SkillSheetContent = ({
   const [isRequestSheetOpen, setIsRequestSheetOpen] = useState(false);
 
   // Use the hook to fetch skill providers with contact info (now includes current user)
-  const { data: providers = [], isLoading: loading } = useSkillProviders(skillTitle, skillCategory);
+  const {
+    data: providers = [],
+    isLoading: loading
+  } = useSkillProviders(skillTitle, skillCategory);
 
   // Function to close the sheet
   const handleSheetClose = () => {
@@ -63,12 +63,9 @@ const SkillSheetContent = ({
     const getNeighborhoodId = async () => {
       if (!user) return;
       try {
-        const { data: userNeighborhood } = await supabase
-          .from('neighborhood_members')
-          .select('neighborhood_id')
-          .eq('user_id', user.id)
-          .eq('status', 'active')
-          .single();
+        const {
+          data: userNeighborhood
+        } = await supabase.from('neighborhood_members').select('neighborhood_id').eq('user_id', user.id).eq('status', 'active').single();
         if (userNeighborhood) {
           setNeighborhoodId(userNeighborhood.neighborhood_id);
         }
@@ -123,14 +120,9 @@ const SkillSheetContent = ({
     if (!user) return;
     try {
       // Remove user's skill offer for this specific skill title and category
-      const { error } = await supabase
-        .from('skills_exchange')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('title', skillTitle)
-        .eq('skill_category', skillCategory)
-        .eq('request_type', 'offer');
-        
+      const {
+        error
+      } = await supabase.from('skills_exchange').delete().eq('user_id', user.id).eq('title', skillTitle).eq('skill_category', skillCategory).eq('request_type', 'offer');
       if (error) throw error;
 
       // Update local state
@@ -173,49 +165,31 @@ const SkillSheetContent = ({
     }
   };
   const categoryStyle = categoryColors[skillCategory] || categoryColors.technology;
-  
-  return (
-    <SheetContent className="sm:max-w-md overflow-y-auto">
+  return <SheetContent className="sm:max-w-md overflow-y-auto">
       <div className="space-y-6">
         {/* Enhanced Skill Header Section with Green Skills Theming */}
-        <div 
-          className="p-6 rounded-xl border-2"
-          style={{ 
-            background: 'linear-gradient(135deg, hsl(var(--skills-light)) 0%, hsl(var(--background)) 100%)',
-            borderColor: 'hsl(var(--skills-color) / 0.2)'
-          }}
-        >
+        <div className="p-6 rounded-xl border-2" style={{
+        background: 'linear-gradient(135deg, hsl(var(--skills-light)) 0%, hsl(var(--background)) 100%)',
+        borderColor: 'hsl(var(--skills-color) / 0.2)'
+      }}>
           {/* Skill Title and Category */}
           <div className="space-y-4">
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">{skillTitle}</h2>
-                <Badge 
-                  className={`${categoryStyle.bg} ${categoryStyle.text} text-sm font-medium px-3 py-1`}
-                >
-                  {skillCategory.charAt(0).toUpperCase() + skillCategory.slice(1)}
-                </Badge>
+                
               </div>
               <div className="flex items-center gap-2">
-                <ShareButton 
-                  contentType="skills" 
-                  contentId={skillTitle || ''} 
-                  neighborhoodId={neighborhoodId} 
-                  size="sm" 
-                  variant="ghost" 
-                />
+                <ShareButton contentType="skills" contentId={skillTitle || ''} neighborhoodId={neighborhoodId} size="sm" variant="ghost" />
               </div>
             </div>
             
             {/* Skill Statistics */}
             <div className="flex items-center gap-4 flex-wrap text-sm">
-              <div 
-                className="flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium"
-                style={{ 
-                  backgroundColor: 'hsl(var(--skills-color))', 
-                  color: 'white' 
-                }}
-              >
+              <div className="flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium" style={{
+              backgroundColor: 'hsl(var(--skills-color))',
+              color: 'white'
+            }}>
                 <Users className="h-4 w-4" />
                 {providers.length} {providers.length === 1 ? 'neighbor offers' : 'neighbors offer'} this skill
               </div>
@@ -225,53 +199,37 @@ const SkillSheetContent = ({
 
         {/* Skill Providers Section */}
         <div>
-          <h3 
-            className="font-semibold text-lg mb-4 flex items-center gap-2"
-            style={{ color: 'hsl(var(--skills-color))' }}
-          >
+          <h3 className="font-semibold text-lg mb-4 flex items-center gap-2" style={{
+          color: 'hsl(var(--skills-color))'
+        }}>
             <Users className="w-5 h-5" />
             Neighbors with this skill
           </h3>
           
-          {loading ? (
-            <div className="text-center py-8 text-gray-500">
+          {loading ? <div className="text-center py-8 text-gray-500">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-300 mx-auto mb-4"></div>
               Loading neighbors...
-            </div>
-          ) : providers.length === 0 ? (
-            <div 
-              className="text-center py-8 rounded-lg border-2 border-dashed"
-              style={{ 
-                backgroundColor: 'hsl(var(--skills-color) / 0.02)', 
-                borderColor: 'hsl(var(--skills-color) / 0.1)' 
-              }}
-            >
+            </div> : providers.length === 0 ? <div className="text-center py-8 rounded-lg border-2 border-dashed" style={{
+          backgroundColor: 'hsl(var(--skills-color) / 0.02)',
+          borderColor: 'hsl(var(--skills-color) / 0.1)'
+        }}>
               <Users className="h-12 w-12 mx-auto mb-4 text-gray-300" />
               <p className="text-gray-500">No neighbors currently offer this skill.</p>
               <p className="text-sm text-gray-400 mt-1">Be the first to share your expertise!</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {providers.map(provider => (
-                <div 
-                  key={provider.user_id} 
-                  className="rounded-lg border p-3 transition-all duration-200 hover:shadow-md group"
-                  style={{ 
-                    backgroundColor: 'hsl(var(--skills-color) / 0.02)', 
-                    borderColor: 'hsl(var(--skills-color) / 0.1)' 
-                  }}
-                >
+            </div> : <div className="space-y-3">
+              {providers.map(provider => <div key={provider.user_id} className="rounded-lg border p-3 transition-all duration-200 hover:shadow-md group" style={{
+            backgroundColor: 'hsl(var(--skills-color) / 0.02)',
+            borderColor: 'hsl(var(--skills-color) / 0.1)'
+          }}>
                   {/* Compact Provider Layout */}
                   <div className="flex items-center gap-3">
                     <div className="relative flex-shrink-0">
                       <Avatar className="h-10 w-10 border border-white shadow-sm">
                         <AvatarImage src={provider.user_profiles?.avatar_url || undefined} />
-                        <AvatarFallback 
-                          style={{ 
-                            backgroundColor: 'hsl(var(--skills-color) / 0.1)', 
-                            color: 'hsl(var(--skills-color))' 
-                          }}
-                        >
+                        <AvatarFallback style={{
+                    backgroundColor: 'hsl(var(--skills-color) / 0.1)',
+                    color: 'hsl(var(--skills-color))'
+                  }}>
                           {provider.user_profiles?.display_name?.[0] || '?'}
                         </AvatarFallback>
                       </Avatar>
@@ -282,89 +240,49 @@ const SkillSheetContent = ({
                         <h4 className="font-medium text-gray-900 text-sm">
                           {provider.user_profiles?.display_name || 'Anonymous'}
                         </h4>
-                        {provider.user_id === user?.id && (
-                          <span 
-                            className="text-xs font-medium px-1.5 py-0.5 rounded-full"
-                            style={{ 
-                              backgroundColor: 'hsl(var(--skills-color) / 0.15)', 
-                              color: 'hsl(var(--skills-color))' 
-                            }}
-                          >
+                        {provider.user_id === user?.id && <span className="text-xs font-medium px-1.5 py-0.5 rounded-full" style={{
+                    backgroundColor: 'hsl(var(--skills-color) / 0.15)',
+                    color: 'hsl(var(--skills-color))'
+                  }}>
                             You
-                          </span>
-                        )}
-                        {provider.time_preferences && provider.time_preferences.length > 0 && (
-                          <div 
-                            className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-md ml-auto"
-                            style={{ 
-                              backgroundColor: 'hsl(var(--skills-color) / 0.08)', 
-                              color: 'hsl(var(--skills-color))' 
-                            }}
-                          >
+                          </span>}
+                        {provider.time_preferences && provider.time_preferences.length > 0 && <div className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-md ml-auto" style={{
+                    backgroundColor: 'hsl(var(--skills-color) / 0.08)',
+                    color: 'hsl(var(--skills-color))'
+                  }}>
                             <Clock className="h-3 w-3" />
                             {provider.time_preferences.join(', ')}
-                          </div>
-                        )}
+                          </div>}
                       </div>
                       
-                      {provider.skill_description && (
-                        <p className="text-xs text-gray-600 leading-relaxed">{provider.skill_description}</p>
-                      )}
+                      {provider.skill_description && <p className="text-xs text-gray-600 leading-relaxed">{provider.skill_description}</p>}
                     </div>
                     
                     {/* Action buttons - Contact for others, Remove for current user */}
-                    {provider.user_id !== user?.id ? (
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="flex-shrink-0 text-xs h-8"
-                        style={{ 
-                          borderColor: 'hsl(var(--skills-color))', 
-                          color: 'hsl(var(--skills-color))' 
-                        }}
-                        onClick={() => handleContactClick(provider.user_id)}
-                      >
+                    {provider.user_id !== user?.id ? <Button size="sm" variant="outline" className="flex-shrink-0 text-xs h-8" style={{
+                borderColor: 'hsl(var(--skills-color))',
+                color: 'hsl(var(--skills-color))'
+              }} onClick={() => handleContactClick(provider.user_id)}>
                         {revealedContactId === provider.user_id ? 'Hide' : 'Contact'}
-                      </Button>
-                    ) : (
-                      /* Green trash icon for current user to remove their skill */
-                      <Button 
-                        size="sm" 
-                        variant="ghost" 
-                        className="flex-shrink-0 h-8 w-8 p-0 hover:bg-red-50"
-                        style={{ 
-                          color: 'hsl(var(--skills-color))' 
-                        }}
-                        onClick={handleRemoveSkill}
-                        title="Remove this skill"
-                      >
+                      </Button> : (/* Green trash icon for current user to remove their skill */
+              <Button size="sm" variant="ghost" className="flex-shrink-0 h-8 w-8 p-0 hover:bg-red-50" style={{
+                color: 'hsl(var(--skills-color))'
+              }} onClick={handleRemoveSkill} title="Remove this skill">
                         <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
+                      </Button>)}
                   </div>
                   
                   {/* Contact Info Display */}
-                  {provider.user_id !== user?.id && revealedContactId === provider.user_id && (
-                    <div className="mt-2 pt-2 border-t border-gray-100">
-                      <ContactMethodDisplay 
-                        provider={provider} 
-                        isRevealed={true} 
-                      />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
+                  {provider.user_id !== user?.id && revealedContactId === provider.user_id && <div className="mt-2 pt-2 border-t border-gray-100">
+                      <ContactMethodDisplay provider={provider} isRevealed={true} />
+                    </div>}
+                </div>)}
+            </div>}
         </div>
       </div>
       
       {/* Request Skill Sheet */}
-      <SkillRequestSheet 
-        open={isRequestSheetOpen}
-        onOpenChange={setIsRequestSheetOpen}
-      />
-    </SheetContent>
-  );
+      <SkillRequestSheet open={isRequestSheetOpen} onOpenChange={setIsRequestSheetOpen} />
+    </SheetContent>;
 };
 export default SkillSheetContent;
