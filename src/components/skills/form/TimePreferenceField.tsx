@@ -16,7 +16,7 @@ const TimePreferenceField = ({ values, onChange }: TimePreferenceFieldProps) => 
   const timeOptions: TimePreference[] = ['morning', 'afternoon', 'evening'];
   
   return (
-    <div className="space-y-2">
+    <>
       <Label>Preferred Times (Select all that apply)</Label>
       <div className="flex flex-wrap gap-2">
         {timeOptions.map((time) => (
@@ -31,7 +31,7 @@ const TimePreferenceField = ({ values, onChange }: TimePreferenceFieldProps) => 
           </Button>
         ))}
       </div>
-    </div>
+    </>
   );
 };
 
