@@ -12,6 +12,25 @@ import {
 } from 'npm:@react-email/components@0.0.22'
 import * as React from 'npm:react@18.3.1'
 
+// Helper function to add context about how skills are useful
+const getSkillContext = (skillTitle: string, category: string): string => {
+  const contexts = {
+    'Internet Safety': 'Perfect for protecting against online scams and keeping your digital life secure',
+    'Transportation': 'Rides available when you need them, from grocery runs to appointments',
+    'Gardening/Landscaping': 'Transform your outdoor space with expert guidance from a neighbor',
+    'Notary Public': 'Official document services right in the neighborhood, no downtown trips needed',
+    'Crisis Management': 'Emergency planning expertise to keep your family prepared',
+    'Smart Home Setup': 'Tech installation help to modernize your home',
+    'Chucking Wood': 'Firewood prep services for cozy winter evenings',
+    'Computer Troubleshooting': 'Tech support from a neighbor who actually knows what they\'re doing',
+    'Photography': 'Capture life\'s moments with professional guidance',
+    'Carpentry': 'Handy skills for home projects and repairs',
+    'Search and Rescue Experience': 'Safety expertise for outdoor adventures and emergency preparedness'
+  };
+  
+  return contexts[skillTitle] || `${category} expertise available when you need it`;
+};
+
 interface WeeklySummaryEmailProps {
   neighborhoodName: string
   neighborhoodId: string
@@ -63,7 +82,7 @@ interface WeeklySummaryEmailProps {
     weekInReview: string
     skillsExchange: string
     communityGroups: string
-    fullPicture: string
+    weekAhead: string
   }
 }
 
@@ -90,40 +109,46 @@ export const WeeklySummaryEmail = ({
         <Text style={greeting}>Hey neighbors! 👋</Text>
         
         {/* THE WEEK IN REVIEW section */}
-        <Text style={sectionTitle}>**THE WEEK IN REVIEW**</Text>
+        <Text style={sectionTitle}>THE WEEK IN REVIEW</Text>
         <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.weekInReview }} />
 
         {/* Visual separator */}
         <Text style={separator}>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</Text>
 
         {/* SKILLS EXCHANGE section */}
-        <Text style={sectionTitle}>🛠️ **SKILLS EXCHANGE**</Text>
+        <Text style={skillsHeader}>🛠️ SKILLS EXCHANGE</Text>
         <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.skillsExchange }} />
 
-        {/* Individual skill links with proper deep linking */}
+        {/* Fresh offers from neighbors */}
         {highlights.skills.filter(s => s.requestType === 'offer').length > 0 && (
-          <div style={skillsList}>
-            {highlights.skills.filter(s => s.requestType === 'offer').slice(0, 8).map((skill, index) => (
-              <Text key={index} style={skillItem}>
-                → **{skill.title}** - {skill.category} skill available{' '}
-                <Link href={`${baseUrl}/n/${neighborhoodId}/skills?highlight=skill&type=skills_exchange&id=${skill.id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_skill`} style={skillLink}>
-                  [Get help →]
-                </Link>
-              </Text>
-            ))}
-          </div>
+          <>
+            <Text style={subsectionTitle}>Fresh offers from your neighbors:</Text>
+            <div style={skillsList}>
+              {highlights.skills.filter(s => s.requestType === 'offer').slice(0, 8).map((skill, index) => (
+                <Text key={index} style={skillItem}>
+                  →{' '}
+                  <Link href={`${baseUrl}/n/${neighborhoodId}/skills?highlight=skill&type=skills_exchange&id=${skill.id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_skill`} style={skillNameLink}>
+                    {skill.title}
+                  </Link>
+                  {' '}- {getSkillContext(skill.title, skill.category)}
+                </Text>
+              ))}
+            </div>
+          </>
         )}
 
+        {/* Neighbors looking for help */}
         {highlights.skills.filter(s => s.requestType === 'request').length > 0 && (
           <>
-            <Text style={requestsTitle}>**Neighbors looking for help:**</Text>
+            <Text style={subsectionTitle}>Neighbors looking for help:</Text>
             <div style={skillsList}>
               {highlights.skills.filter(s => s.requestType === 'request').map((skill, index) => (
                 <Text key={index} style={skillItem}>
-                  → **{skill.title}** - Someone needs {skill.category} help! This could be your moment to shine{' '}
-                  <Link href={`${baseUrl}/n/${neighborhoodId}/skills?highlight=skill&type=skills_exchange&id=${skill.id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_skill`} style={skillLink}>
-                    [Offer to help →]
+                  →{' '}
+                  <Link href={`${baseUrl}/n/${neighborhoodId}/skills?highlight=skill&type=skills_exchange&id=${skill.id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_skill`} style={skillNameLink}>
+                    {skill.title}
                   </Link>
+                  {' '}- Someone needs {skill.category} help! This could be your moment to shine
                 </Text>
               ))}
             </div>
@@ -134,7 +159,7 @@ export const WeeklySummaryEmail = ({
           <Text style={moreSkills}>
             Plus {stats.availableSkills - 8} more skills just waiting for the right moment...{' '}
             <Link href={`${baseUrl}/n/${neighborhoodId}/skills?utm_source=email&utm_medium=email&utm_campaign=weekly_summary_skills_all`} style={browseAllLink}>
-              [Browse all {stats.availableSkills} skills →]
+              Browse all {stats.availableSkills} skills
             </Link>
           </Text>
         )}
@@ -143,18 +168,20 @@ export const WeeklySummaryEmail = ({
         <Text style={separator}>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</Text>
 
         {/* COMMUNITY GROUPS section */}
-        <Text style={sectionTitle}>👥 **COMMUNITY GROUPS**</Text>
+        <Text style={groupsHeader}>👥 COMMUNITY GROUPS</Text>
         <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.communityGroups }} />
 
-        {/* Individual group links */}
+        {/* Individual group links with recent updates */}
         {highlights.groups.activeGroups.length > 0 && (
           <div style={groupsList}>
             {highlights.groups.activeGroups.map((group, index) => (
               <Text key={index} style={groupItem}>
-                **{group.name}** - {group.memberCount} members{group.type === 'physical' && group.unitValue ? ` (${group.unitValue})` : ''}{' '}
-                <Link href={`${baseUrl}/n/${neighborhoodId}/groups?highlight=group&type=group&id=${group.id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_group`} style={groupLink}>
-                  [Join {group.name} →]
+                <Link href={`${baseUrl}/n/${neighborhoodId}/groups?highlight=group&type=group&id=${group.id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_group`} style={groupNameLink}>
+                  {group.name}
                 </Link>
+                {' '}({group.memberCount} members){group.type === 'physical' && group.unitValue ? ` - ${group.unitValue}` : ''}
+                <br />
+                Recent activity: Planning neighborhood coffee meetup
               </Text>
             ))}
           </div>
@@ -163,16 +190,16 @@ export const WeeklySummaryEmail = ({
         <Text style={paragraph}>
           Got an idea for a new group?{' '}
           <Link href={`${baseUrl}/n/${neighborhoodId}/groups?create=true&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_create_group`} style={createGroupLink}>
-            [Start your own group →]
+            Start your own group
           </Link>
         </Text>
 
         {/* Visual separator */}
         <Text style={separator}>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</Text>
 
-        {/* THE FULL PICTURE section */}
-        <Text style={sectionTitle}>**THE FULL PICTURE**</Text>
-        <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.fullPicture }} />
+        {/* THE WEEK AHEAD section */}
+        <Text style={weekAheadHeader}>THE WEEK AHEAD</Text>
+        <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.weekAhead }} />
 
         <Text style={paragraph}>
           <Link href={`${baseUrl}/n/${neighborhoodId}?utm_source=email&utm_medium=email&utm_campaign=weekly_summary_dashboard`} style={ctaButton}>
@@ -264,9 +291,9 @@ const subsection = {
 
 const subsectionTitle = {
   color: '#1a1a1a',
-  fontSize: '14px',
+  fontSize: '16px',
   fontWeight: '600',
-  margin: '0 0 8px 0',
+  margin: '12px 0 8px 0',
 };
 
 const listItem = {
@@ -321,9 +348,31 @@ const link = {
   textDecoration: 'none',
 };
 
-// NEW: Gazette-specific styles
+// NEW: Weekly Neighborhood Digest styles with theme colors
 const sectionTitle = {
   color: '#1a1a1a',
+  fontSize: '18px',
+  fontWeight: 'bold',
+  margin: '20px 0 12px 0',
+};
+
+// Theme-colored section headers
+const skillsHeader = {
+  color: '#059669', // Green theme for skills
+  fontSize: '18px',
+  fontWeight: 'bold',
+  margin: '20px 0 12px 0',
+};
+
+const groupsHeader = {
+  color: '#7c3aed', // Purple theme for groups  
+  fontSize: '18px',
+  fontWeight: 'bold',
+  margin: '20px 0 12px 0',
+};
+
+const weekAheadHeader = {
+  color: '#2563eb', // Blue theme for future/calendar
   fontSize: '18px',
   fontWeight: 'bold',
   margin: '20px 0 12px 0',
@@ -348,10 +397,11 @@ const skillItem = {
   margin: '0 0 8px 0',
 };
 
-const skillLink = {
-  color: '#2563eb',
+// NEW: Skill name links (green theme)
+const skillNameLink = {
+  color: '#059669',
   textDecoration: 'none',
-  fontWeight: '500',
+  fontWeight: '600',
 };
 
 const requestsTitle = {
@@ -369,7 +419,7 @@ const moreSkills = {
 };
 
 const browseAllLink = {
-  color: '#2563eb',
+  color: '#059669', // Green theme to match skills
   textDecoration: 'none',
   fontWeight: '500',
 };
@@ -385,14 +435,15 @@ const groupItem = {
   margin: '0 0 8px 0',
 };
 
-const groupLink = {
-  color: '#2563eb',
+// NEW: Group name links (purple theme)
+const groupNameLink = {
+  color: '#7c3aed',
   textDecoration: 'none',
-  fontWeight: '500',
+  fontWeight: '600',
 };
 
 const createGroupLink = {
-  color: '#2563eb',
+  color: '#7c3aed', // Purple theme to match groups
   textDecoration: 'none',
   fontWeight: '500',
 };

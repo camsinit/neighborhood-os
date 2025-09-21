@@ -38,9 +38,9 @@ async function generateAIContent(
     console.log('No Claude API key found, using default content');
     return {
       weekInReview: `Calvin and Mac have been the community champions this week, keeping their groups active and our skill-sharing network buzzing. It's been one of those weeks where you can really feel the neighborly energy - people stepping up to help, offering what they know, and keeping our little corner of the world connected.`,
-      skillsExchange: `Fresh offers from your neighbors: Internet Safety, Transportation, Gardening & Landscaping, Notary Public, Crisis Management, and more! Plus someone's looking for carpentry help - perfect chance to be the hero of someone's home project.`,
-      communityGroups: `Calvin's Group and Mac's Group are both going strong with 2 members each and always welcoming new faces. Small but mighty communities!`,
-      fullPicture: `${stats.availableSkills} skills offered, ${stats.activeGroups} active groups, and neighbors who keep showing up for each other. Classic ${neighborhoodName} energy right there! Whether you're looking to learn something new, share what you know, or just connect with the folks around you, there's always something happening.`
+      skillsExchange: `Fresh offers from your neighbors this week, from tech security to yard work to professional services. Plus someone's looking for carpentry help - perfect chance to be the hero of someone's home project.`,
+      communityGroups: `Calvin's Group and Mac's Group are both going strong with 2 members each, keeping the community spirit alive with regular updates and welcoming new faces.`,
+      weekAhead: `The week ahead is full of possibility! Perfect timing for someone to organize a neighborhood walk, start a group for a shared interest, or offer to help with something they're good at. Sometimes the best connections start with the simplest gestures.`
     };
   }
 
@@ -120,13 +120,13 @@ Upcoming Events: ${upcomingActivities.events.map(e => `"${e.title}" on ${e.date}
 Generate content in this EXACT format structure:
 
 {
-  "weekInReview": "Write a 2-3 sentence intro that mentions the most active neighbors by name and describes the community energy. Example: 'Calvin and Mac have been the community champions this week, keeping their groups active and our skill-sharing network buzzing. It's been one of those weeks where you can really feel the neighborly energy - people stepping up to help, offering what they know, and keeping our little corner of the world connected.'",
+  "weekInReview": "Write a 2-3 sentence intro that mentions the most active neighbors by name and describes the community energy. NO bold formatting (**). Example: 'Calvin and Mac have been the community champions this week, keeping their groups active and our skill-sharing network buzzing. It's been one of those weeks where you can really feel the neighborly energy - people stepping up to help, offering what they know, and keeping our little corner of the world connected.'",
   
-  "skillsExchange": "Create a detailed skills section. Start with 'Fresh offers from your neighbors:' then list each skill offer with neighbor context and commentary. Then 'Neighbors looking for help:' for requests. Make each item feel personal with context about why it's useful or timely.",
+  "skillsExchange": "Write intro text for skills section. NO bold formatting. Do NOT include individual skill listings - those will be generated separately with proper links and context.",
   
-  "communityGroups": "Write about each active group with personality, mentioning member counts and welcoming tone. Include encouragement to start new groups.",
+  "communityGroups": "Write intro text for groups section. NO bold formatting. Do NOT include individual group listings - those will be generated separately with proper links and recent updates.",
   
-  "fullPicture": "Write a 2-3 sentence wrap-up that summarizes the total activity and captures the neighborhood's personality. End with encouragement about what's available."
+  "weekAhead": "Write a 2-3 sentence forward-looking section about upcoming opportunities and suggestions for neighbors to populate the dashboard next week. Focus on encouraging participation in events, skills sharing, and group activities."
 }
 
 WRITING GUIDELINES:
@@ -170,23 +170,23 @@ WRITING GUIDELINES:
       return aiContent;
     } catch (parseError) {
       console.error('Failed to parse AI response as JSON:', parseError);
-      // Return default gazette content if parsing fails
+      // Return default digest content if parsing fails
       return {
         weekInReview: `${neighborhoodName} has been buzzing with activity this week! It's been one of those weeks where you can really feel the neighborly energy - people stepping up to help, offering what they know, and keeping our community connected.`,
-        skillsExchange: `Fresh offers from your neighbors: ${upcomingActivities.skills.filter(s => s.requestType === 'offer').slice(0, 3).map(s => s.title).join(', ')}${upcomingActivities.skills.filter(s => s.requestType === 'request').length > 0 ? '. Plus neighbors looking for help with: ' + upcomingActivities.skills.filter(s => s.requestType === 'request').map(s => s.title).join(', ') : ''}.`,
-        communityGroups: `${upcomingActivities.activeGroups.map(g => `${g.name} (${g.memberCount} members)`).join(' and ')} ${upcomingActivities.activeGroups.length > 1 ? 'are' : 'is'} keeping the community spirit alive!`,
-        fullPicture: `${stats.availableSkills} skills offered, ${stats.activeGroups} active groups, and neighbors who keep showing up for each other. Classic ${neighborhoodName} energy right there!`
+        skillsExchange: `Fresh offers from your neighbors this week, from tech security to yard work to professional services. Plus someone's looking for carpentry help - perfect chance to be the hero of someone's home project.`,
+        communityGroups: `${upcomingActivities.activeGroups.map(g => `${g.name} (${g.memberCount} members)`).join(' and ')} ${upcomingActivities.activeGroups.length > 1 ? 'are' : 'is'} keeping the community spirit alive with regular updates and welcoming new faces.`,
+        weekAhead: `The week ahead is full of possibility! Perfect timing for someone to organize a neighborhood walk, start a group for a shared interest, or offer to help with something they're good at. Sometimes the best connections start with the simplest gestures.`
       };
     }
 
   } catch (error) {
     console.error('Error generating AI content:', error);
-    // Return default gazette content if AI generation fails
+    // Return default digest content if AI generation fails
     return {
       weekInReview: `${neighborhoodName} has been buzzing with activity this week! It's been one of those weeks where you can really feel the neighborly energy - people stepping up to help, offering what they know, and keeping our community connected.`,
-      skillsExchange: `Fresh offers from your neighbors: ${upcomingActivities.skills.filter(s => s.requestType === 'offer').slice(0, 3).map(s => s.title).join(', ')}${upcomingActivities.skills.filter(s => s.requestType === 'request').length > 0 ? '. Plus neighbors looking for help with: ' + upcomingActivities.skills.filter(s => s.requestType === 'request').map(s => s.title).join(', ') : ''}.`,
-      communityGroups: `${upcomingActivities.activeGroups.map(g => `${g.name} (${g.memberCount} members)`).join(' and ')} ${upcomingActivities.activeGroups.length > 1 ? 'are' : 'is'} keeping the community spirit alive!`,
-      fullPicture: `${stats.availableSkills} skills offered, ${stats.activeGroups} active groups, and neighbors who keep showing up for each other. Classic ${neighborhoodName} energy right there!`
+      skillsExchange: `Fresh offers from your neighbors this week, from tech security to yard work to professional services. Plus someone's looking for carpentry help - perfect chance to be the hero of someone's home project.`,
+      communityGroups: `${upcomingActivities.activeGroups.map(g => `${g.name} (${g.memberCount} members)`).join(' and ')} ${upcomingActivities.activeGroups.length > 1 ? 'are' : 'is'} keeping the community spirit alive with regular updates and welcoming new faces.`,
+      weekAhead: `The week ahead is full of possibility! Perfect timing for someone to organize a neighborhood walk, start a group for a shared interest, or offer to help with something they're good at. Sometimes the best connections start with the simplest gestures.`
     };
   }
 }
