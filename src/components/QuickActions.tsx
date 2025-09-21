@@ -14,7 +14,7 @@ import { useNeighborhood } from "@/contexts/neighborhood";
 import { supabase } from "@/integrations/supabase/client";
 import { createLogger } from "@/utils/logger";
 import { neighborhoodPath, BASE_ROUTES } from "@/utils/routes";
-import SkillsSidePanelSelector from "./skills/SkillsSidePanelSelector";
+import SkillForm from "./skills/SkillForm";
 
 // Logger for this component
 const logger = createLogger('QuickActions');
@@ -223,12 +223,11 @@ const QuickActions = () => {
             </SheetTitle>
           </SheetHeader>
           <div className="mt-6">
-            {/* Use SkillsSidePanelSelector optimized for side panels */}
+            {/* Use new SkillForm with text inputs */}
             <SkillsProvider>
-              <SkillsSidePanelSelector 
-                onSkillAdded={handleSkillAdded} 
-                multiCategoryMode={true}
+              <SkillForm 
                 onClose={() => setIsSkillSheetOpen(false)}
+                mode="offer"
               />
             </SkillsProvider>
           </div>
