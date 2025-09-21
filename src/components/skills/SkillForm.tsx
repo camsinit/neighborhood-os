@@ -168,7 +168,7 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
 
       {/* Form submit button */}
       <DialogFooter>
-        <Button type="submit">
+        <Button type="submit" className="bg-skills hover:bg-skills/90 text-white">
           {mode === 'offer' ? 'Offer Skill' : 'Request Skill'}
         </Button>
       </DialogFooter>
