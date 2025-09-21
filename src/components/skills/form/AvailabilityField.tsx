@@ -19,7 +19,7 @@ interface AvailabilityFieldProps {
 // Component for selecting availability
 const AvailabilityField = ({ value, onChange }: AvailabilityFieldProps) => {
   return (
-    <div className="space-y-2">
+    <>
       <Label htmlFor="availability">Availability</Label>
       <Select 
         value={value} 
@@ -34,7 +34,7 @@ const AvailabilityField = ({ value, onChange }: AvailabilityFieldProps) => {
           <SelectItem value="both">Both</SelectItem>
         </SelectContent>
       </Select>
-    </div>
+    </>
   );
 };
 
