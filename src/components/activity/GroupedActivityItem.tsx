@@ -69,6 +69,10 @@ const GroupedActivityItem = ({ group, onGroupClick }: GroupedActivityItemProps) 
   const fullName = primaryActivity.profiles.display_name || 'Neighbor';
   const firstName = extractFirstName(fullName);
   
+  // For grouped activities, use full name to match other activity items format
+  // For single activities, continue using first name for privacy
+  const displayName = group.type === 'grouped' ? fullName : firstName;
+  
   // Generate data attributes for the primary activity
   const activityType = primaryActivity.activity_type.split('_')[0] === 'skill' ? 'skills' : 'event';
   const dataAttributes = generateDataAttributes(activityType, primaryActivity.content_id);
@@ -124,8 +128,8 @@ const GroupedActivityItem = ({ group, onGroupClick }: GroupedActivityItemProps) 
             />
           )}
           <p className="text-base font-medium text-foreground truncate">
-            {/* Use only the first name for activity text; keeps feed concise and respects privacy */}
-            {firstName} {groupText}
+            {/* Use full name for grouped activities to match other activity items, first name for single activities */}
+            {displayName} {groupText}
           </p>
         </div>
 
