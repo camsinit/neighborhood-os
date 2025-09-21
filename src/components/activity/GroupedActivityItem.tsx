@@ -108,8 +108,8 @@ const GroupedActivityItem = ({ group, onGroupClick }: GroupedActivityItemProps) 
               </div>
             </TooltipTrigger>
             <TooltipContent className="bg-gray-800 text-white">
-              {/* Show first name in the tooltip to keep activity UI consistent and privacy-friendly */}
-              <p>{firstName}</p>
+              {/* Show consistent name format in tooltip */}
+              <p>{displayName}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
