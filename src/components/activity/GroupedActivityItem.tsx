@@ -140,8 +140,8 @@ const GroupedActivityItem = ({ group, onGroupClick }: GroupedActivityItemProps) 
               </div>
             </div>
             
-            {/* Time and count badge - badge moved underneath time */}
-            <div className="flex flex-col items-end gap-1 flex-shrink-0">
+            {/* Time and count badge */}
+            <div className="flex items-center gap-2 flex-shrink-0">
               <span className="text-xs text-gray-500 font-medium">
                 {timeAgo}
               </span>
