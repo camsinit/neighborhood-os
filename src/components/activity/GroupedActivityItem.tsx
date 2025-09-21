@@ -3,6 +3,7 @@ import React from "react";
 import { differenceInHours, differenceInDays, differenceInWeeks, differenceInMonths } from "date-fns";
 import { User, ChevronRight } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card } from "@/components/ui/card";
 import { getActivityIcon, getActivityColor } from "./utils/activityHelpers";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -85,20 +86,20 @@ const GroupedActivityItem = ({ group, onGroupClick }: GroupedActivityItemProps) 
   };
 
   return (
-    <div className="mb-3">
-      <div 
-        className="relative flex items-center py-3 px-4 rounded-lg border border-gray-100 hover:bg-gray-50 hover:shadow-sm transition-all cursor-pointer bg-white"
-        style={{
-          borderLeft: `4px solid ${activityColor}`
-        }}
-        onClick={handleItemClick}
-        {...dataAttributes}
-      >
-        {/* Profile avatar with hover tooltip showing name */}
+    <Card 
+      className="relative p-3 transition-all duration-200 hover:shadow-md cursor-pointer border-l-4 group bg-white mb-3"
+      style={{
+        borderLeftColor: activityColor
+      }}
+      onClick={handleItemClick}
+      {...dataAttributes}
+    >
+      <div className="flex items-start space-x-3">
+        {/* Avatar */}
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="flex-shrink-0 mr-3">
+              <div className="flex-shrink-0">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={primaryActivity.profiles.avatar_url} />
                   <AvatarFallback>
@@ -108,50 +109,58 @@ const GroupedActivityItem = ({ group, onGroupClick }: GroupedActivityItemProps) 
               </div>
             </TooltipTrigger>
             <TooltipContent className="bg-gray-800 text-white">
-              {/* Show consistent name format in tooltip */}
               <p>{displayName}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-
-        {/* Time elapsed */}
-        <span className="text-sm text-gray-500 mr-3 min-w-12 font-medium">
-          {timeAgo}
-        </span>
-
-        {/* Activity description with icon inline */}
-        <div className="flex items-center flex-1 min-w-0">
-          {IconComponent && (
-            <IconComponent 
-              className="h-4.5 w-4.5 mr-2 flex-shrink-0" 
-              style={{ color: activityColor }} 
-            />
-          )}
-          <p className="text-base font-medium text-foreground truncate">
-            {/* Use full name for grouped activities to match other activity items, first name for single activities */}
-            {displayName} {groupText}
-          </p>
-        </div>
-
-        {/* Count badge and arrow */}
-        <div className="flex items-center gap-2 ml-auto flex-shrink-0">
-          <Badge 
-            variant="outline" 
-            className="text-sm px-2.5 py-0.5 font-medium" 
-            style={{ 
-              backgroundColor: `${activityColor}15`,
-              color: activityColor,
-              borderColor: `${activityColor}30`
-            }}
-          >
-            View {group.count} {primaryActivity.activity_type.includes('skill') ? 'Skills' : 'Items'}
-          </Badge>
-          <ChevronRight 
-            className="h-4 w-4 text-gray-400" 
-          />
+        
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          {/* Title and Time/Badge */}
+          <div className="flex justify-between items-start gap-2">
+            <div className="text-sm leading-tight flex-1 font-medium">
+              {/* Activity title with icon inline */}
+              <div className="flex items-center min-h-[2rem]">
+                {IconComponent && (
+                  <IconComponent 
+                    className="h-4 w-4 mr-2 flex-shrink-0" 
+                    style={{ color: activityColor }} 
+                  />
+                )}
+                <span className="break-words leading-relaxed">
+                  {/* Display name in color + action description */}
+                  <span style={{ color: activityColor, fontWeight: '600' }}>
+                    {displayName}
+                  </span>
+                  {' '}
+                  <span className="text-gray-700">
+                    {groupText}
+                  </span>
+                </span>
+              </div>
+            </div>
+            
+            {/* Time and count badge */}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <span className="text-xs text-gray-500 font-medium">
+                {timeAgo}
+              </span>
+              <Badge 
+                variant="outline" 
+                className="text-xs px-2 py-0.5 font-medium" 
+                style={{ 
+                  backgroundColor: `${activityColor}15`,
+                  color: activityColor,
+                  borderColor: `${activityColor}30`
+                }}
+              >
+                View {group.count}
+              </Badge>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </Card>
   );
 };
 
