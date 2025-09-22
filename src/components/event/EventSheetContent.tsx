@@ -300,6 +300,21 @@ const EventSheetContent = ({
 
                 {/* Action Buttons */}
                 <div className="flex gap-3 mt-6 pt-4 border-t border-gray-200">
+                  {isHost && (
+                    <Button
+                      onClick={() => setIsEditing(true)}
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      style={{
+                        borderColor: 'hsl(var(--calendar-color) / 0.3)',
+                        color: 'hsl(var(--calendar-color))'
+                      }}
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit
+                    </Button>
+                  )}
                   <Button
                     onClick={downloadICS}
                     variant="outline"
