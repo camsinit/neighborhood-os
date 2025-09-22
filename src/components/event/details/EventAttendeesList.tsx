@@ -4,6 +4,8 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEventRSVPs } from "@/utils/queries/useEventRSVPs";
 import { useUser } from "@supabase/auth-helpers-react";
+import { useNavigate } from "react-router-dom";
+import { createItemNavigationService } from "@/services/navigation/ItemNavigationService";
 
 /**
  * EventAttendeesList component - Displays a list of event attendees including the host
@@ -20,12 +22,24 @@ interface EventAttendeesListProps {
 const EventAttendeesList = ({ eventId }: EventAttendeesListProps) => {
   // Get current user to highlight their own RSVP
   const user = useUser();
+  const navigate = useNavigate();
   
   // Fetch RSVPs for this event using the custom hook
   const { data: attendees, isLoading } = useEventRSVPs(eventId);
   
   // Count of RSVPs
   const rsvpCount = attendees?.length || 0;
+
+  /**
+   * Handle clicking on an attendee profile to open their neighbor side-panel
+   * Uses the same navigation pattern as other components in the app
+   */
+  const handleAttendeeClick = (userId: string) => {
+    const navigationService = createItemNavigationService(navigate);
+    navigationService.navigateToItem('neighbors', userId, { 
+      showToast: false 
+    });
+  };
 
   return (
     <div className="mt-4">
@@ -44,7 +58,20 @@ const EventAttendeesList = ({ eventId }: EventAttendeesListProps) => {
             const isCurrentUser = user?.id === attendee.user_id;
             
             return (
-              <div key={attendee.user_id} className="flex items-center gap-2">
+              <div 
+                key={attendee.user_id} 
+                className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                onClick={() => handleAttendeeClick(attendee.user_id)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  // Handle keyboard navigation (Enter and Space)
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleAttendeeClick(attendee.user_id);
+                  }
+                }}
+              >
                 <Avatar className="h-6 w-6">
                   {attendee.profiles?.avatar_url ? (
                     <AvatarImage src={attendee.profiles.avatar_url} />
