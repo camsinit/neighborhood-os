@@ -19,6 +19,9 @@ interface EmailInviteSectionProps {
   isAdmin?: boolean;
   inviteAsAdmin?: boolean;
   setInviteAsAdmin?: (value: boolean) => void;
+  // Group invite props
+  isGroupInvite?: boolean;
+  setIsGroupInvite?: (value: boolean) => void;
 }
 
 /**
@@ -36,7 +39,9 @@ const EmailInviteSection = ({
   onSendEmailInvite,
   isAdmin,
   inviteAsAdmin,
-  setInviteAsAdmin
+  setInviteAsAdmin,
+  isGroupInvite,
+  setIsGroupInvite
 }: EmailInviteSectionProps) => {
   return (
     <div className="space-y-4">
@@ -44,24 +49,42 @@ const EmailInviteSection = ({
       {/* Email input form with validation */}
       <div className="space-y-3">
         <div className="space-y-2">
-          {/* Email address label with admin toggle right next to it */}
+          {/* Email address label with checkboxes on the same level */}
           <div className="flex items-center justify-between">
             <Label htmlFor="email" className="text-sm font-medium">
               Email address
             </Label>
-            {/* Admin toggle appears right next to the label */}
-            {isAdmin && setInviteAsAdmin && (
-              <div className="inline-flex items-center gap-2">
-                <Checkbox
-                  id="invite-as-admin"
-                  checked={inviteAsAdmin}
-                  onCheckedChange={(checked) => setInviteAsAdmin(Boolean(checked))}
-                />
-                <Label htmlFor="invite-as-admin" className="text-sm text-muted-foreground">
-                  Invite as Admin
-                </Label>
-              </div>
-            )}
+            
+            {/* Checkboxes on the same level as email label */}
+            <div className="flex items-center gap-4">
+              {/* Group Invite checkbox */}
+              {setIsGroupInvite && (
+                <div className="inline-flex items-center gap-2">
+                  <Checkbox
+                    id="group-invite"
+                    checked={isGroupInvite}
+                    onCheckedChange={(checked) => setIsGroupInvite(Boolean(checked))}
+                  />
+                  <Label htmlFor="group-invite" className="text-sm text-muted-foreground">
+                    Group Invite
+                  </Label>
+                </div>
+              )}
+              
+              {/* Admin toggle */}
+              {isAdmin && setInviteAsAdmin && (
+                <div className="inline-flex items-center gap-2">
+                  <Checkbox
+                    id="invite-as-admin"
+                    checked={inviteAsAdmin}
+                    onCheckedChange={(checked) => setInviteAsAdmin(Boolean(checked))}
+                  />
+                  <Label htmlFor="invite-as-admin" className="text-sm text-muted-foreground">
+                    Invite as Admin
+                  </Label>
+                </div>
+              )}
+            </div>
           </div>
           <Input
             id="email"

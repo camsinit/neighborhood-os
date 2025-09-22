@@ -47,6 +47,8 @@ const UnifiedInviteDialog = ({
   
   // NEW: Admin-specific state to allow inviting as an Admin (visible only to admins)
   const [inviteAsAdmin, setInviteAsAdmin] = useState(false);
+  // NEW: Group invite state to allow creating reusable invitations
+  const [isGroupInvite, setIsGroupInvite] = useState(false);
 
   // Get required hooks for user and neighborhood context
   const user = useUser();
@@ -97,7 +99,10 @@ const UnifiedInviteDialog = ({
       const { error } = await supabase.from("invitations").insert({
         invite_code: inviteCode,
         inviter_id: user.id,
-        neighborhood_id: currentNeighborhood.id
+        neighborhood_id: currentNeighborhood.id,
+        // For group invites, we'll use email being null to indicate reusability
+        // This is a temporary solution until the is_group_invite field is added
+        email: isGroupInvite ? null : undefined
       });
       
       if (error) throw error;
@@ -111,7 +116,11 @@ const UnifiedInviteDialog = ({
       await navigator.clipboard.writeText(inviteUrl);
 
       // Show success message
-      toast.success("Invite link copied to clipboard!");
+      if (isGroupInvite) {
+        toast.success("Group invite link copied to clipboard! This link can be used multiple times.");
+      } else {
+        toast.success("Invite link copied to clipboard!");
+      }
     } catch (error: any) {
       console.error("[UnifiedInviteDialog] Error generating invite:", error);
       toast.error("Failed to generate invite link. Please try again.");
@@ -210,7 +219,9 @@ const UnifiedInviteDialog = ({
           invite_code: newCode,
           inviter_id: user.id,
           neighborhood_id: currentNeighborhood.id,
-          email: invitedEmail,
+          // For group invites, we'll use email being null to indicate reusability
+          // This is a temporary solution until the is_group_invite field is added
+          email: isGroupInvite ? null : invitedEmail
         });
         if (insertErr) throw insertErr;
         inviteCodeToUse = newCode;
@@ -228,6 +239,8 @@ const UnifiedInviteDialog = ({
           toast.warning('An admin invite to this email is already pending. Reusing the existing link.');
         }
         toast.success(`Admin invitation sent to ${invitedEmail}!`);
+      } else if (isGroupInvite) {
+        toast.success(`Group invitation sent to ${invitedEmail}! This invite can be used multiple times.`);
       } else {
         toast.success(`Invitation sent to ${invitedEmail}!`);
       }
@@ -275,6 +288,7 @@ const UnifiedInviteDialog = ({
   const handleClose = () => {
     setEmail('');
     setEmailError('');
+    setIsGroupInvite(false);
     onOpenChange(false);
   };
 
@@ -312,6 +326,9 @@ const UnifiedInviteDialog = ({
                 isAdmin={isAdmin}
                 inviteAsAdmin={inviteAsAdmin}
                 setInviteAsAdmin={setInviteAsAdmin}
+                // Pass group invite props
+                isGroupInvite={isGroupInvite}
+                setIsGroupInvite={setIsGroupInvite}
               />
 
               {/* Divider */}
