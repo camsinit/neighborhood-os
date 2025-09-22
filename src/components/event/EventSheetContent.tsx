@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import ShareButton from "@/components/ui/share-button";
 import EventForm from "../events/EventForm";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash } from "lucide-react";
+import { Edit, Trash, Calendar, MapPin, Clock, Download } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -29,6 +29,7 @@ import EventHost from "./details/EventHost";
 import EventDescription from "./details/EventDescription";
 import EventRSVPButton from "./details/EventRSVPButton";
 import EventAttendeesList from "./details/EventAttendeesList";
+import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
 
 /**
  * EventSheetContent component displays the full details of an event
@@ -130,6 +131,47 @@ const EventSheetContent = ({
     fetchNeighborhoodTimezone();
   }, [event.neighborhood_id]);
 
+  // Function to generate and download .ics file
+  const downloadICS = () => {
+    try {
+      const eventDate = parseISO(event.time);
+      const startDate = format(eventDate, "yyyyMMdd'T'HHmmss'Z'");
+      const endDate = format(new Date(eventDate.getTime() + 2 * 60 * 60 * 1000), "yyyyMMdd'T'HHmmss'Z'"); // 2 hours later
+      
+      const icsContent = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//NeighborhoodOS//Event//EN',
+        'BEGIN:VEVENT',
+        `UID:${event.id}@neighborhoodos.com`,
+        `DTSTART:${startDate}`,
+        `DTEND:${endDate}`,
+        `SUMMARY:${event.title}`,
+        `DESCRIPTION:${event.description || ''}`,
+        `LOCATION:${event.location}`,
+        'STATUS:CONFIRMED',
+        'TRANSP:OPAQUE',
+        'END:VEVENT',
+        'END:VCALENDAR'
+      ].join('\r\n');
+
+      const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${event.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.ics`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      toast.success("Calendar file downloaded!");
+    } catch (error) {
+      console.error('Error generating ICS file:', error);
+      toast.error("Failed to download calendar file");
+    }
+  };
+
   // Delete button component
   const DeleteButton = (
     <Button 
@@ -149,48 +191,39 @@ const EventSheetContent = ({
         moduleTheme="calendar"
         className="space-y-0"
       >
-        {/* Header section with title and actions - following skills/groups pattern */}
-        <div className="flex items-start justify-between mb-6">
-          <div className="flex-1 min-w-0">
-            <h2 className="text-xl font-semibold text-foreground leading-tight pr-4">
-              {isEditing ? "Edit Event" : event.title}
-            </h2>
-          </div>
-          
-          {/* Action buttons positioned in top-right like other panels */}
-          <div className="flex items-center gap-2 flex-shrink-0">
-            {!isEditing && (
-              <ShareButton
-                contentType="events"
-                contentId={event.id}
-                neighborhoodId={event.neighborhood_id}
-                size="sm"
-                variant="ghost"
-              />
-            )}
-            {(EditButton && <EditButton onSheetClose={handleSheetClose} />) || 
-             (isHost && !isEditing && (
-               <Button
-                 variant="ghost"
-                 size="sm"
-                 onClick={() => setIsEditing(true)}
-                 className="text-foreground hover:bg-accent"
-               >
-                 <Edit className="h-4 w-4 mr-2" />
-                 Edit
-               </Button>
-             ))}
-            {isEditing && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsEditing(false)}
-                className="text-muted-foreground hover:bg-accent"
-              >
-                Cancel
-              </Button>
-            )}
-          </div>
+        {/* Action buttons positioned in top-right like other panels */}
+        <div className="flex items-center justify-end gap-2 mb-6">
+          {!isEditing && (
+            <ShareButton
+              contentType="events"
+              contentId={event.id}
+              neighborhoodId={event.neighborhood_id}
+              size="sm"
+              variant="ghost"
+            />
+          )}
+          {(EditButton && <EditButton onSheetClose={handleSheetClose} />) || 
+           (isHost && !isEditing && (
+             <Button
+               variant="ghost"
+               size="sm"
+               onClick={() => setIsEditing(true)}
+               className="text-foreground hover:bg-accent"
+             >
+               <Edit className="h-4 w-4 mr-2" />
+               Edit
+             </Button>
+           ))}
+          {isEditing && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsEditing(false)}
+              className="text-muted-foreground hover:bg-accent"
+            >
+              Cancel
+            </Button>
+          )}
         </div>
 
         {/* Main content with consistent spacing pattern */}
@@ -211,31 +244,119 @@ const EventSheetContent = ({
             </div>
           ) : (
             <>
-              {/* Highlighted key information section - following established pattern */}
-              <div className="bg-accent/30 rounded-lg p-4 space-y-4 border border-accent/20">
-                <EventDateTime 
-                  date={event.time} 
-                  neighborhoodTimezone={neighborhoodTimezone} 
-                />
-                <EventLocation location={event.location} />
+              {/* Enhanced Event Details Card with Gradient Background */}
+              <div 
+                className="p-6 rounded-xl border-2" 
+                style={{
+                  background: 'linear-gradient(135deg, hsl(var(--calendar-light)) 0%, hsl(var(--background)) 100%)',
+                  borderColor: 'hsl(var(--calendar-color) / 0.2)'
+                }}
+              >
+                {/* Event Details Grid */}
+                <div className="space-y-4">
+                  {/* Date and Time */}
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center" style={{
+                      backgroundColor: 'hsl(var(--calendar-color) / 0.1)'
+                    }}>
+                      <Calendar className="h-5 w-5" style={{ color: 'hsl(var(--calendar-color))' }} />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900">
+                        {formatInNeighborhoodTimezone(
+                          parseISO(event.time), 
+                          'EEEE, MMMM d, yyyy', 
+                          neighborhoodTimezone
+                        )}
+                      </div>
+                      <div className="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                        <Clock className="h-4 w-4" />
+                        {formatInNeighborhoodTimezone(
+                          parseISO(event.time), 
+                          'h:mm a', 
+                          neighborhoodTimezone
+                        )} ({neighborhoodTimezone.replace('_', ' ')})
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Location */}
+                  {event.location && (
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center" style={{
+                        backgroundColor: 'hsl(var(--calendar-color) / 0.1)'
+                      }}>
+                        <MapPin className="h-5 w-5" style={{ color: 'hsl(var(--calendar-color))' }} />
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-semibold text-gray-900">Location</div>
+                        <div className="text-sm text-gray-600 mt-1">{event.location}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Description */}
+                  {event.description && (
+                    <div className="pt-2">
+                      <div className="font-semibold text-gray-900 mb-2">Details</div>
+                      <p className="text-sm text-gray-600 whitespace-pre-wrap">{event.description}</p>
+                    </div>
+                  )}
+
+                  {/* Host Information */}
+                  <div className="flex items-start gap-3 pt-2">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center" style={{
+                      backgroundColor: 'hsl(var(--calendar-color) / 0.1)'
+                    }}>
+                      <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                        {event.profiles?.avatar_url ? (
+                          <img 
+                            src={event.profiles.avatar_url} 
+                            alt={event.profiles.display_name || 'Host'} 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-xs font-medium text-gray-600">
+                            {event.profiles?.display_name?.[0] || '?'}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900">Host</div>
+                      <div className="text-sm text-gray-600 mt-1">
+                        {event.profiles?.display_name || 'Anonymous'}
+                        {isHost && <span className="ml-2 text-xs text-gray-500">(You)</span>}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 mt-6 pt-4 border-t border-gray-200">
+                  <Button
+                    onClick={downloadICS}
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    style={{
+                      borderColor: 'hsl(var(--calendar-color) / 0.3)',
+                      color: 'hsl(var(--calendar-color))'
+                    }}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Add to Calendar
+                  </Button>
+                  <EventRSVPButton 
+                    eventId={event.id} 
+                    isHost={isHost}
+                    neighborhoodId={event.neighborhood_id}
+                  />
+                </div>
               </div>
               
               {/* Secondary information with consistent spacing */}
               <div className="space-y-6">
-                <EventHost 
-                  hostName={event.profiles?.display_name} 
-                  isCurrentUserHost={isHost} 
-                />
-                
-                <EventDescription description={event.description} />
-                
-                {/* RSVP button */}
-                <EventRSVPButton 
-                  eventId={event.id} 
-                  isHost={isHost}
-                  neighborhoodId={event.neighborhood_id}
-                />
-                
                 {/* Attendees section */}
                 <EventAttendeesList eventId={event.id} />
               </div>
