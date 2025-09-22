@@ -184,7 +184,7 @@ serve(async (req) => {
         to: [email],
         subject: 'Thanks for your neighborhood instigator survey!',
         html,
-      ,        // Disable Resend's automatic link tracking to prevent URL wrapping
+        // Disable Resend's automatic link tracking to prevent URL wrapping
         tracking: {
           opens: true,
           clicks: false, // This prevents the long tracking URLs
