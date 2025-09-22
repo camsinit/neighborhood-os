@@ -22,6 +22,10 @@ export interface SurveyFormData {
   yearMovedIn: number | null;
   address: string;
   
+  // Contact preferences
+  contactPreference: string; // The selected contact method
+  customContactMethod?: string; // Custom method if "Other" is selected
+  
   // Neighborhood agreements
   agreements: {
     communication: boolean;

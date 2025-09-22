@@ -60,7 +60,7 @@ async function testFinalNewsletter() {
       ...(testEmail && { testEmail: testEmail })
     };
 
-    console.log('\n📤 Calling FINAL send-weekly-summary function...');
+    console.log('\n📤 Calling send-weekly-summary-final function...');
 
     // Call the FINAL Supabase function
     const response = await fetch(`${SUPABASE_URL}/functions/v1/send-weekly-summary-final`, {

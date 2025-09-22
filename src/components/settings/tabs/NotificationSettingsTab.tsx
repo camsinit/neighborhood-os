@@ -9,7 +9,7 @@ import { AutoSaveField } from '../AutoSaveField';
 import { SettingsCard } from '../SettingsCard';
 
 /**
- * Complete notification preferences structure including email settings
+ * Simplified notification preferences structure - only weekly newsletter for email
  */
 interface NotificationPreferences {
   in_app: {
@@ -27,18 +27,9 @@ interface NotificationPreferences {
   };
   email: {
     enabled: boolean;
-    frequency: 'immediate' | 'daily' | 'weekly' | 'off';
+    frequency: 'weekly';
     types: {
-      event_rsvp: boolean;
-      safety_comment: boolean;
-      safety_emergency: boolean;
-      goods_response: boolean;
-      skill_session_request: boolean;
       weekly_summary: boolean;
-    };
-    digest_settings: {
-      day_of_week: string;
-      time_of_day: string;
     };
   };
 }
@@ -71,7 +62,7 @@ export const NotificationSettingsTab: React.FC = () => {
   // Get current user
   const user = useUser();
   
-  // State for notification preferences - use the complete structure
+  // State for notification preferences - simplified structure
   const [preferences, setPreferences] = useState<NotificationPreferences>({
     in_app: {
       involved_only: true,
@@ -87,19 +78,10 @@ export const NotificationSettingsTab: React.FC = () => {
       new_neighbors: true
     },
     email: {
-      enabled: false,
+      enabled: true,  // Keep enabled for backward compatibility
       frequency: 'weekly',
       types: {
-        event_rsvp: false,
-        safety_comment: false,
-        safety_emergency: true,
-        goods_response: false,
-        skill_session_request: false,
-        weekly_summary: true
-      },
-      digest_settings: {
-        day_of_week: 'Sunday',
-        time_of_day: '09:00'
+        weekly_summary: true  // Only weekly newsletter, enabled by default
       }
     }
   });
@@ -207,17 +189,18 @@ export const NotificationSettingsTab: React.FC = () => {
    * Update an email type preference field (disabled for now)
    */
   const updateEmailType = (type: keyof NotificationPreferences['email']['types'], value: boolean) => {
-    // For now, just show coming soon message
-    handleEmailComingSoon();
+    setPreferences(prev => ({
+      ...prev,
+      email: {
+        ...prev.email,
+        types: {
+          ...prev.email.types,
+          [type]: value
+        }
+      }
+    }));
   };
 
-  /**
-   * Update digest settings (disabled for now)
-   */
-  const updateDigestSettings = (field: keyof NotificationPreferences['email']['digest_settings'], value: string) => {
-    // For now, just show coming soon message
-    handleEmailComingSoon();
-  };
 
   // Page-specific notification settings configuration
   const pageSpecificSettings = [
@@ -252,88 +235,12 @@ export const NotificationSettingsTab: React.FC = () => {
   }
 
   // Combined notification settings for unified list view
-  const allNotificationSettings = [
-    {
-      key: 'event_rsvp',
-      title: 'Event RSVPs',
-      description: 'When someone RSVPs to your events',
-      hasInApp: true,
-      hasEmail: true,
-      inAppChecked: preferences.in_app.page_specific.events,
-      emailChecked: preferences.email.types.event_rsvp,
-      onInAppChange: (value: boolean) => updatePageSpecific('events', value),
-      onEmailChange: (value: boolean) => updateEmailType('event_rsvp', value)
-    },
-    {
-      key: 'safety_comment',
-      title: 'Safety Comments',
-      description: 'When someone comments on your safety updates',
-      hasInApp: true,
-      hasEmail: true,
-      inAppChecked: preferences.in_app.page_specific.safety,
-      emailChecked: preferences.email.types.safety_comment,
-      onInAppChange: (value: boolean) => updatePageSpecific('safety', value),
-      onEmailChange: (value: boolean) => updateEmailType('safety_comment', value)
-    },
-    {
-      key: 'safety_emergency',
-      title: 'Emergency Alerts',
-      description: 'When neighbors report emergencies in your area',
-      hasInApp: true,
-      hasEmail: true,
-      inAppChecked: preferences.in_app.page_specific.safety,
-      emailChecked: preferences.email.types.safety_emergency,
-      onInAppChange: (value: boolean) => updatePageSpecific('safety', value),
-      onEmailChange: (value: boolean) => updateEmailType('safety_emergency', value)
-    },
-    {
-      key: 'goods_exchange',
-      title: 'Goods Exchange',
-      description: 'When someone responds to your shared items or requests',
-      hasInApp: true,
-      hasEmail: true,
-      inAppChecked: preferences.in_app.page_specific.goods,
-      emailChecked: preferences.email.types.goods_response,
-      onInAppChange: (value: boolean) => updatePageSpecific('goods', value),
-      onEmailChange: (value: boolean) => updateEmailType('goods_response', value)
-    },
-    {
-      key: 'skills_sharing',
-      title: 'Skills Sharing',
-      description: 'When someone requests help with your offered skills',
-      hasInApp: true,
-      hasEmail: true,
-      inAppChecked: preferences.in_app.page_specific.skills,
-      emailChecked: preferences.email.types.skill_session_request,
-      onInAppChange: (value: boolean) => updatePageSpecific('skills', value),
-      onEmailChange: (value: boolean) => updateEmailType('skill_session_request', value)
-    },
-    {
-      key: 'neighbor_activity',
-      title: 'Neighbor Activity',
-      description: 'When neighbors interact with your posts and updates',
-      hasInApp: true,
-      hasEmail: false, // No email equivalent
-      inAppChecked: preferences.in_app.page_specific.neighbors,
-      emailChecked: false,
-      onInAppChange: (value: boolean) => updatePageSpecific('neighbors', value),
-      onEmailChange: () => {}
-    },
-    {
-      key: 'new_neighbors',
-      title: 'New Neighbors',
-      description: 'When new neighbors join your community',
-      hasInApp: true,
-      hasEmail: false, // No email equivalent
-      inAppChecked: preferences.in_app.new_neighbors,
-      emailChecked: false,
-      onInAppChange: (value: boolean) => updateInAppPreference('new_neighbors', value),
-      onEmailChange: () => {}
-    },
+  // Simplified notification settings - only weekly newsletter for email
+const allNotificationSettings = [
     {
       key: 'weekly_summary',
-      title: 'Weekly Summary',
-      description: 'Weekly digest of activity relevant to you',
+      title: 'Weekly Newsletter',
+      description: 'Weekly digest of neighborhood activity and updates',
       hasInApp: false, // Email only
       hasEmail: true,
       inAppChecked: false,
@@ -375,12 +282,10 @@ export const NotificationSettingsTab: React.FC = () => {
                   {/* Email toggle */}
                   <div className="flex justify-center">
                     {setting.hasEmail ? (
-                      <div className="opacity-50">
-                        <Switch
-                          checked={false}
-                          onCheckedChange={handleEmailComingSoon}
-                        />
-                      </div>
+                      <Switch
+                        checked={setting.emailChecked}
+                        onCheckedChange={setting.onEmailChange}
+                      />
                     ) : (
                       <span className="text-gray-400 text-sm">—</span>
                     )}
@@ -390,28 +295,11 @@ export const NotificationSettingsTab: React.FC = () => {
             ))}
           </div>
 
-          {/* Weekly digest settings - coming soon */}
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg opacity-50">
-            <h4 className="text-sm font-medium text-gray-900 mb-3">Weekly Summary Settings</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-sm">Day of Week</Label>
-                <Select disabled onValueChange={handleEmailComingSoon}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Coming soon" />
-                  </SelectTrigger>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label className="text-sm">Time of Day</Label>
-                <Select disabled onValueChange={handleEmailComingSoon}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Coming soon" />
-                  </SelectTrigger>
-                </Select>
-              </div>
-            </div>
+          {/* Weekly newsletter info */}
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+            <p className="text-sm text-blue-700">
+              Your weekly newsletter is sent every Sunday at 9:00 AM with a summary of neighborhood activity and updates.
+            </p>
           </div>
         </div>
       </SettingsCard>

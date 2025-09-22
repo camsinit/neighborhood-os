@@ -14,7 +14,7 @@ This document outlines the strategy for keeping React Email templates in sync be
 2. `emails/invitation-accepted.tsx` ↔ `supabase/functions/send-invitation-accepted/_templates/invitation-accepted.tsx`
 3. `emails/welcome-email.tsx` ↔ `supabase/functions/send-welcome-email/_templates/welcome-email-updated.tsx`
 4. `emails/onboarding-*.tsx` ↔ `supabase/functions/send-onboarding-email/_templates/onboarding-*.tsx`
-5. `emails/weekly-summary.tsx` ↔ `supabase/functions/send-weekly-summary/_templates/weekly-summary.tsx`
+5. `emails/weekly-summary.tsx` ↔ `supabase/functions/send-weekly-summary-final/_templates/weekly-summary.tsx`
 
 ## Synchronization Challenges
 

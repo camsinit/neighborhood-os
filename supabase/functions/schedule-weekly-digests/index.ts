@@ -88,7 +88,7 @@ const handler = async (req: Request): Promise<Response> => {
         logger.info(`Found ${subscribers.length} subscribers for ${neighborhood.neighborhood_name}`);
 
         // Trigger the weekly digest generation
-        const digestResponse = await supabase.functions.invoke('send-weekly-summary', {
+        const digestResponse = await supabase.functions.invoke('send-weekly-summary-final', {
           body: {
             neighborhoodId: neighborhood.neighborhood_id,
             scheduledSend: true // Flag to indicate this is an automated send

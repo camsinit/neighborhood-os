@@ -243,7 +243,7 @@ export const EmailTestingPanel: React.FC = () => {
       description: 'AI-generated weekly neighborhood newsletter with highlights, upcoming events, and community updates',
       icon: <BookOpen className="w-5 h-5" />,
       category: 'notifications',
-      functionName: 'send-weekly-summary',
+      functionName: 'send-weekly-summary-final',
       sampleData: {
         neighborhoodId: 'c0e4e442-74c1-4b34-8388-b19f7b1c6a5d', // Piedmont Ave neighborhood
         testEmail: '' // Will be filled with the test email

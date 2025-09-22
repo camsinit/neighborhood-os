@@ -34,7 +34,7 @@ const TEMPLATE_MAPPINGS = {
   'welcome-email.tsx': ['send-welcome-email'],
   'invitation-accepted.tsx': ['send-invitation-accepted'],
   'waitlist-welcome.tsx': ['send-waitlist-welcome'],
-  'weekly-summary.tsx': ['send-weekly-summary', 'send-weekly-summary-final'],
+  'weekly-summary.tsx': ['send-weekly-summary-final'],
   // Onboarding series templates (7 emails)
   'onboarding-community.tsx': ['send-onboarding-email'],
   'onboarding-events.tsx': ['send-onboarding-email'],

@@ -58,8 +58,12 @@ export const SurveyStepRenderer = ({
           <ContactInfoStep
             email={formData.email}
             password={formData.password || ''}
+            contactPreference={formData.contactPreference}
+            customContactMethod={formData.customContactMethod}
             onEmailChange={(value) => handleChange('email', value)}
             onPasswordChange={(value) => handleChange('password', value)}
+            onContactPreferenceChange={(value) => handleChange('contactPreference', value)}
+            onCustomContactMethodChange={(value) => handleChange('customContactMethod', value)}
             onValidation={handleValidation}
             isOAuthUser={formData.authMethod === 'oauth'}
           />

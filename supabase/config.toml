@@ -21,7 +21,7 @@ enabled = false  # Disabled as functionality moved to database triggers
 [functions.slack]
 verify_jwt = false
 
-[functions.send-weekly-summary]
+[functions.send-weekly-summary-final]
 verify_jwt = true
 
 [functions.schedule-weekly-digests]

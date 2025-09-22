@@ -34,6 +34,8 @@ export const useSurveyState = () => {
     email: "",
     password: "",
     address: "",
+    contactPreference: "",
+    customContactMethod: "",
     agreements: {
       communication: false,
       authenticity: false,
@@ -86,16 +88,33 @@ export const useSurveyState = () => {
       case 0: // Basic Information (or OAuth Welcome)
         return formData.firstName.trim() !== "" && formData.lastName.trim() !== "";
       
-      case 1: // Contact/Auth Information  
+      case 1: // Contact/Auth Information & Address
+        // Check email and password requirements
+        let emailPasswordValid = false;
         if (formData.authMethod === 'oauth') {
           // OAuth users only need email (password provided by OAuth)
-          return formData.email.trim() !== "" && formData.email.includes("@");
+          emailPasswordValid = formData.email.trim() !== "" && formData.email.includes("@");
         } else {
           // Manual users need email and password
-          return formData.email.trim() !== "" && 
+          emailPasswordValid = formData.email.trim() !== "" && 
                  formData.password && formData.password.trim() !== "" && 
                  formData.email.includes("@");
         }
+        
+        // Check contact preference requirements
+        let contactPreferenceValid = false;
+        if (!formData.contactPreference) {
+          contactPreferenceValid = false;
+        } else if (formData.contactPreference === "other") {
+          contactPreferenceValid = formData.customContactMethod && formData.customContactMethod.trim() !== "";
+        } else {
+          contactPreferenceValid = true;
+        }
+        
+        // Check address requirement
+        const addressValid = formData.address.trim() !== "";
+        
+        return emailPasswordValid && contactPreferenceValid && addressValid;
       
       case 2: // Profile Image
         // Profile image is optional, so always return true
