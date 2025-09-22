@@ -291,6 +291,12 @@ const EventSheetContent = ({
                       Edit
                     </Button>
                   )}
+                  {/* RSVP Button - positioned before Add to Calendar */}
+                  <EventRSVPButton 
+                    eventId={event.id} 
+                    isHost={isHost}
+                    neighborhoodId={event.neighborhood_id}
+                  />
                   <Button
                     onClick={downloadICS}
                     variant="outline"
@@ -304,11 +310,6 @@ const EventSheetContent = ({
                     <Download className="h-4 w-4 mr-2" />
                     Add to Calendar
                   </Button>
-                  <EventRSVPButton 
-                    eventId={event.id} 
-                    isHost={isHost}
-                    neighborhoodId={event.neighborhood_id}
-                  />
                 </div>
               </div>
               

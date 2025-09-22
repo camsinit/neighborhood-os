@@ -31,7 +31,7 @@ const EventRSVPButton = ({
     <RSVPButton 
       eventId={eventId} 
       neighborhoodId={neighborhoodId}
-      className="w-full"
+      className="flex-1"
     />
   );
 };

@@ -108,8 +108,13 @@ const RSVPButton = ({
     <Button
       onClick={toggleRSVP}
       disabled={isLoading}
-      variant={hasRSVPed ? "default" : "outline"}
+      variant="outline"
+      size="sm"
       className={`transition-colors ${className}`}
+      style={{
+        borderColor: 'hsl(var(--calendar-color) / 0.3)',
+        color: 'hsl(var(--calendar-color))'
+      }}
       data-testid="rsvp-button"
     >
       {isLoading ? (
