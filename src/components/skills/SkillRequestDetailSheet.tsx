@@ -7,7 +7,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { MessageSquare, HandHeart, User, Clock, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-import ShareButton from '@/components/ui/share-button';
 import { SkillWithProfile, SkillCategory } from './types/skillTypes';
 import { createContactEmailLink } from '@/components/goods/utils/contactUtils';
 
@@ -148,15 +147,6 @@ const SkillRequestDetailSheet: React.FC<SkillRequestDetailSheetProps> = ({
                   >
                     {skillRequest.skill_category.charAt(0).toUpperCase() + skillRequest.skill_category.slice(1)}
                   </Badge>
-                </div>
-                <div className="flex items-center gap-2">
-                  <ShareButton 
-                    contentType="skills" 
-                    contentId={skillRequest.id} 
-                    neighborhoodId={skillRequest.neighborhood_id} 
-                    size="sm" 
-                    variant="ghost" 
-                  />
                 </div>
               </div>
               

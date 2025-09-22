@@ -7,7 +7,6 @@ import { MessageSquare, Plus, Users, Star, Clock, Lightbulb, Copy, Trash2 } from
 import { useState, useEffect } from "react";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
-import ShareButton from "@/components/ui/share-button";
 import { SkillCategory } from "./types/skillTypes";
 import { useSkillProviders, SkillProvider } from "./hooks/useSkillProviders";
 import { ContactMethodDisplay } from "./components/ContactMethodDisplay";
@@ -178,9 +177,6 @@ const SkillSheetContent = ({
               <div className="flex-1">
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">{skillTitle}</h2>
                 
-              </div>
-              <div className="flex items-center gap-2">
-                <ShareButton contentType="skills" contentId={skillTitle || ''} neighborhoodId={neighborhoodId} size="sm" variant="ghost" />
               </div>
             </div>
             

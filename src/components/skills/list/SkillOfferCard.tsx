@@ -4,7 +4,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { SkillWithProfile, SkillCategory } from '../types/skillTypes';
 
-import ShareButton from '@/components/ui/share-button';
 import { useState } from 'react';
 
 /**
@@ -66,17 +65,6 @@ const SkillOfferCard = ({
         </div>
       </div>
       
-      {/* Share button that shows on hover */}
-      {isHovering && !isOwner && (
-        <div className="absolute right-20 top-1/2 transform -translate-y-1/2 z-10">
-          <ShareButton
-            contentType="skills"
-            contentId={skill.id}
-            neighborhoodId={skill.neighborhood_id}
-            className="bg-white hover:bg-gray-50 border border-gray-200"
-          />
-        </div>
-      )}
       
       {/* Category tag that hides on hover */}
       <Badge 

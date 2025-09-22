@@ -8,7 +8,6 @@ import { SkillCategory, SkillWithProfile } from '../types/skillTypes';
 import { useSkillUpdate } from '@/hooks/skills/useSkillUpdate';
 import { useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS, getInvalidationKeys } from '@/utils/queryKeys';
-import ShareButton from '@/components/ui/share-button';
 import SkillEditDialog from '../form/SkillEditDialog';
 import SkillRequestDetailSheet from '../SkillRequestDetailSheet';
 
@@ -95,17 +94,6 @@ const SkillRequestCard = ({ skill }: SkillRequestCardProps) => {
         </div>
       </div>
       
-      {/* Share button that shows on hover - positioned to avoid conflicts with owner actions */}
-      {isHovering && !isOwner && (
-        <div className="absolute right-20 top-1/2 transform -translate-y-1/2 z-10">
-          <ShareButton
-            contentType="skills"
-            contentId={skill.id}
-            neighborhoodId={skill.neighborhood_id}
-            className="bg-white hover:bg-gray-50 border border-gray-200"
-          />
-        </div>
-      )}
       
       {/* Category tag that hides on hover */}
       <Badge 
