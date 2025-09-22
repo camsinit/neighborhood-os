@@ -13,8 +13,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { EditGroupForm } from './EditGroupForm';
 import { GroupActivityTimeline } from './activity/GroupActivityTimeline';
 import { extractNeighborhoodId, neighborhoodPath, BASE_ROUTES } from '@/utils/routes';
-// Import the standardized share button component
-import { ShareButton } from '@/components/ui/share-button';
 import { GroupMembersPopover } from './GroupMembersPopover';
 
 /**
@@ -184,15 +182,6 @@ const GroupSheetContent = ({
               
               {/* Action buttons container */}
               <div className="ml-auto flex items-center gap-2">
-                {/* Share button - visible to all users, uses standardized ShareButton component */}
-                <ShareButton
-                  contentType="groups"
-                  contentId={group.id}
-                  neighborhoodId={group.neighborhood_id}
-                  size="sm"
-                  variant="ghost"
-                />
-                
                 {/* Edit button for group owners/moderators */}
                 {canEditGroup && (
                   <button 
