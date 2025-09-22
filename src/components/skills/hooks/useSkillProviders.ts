@@ -2,6 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@supabase/auth-helpers-react';
+import { mapToCurrentCategory } from '@/components/skills/types/skillTypes';
 
 /**
  * Interface defining the structure of a skill provider
@@ -50,11 +51,12 @@ export const useSkillProviders = (skillTitle: string, skillCategory: string) => 
 
       if (!userNeighborhood) return [];
 
-      // Fetch ALL skill providers including the current user for transparency
-      const { data: skills, error } = await supabase
+      // Fetch ALL skills first, then filter by mapped category to include legacy categories
+      const { data: allSkills, error } = await supabase
         .from('skills_exchange')
         .select(`
           user_id,
+          skill_category,
           description,
           time_preferences,
           profiles:user_id (
@@ -66,13 +68,17 @@ export const useSkillProviders = (skillTitle: string, skillCategory: string) => 
           )
         `)
         .eq('neighborhood_id', userNeighborhood.neighborhood_id)
-        .eq('skill_category', skillCategory)
         .eq('title', skillTitle)
         .eq('request_type', 'offer')
         .eq('is_archived', false);
-        // REMOVED: .neq('user_id', user.id) - now includes current user
 
       if (error) throw error;
+
+      // Filter by mapped category (includes legacy category mapping)
+      const skills = allSkills?.filter(skill => 
+        mapToCurrentCategory(skill.skill_category) === skillCategory
+      ) || [];
+        // REMOVED: .neq('user_id', user.id) - now includes current user
 
       // Fetch visible email addresses using our secure function
       const { data: emailsData, error: emailsError } = await supabase

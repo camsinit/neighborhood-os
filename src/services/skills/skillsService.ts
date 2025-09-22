@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { SkillCategory, SkillWithProfile } from '@/components/skills/types/skillTypes';
+import { SkillCategory, SkillWithProfile, mapToCurrentCategory } from '@/components/skills/types/skillTypes';
 import { SkillFormData } from '@/components/skills/types/skillFormTypes';
 import { createLogger } from '@/utils/logger';
 
@@ -13,7 +13,7 @@ const logger = createLogger('skillsService');
  * @param category Optional category to filter by
  */
 export const fetchSkills = async (category?: SkillCategory) => {
-  // Start the query builder
+  // Start the query builder - fetch all skills first
   let query = supabase
     .from('skills_exchange')
     .select(`
@@ -25,17 +25,20 @@ export const fetchSkills = async (category?: SkillCategory) => {
     `)
     .order('created_at', { ascending: false });
   
-  // Apply category filter if specified
-  if (category) {
-    query = query.eq('skill_category', category);
-  }
-  
   // Execute the query
-  const { data, error } = await query;
+  const { data: allData, error } = await query;
   
   if (error) {
     logger.error('Error fetching skills:', error);
     throw error;
+  }
+
+  // Apply category filter using legacy mapping if specified
+  let data = allData;
+  if (category) {
+    data = allData?.filter(skill => 
+      mapToCurrentCategory(skill.skill_category) === category
+    ) || [];
   }
 
   return data as any[]; // Type assertion will be handled by the context
@@ -246,18 +249,22 @@ export const checkForDuplicates = async (
   category: string,
   mode: 'offer' | 'need'
 ) => {
-  // Query for similar skills
-  const { data, error } = await supabase
+  // Query for all similar skills first, then filter by mapped category
+  const { data: allData, error } = await supabase
     .from('skills_exchange')
     .select()
     .eq('request_type', mode)
-    .eq('skill_category', category)
     .ilike('title', `%${title}%`);
 
   if (error) {
     logger.error('Error checking for duplicates:', error);
     throw error;
   }
+
+  // Filter by mapped category (includes legacy category mapping)
+  const data = allData?.filter(skill => 
+    mapToCurrentCategory(skill.skill_category) === category
+  ) || [];
 
   return data;
 };

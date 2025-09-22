@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useUser } from '@supabase/auth-helpers-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { mapToCurrentCategory } from '@/components/skills/types/skillTypes';
 import { createTemplatedNotification } from '@/utils/notifications/templatedNotificationService';
 
 /**
@@ -42,17 +43,17 @@ export const useSkillContactManagement = () => {
         return;
       }
 
-      // Get all providers of this skill
-      const { data: skillProviders, error } = await supabase
+      // Get all providers of this skill (fetch all first, then filter by mapped category)
+      const { data: allProviders, error } = await supabase
         .from('skills_exchange')
         .select(`
           user_id,
+          skill_category,
           profiles:user_id (
             display_name
           )
         `)
         .eq('neighborhood_id', userNeighborhood.neighborhood_id)
-        .eq('skill_category', skillCategory)
         .eq('title', skillTitle)
         .eq('request_type', 'offer')
         .eq('is_archived', false)
@@ -63,6 +64,11 @@ export const useSkillContactManagement = () => {
         toast.error('Failed to find skill providers');
         return;
       }
+
+      // Filter by mapped category (includes legacy category mapping)
+      const skillProviders = allProviders?.filter(skill => 
+        mapToCurrentCategory(skill.skill_category) === skillCategory
+      ) || [];
 
       if (!skillProviders || skillProviders.length === 0) {
         toast.error('No providers found for this skill');
