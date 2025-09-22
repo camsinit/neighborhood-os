@@ -29,7 +29,6 @@ const EventAttendeesList = ({ eventId }: EventAttendeesListProps) => {
 
   return (
     <div className="mt-4">
-      <Separator className="my-4" />
       <h3 className="font-medium flex items-center mb-2">
         <CalIcon className="h-4 w-4 mr-2 text-gray-500" />
         Attendees ({rsvpCount})

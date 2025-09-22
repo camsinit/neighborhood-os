@@ -312,6 +312,9 @@ const EventSheetContent = ({
                   />
                 </div>
               </div>
+              
+              {/* Attendees section */}
+              <EventAttendeesList eventId={event.id} />
             </>
           )}
         </div>
