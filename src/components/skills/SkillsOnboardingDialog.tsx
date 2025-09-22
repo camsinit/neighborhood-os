@@ -140,7 +140,7 @@ export const SkillsOnboardingDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[1200px] max-h-[98vh] overflow-y-auto">
         {/* Test mode indicator */}
         {isTestMode && (
           <div className="bg-amber-50 border border-amber-200 rounded px-3 py-2 text-amber-700 text-sm mb-4">

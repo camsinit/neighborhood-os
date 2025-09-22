@@ -10,7 +10,7 @@ export const SKILL_CATEGORIES = {
   technology: {
     title: "Technology",
     skills: [
-      "Computer, Smartphone, Tablet Help",
+      "Computer, Phone, Tablet Help",
       "WiFi Troubleshooting",
       "Social Media Help",
       "Photo Organization & Sharing",
@@ -65,7 +65,7 @@ export const SKILL_CATEGORIES = {
       "Music Jams",
       "Arts & Crafts Activities",
       "Sports",
-      "Hobby Sharing & Teaching"
+      "Sharing Hobbies"
     ],
   },
 };
@@ -87,7 +87,7 @@ export const SPECIAL_SKILLS = {
     prompt: "Which sports?",
     placeholder: "Soccer, Basketball, Swimming"
   },
-  "Hobby Sharing & Teaching": {
+  "Sharing Hobbies": {
     prompt: "Which hobby?",
     placeholder: "Photography, Woodworking, Knitting"
   }

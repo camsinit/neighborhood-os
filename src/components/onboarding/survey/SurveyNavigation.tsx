@@ -46,8 +46,8 @@ export const SurveyNavigation = ({
       return !hasCompletedSkillsSurvey;
     }
     
-    // For other steps that require validation (steps 0-2), use the existing validation
-    if (currentStep < 3) {
+    // For all steps that require validation (steps 0-3), use the existing validation
+    if (currentStep <= 3) {
       return !isCurrentStepValid;
     }
     

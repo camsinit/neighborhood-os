@@ -51,15 +51,15 @@ export const SelectedSkillsOverlay = ({
       {/* Expanded overlay - positioned absolutely to not push content down */}
       {isExpanded && (
         <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg p-3 z-20">
-          <div className="max-h-40 overflow-y-auto">
+          <div className="max-h-[40vh] overflow-y-auto">
             <div className="grid grid-cols-1 gap-2">
               {selectedSkills.map((skill, index) => (
                 <Badge 
                   key={index} 
                   variant="secondary" 
-                  className="flex items-center justify-between gap-2 text-xs p-2"
+                  className="flex items-center justify-between gap-2 text-sm p-2"
                 >
-                  <span className="truncate text-xs flex-1">
+                  <span className="text-sm flex-1">
                     {skill.details ? `${skill.name}: ${skill.details}` : skill.name}
                   </span>
                   <button

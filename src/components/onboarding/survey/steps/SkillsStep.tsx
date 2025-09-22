@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 
 export const SKILLS_OPTIONS = [
   // Technology
-  "Computer, Smartphone, Tablet Help",
+  "Computer, Phone, Tablet Help",
   "WiFi Troubleshooting",
   "Social Media Help",
   "Photo Organization & Sharing",
@@ -47,7 +47,7 @@ export const SKILLS_OPTIONS = [
   "Music Jams",
   "Arts & Crafts Activities",
   "Sports",
-  "Hobby Sharing & Teaching",
+  "Sharing Hobbies",
 ];
 
 /**

@@ -219,8 +219,8 @@ export const SkillsMiniSurvey = ({
       <div className="space-y-4">
         {/* Condensed header */}
         <div className="text-center space-y-1">
-          <h3 className="text-lg font-semibold">Skills Summary</h3>
-          <p className="text-xs text-muted-foreground">
+          <h3 className="text-sm font-semibold">Skills Summary</h3>
+          <p className="text-sm text-muted-foreground">
             Review your selected skills. You can go back to make changes or continue to complete the onboarding.
           </p>
         </div>
@@ -229,15 +229,15 @@ export const SkillsMiniSurvey = ({
         {skillsWithDetails.length > 0 ? (
           <div className="space-y-3">
             <div className="text-center">
-              <Badge variant="secondary" className="text-xs px-2 py-1">
+              <Badge variant="secondary" className="text-sm px-2 py-1">
                 {skillsWithDetails.length} skills selected
               </Badge>
             </div>
             {/* Condensed skills grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-32 overflow-y-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-[50vh] overflow-y-auto">
               {skillsWithDetails.map((skill, index) => (
-                <Badge key={index} variant="secondary" className="flex items-center justify-between gap-1 text-xs p-1.5">
-                  <span className="truncate text-xs">
+                <Badge key={index} variant="secondary" className="flex items-center justify-between gap-1 text-sm p-1.5">
+                  <span className="text-sm">
                     {skill.details ? `${skill.name}: ${skill.details}` : skill.name}
                   </span>
                   <button
@@ -252,7 +252,7 @@ export const SkillsMiniSurvey = ({
           </div>
         ) : (
           <div className="text-center py-4">
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               No skills selected. You can go back to add skills or continue without any.
             </p>
           </div>
@@ -264,7 +264,7 @@ export const SkillsMiniSurvey = ({
             <ArrowLeft className="mr-1 h-3 w-3" />
             Back
           </Button>
-          <div className="text-xs text-muted-foreground">
+          <div className="text-sm text-muted-foreground">
             Review Complete
           </div>
           <div className="w-16" /> {/* Spacer for layout balance */}
@@ -281,8 +281,8 @@ export const SkillsMiniSurvey = ({
     <div className="space-y-4">
       {/* Condensed category header */}
       <div className="text-center space-y-1">
-        <h3 className="text-base font-semibold">{currentCategory?.title}</h3>
-        <p className="text-xs text-muted-foreground">
+        <h3 className="text-sm font-semibold">{currentCategory?.title}</h3>
+        <p className="text-sm text-muted-foreground">
           Select any {currentCategory?.title.toLowerCase()} skills you have.
         </p>
       </div>
@@ -294,24 +294,24 @@ export const SkillsMiniSurvey = ({
       />
 
       {/* Condensed skills grid for current category */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto">
         {currentSkills.map((skill) => {
           const selected = isSkillSelected(skill);
           return (
             <div
               key={skill}
-              className={`p-2 border rounded-md cursor-pointer transition-colors hover:bg-gray-50 ${
+              className={`p-3 border rounded-md cursor-pointer transition-colors hover:bg-gray-50 ${
                 selected ? 'border-green-500 bg-green-50' : 'border-gray-200'
               }`}
               onClick={() => handleSkillSelect(skill)}
             >
-              <div className="flex items-center space-x-1.5">
+              <div className="flex items-center space-x-2">
                 <Checkbox
                   checked={selected}
                   onChange={() => {}} // Handled by parent div click
                   className="data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500 border-green-500 data-[state=unchecked]:border-green-500"
                 />
-                <span className="text-xs font-medium truncate">{skill}</span>
+                <span className="text-sm font-medium">{skill}</span>
                 {SPECIAL_SKILLS[skill as keyof typeof SPECIAL_SKILLS] && (
                   <Badge variant="outline" className="text-xs px-1 py-0">Details</Badge>
                 )}
@@ -372,18 +372,18 @@ export const SkillsMiniSurvey = ({
       }>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-base">Add Details for {specialSkillDialog.skillName}</DialogTitle>
+            <DialogTitle className="text-sm">Add Details for {specialSkillDialog.skillName}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <div>
-              <Label className="text-xs">
+              <Label className="text-sm">
                 {SPECIAL_SKILLS[specialSkillDialog.skillName as keyof typeof SPECIAL_SKILLS]?.prompt}
               </Label>
               <Input
                 placeholder={SPECIAL_SKILLS[specialSkillDialog.skillName as keyof typeof SPECIAL_SKILLS]?.placeholder}
                 value={specialSkillDialog.details}
                 onChange={(e) => setSpecialSkillDialog(prev => ({ ...prev, details: e.target.value }))}
-                className="h-8 text-xs mt-1"
+                className="h-8 text-sm mt-1"
               />
             </div>
           </div>

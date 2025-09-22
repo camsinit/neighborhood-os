@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 /**
  * Interface for tracking which agreements have been accepted
@@ -92,42 +94,51 @@ export const AgreementsStep = ({
     // so the list reads quickly on smaller screens like iPads.
     <div className="space-y-4">
       {/* Short instructional helper text so it's obvious what to do */}
-      <p className="text-sm text-muted-foreground">
-        Please check all the boxes to continue. These agreements help keep our neighborhood safe and respectful.
+      <p className="text-base text-blue-600 text-center pt-2 pb-4">
+        Check all the boxes to continue. These agreements help keep neighborhoodOS a place we all want to be.
       </p>
 
       {/* List of agreements with checkboxes */}
-      <div className="space-y-2">
-        {NEIGHBORHOOD_AGREEMENTS.map((agreement) => (
-          <div key={agreement.id} className="space-y-1">
-            {/* Checkbox and main agreement text */}
-            <div className="flex items-start gap-3">
-              <Checkbox
-                id={agreement.id}
-                checked={agreementState[agreement.id]}
-                onCheckedChange={(checked) =>
-                  handleAgreementToggle(agreement.id, checked === true)
-                }
-                // Make the boxes visually clearer to “check off”: slightly larger,
-                // square corners, and a strong (brand/primary) outline.
-                className="mt-0.5 h-5 w-5 rounded-none border-2 border-primary"
-              />
-              <div className="space-y-0.5 flex-1">
-                <Label
-                  htmlFor={agreement.id}
-                  className="text-sm font-medium leading-snug cursor-pointer"
-                >
-                  {agreement.title}
-                </Label>
-                {/* Sub-text explaining the agreement - compact and easy to scan */}
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {agreement.description}
-                </p>
+      <TooltipProvider delayDuration={300}>
+        <div className="space-y-4">
+          {NEIGHBORHOOD_AGREEMENTS.map((agreement) => (
+            <div key={agreement.id} className="space-y-1">
+              {/* Checkbox and main agreement text */}
+              <div className="flex items-center gap-3">
+                <Checkbox
+                  id={agreement.id}
+                  checked={agreementState[agreement.id]}
+                  onCheckedChange={(checked) =>
+                    handleAgreementToggle(agreement.id, checked === true)
+                  }
+                  // Make the boxes visually clearer with rounded edges and proper alignment
+                  className="h-5 w-5 rounded border-2 border-primary"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <Label
+                      htmlFor={agreement.id}
+                      className="text-sm font-medium leading-snug cursor-pointer flex-1"
+                    >
+                      {agreement.title}
+                    </Label>
+                    <Tooltip delayDuration={300}>
+                      <TooltipTrigger asChild>
+                        <button type="button" className="inline-flex items-center justify-center">
+                          <Info className="h-4 w-4 text-gray-400 hover:text-gray-600 cursor-help" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-xs z-50">
+                        <p className="text-sm">{agreement.description}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      </TooltipProvider>
     </div>
   );
 };
