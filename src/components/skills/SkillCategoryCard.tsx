@@ -40,6 +40,11 @@ const categoryConfig: Record<SkillCategory, {
     icon: GraduationCap,
     displayName: 'Learning and Fun',
     iconColor: 'text-green-600'
+  },
+  maintenance: {
+    icon: Wrench,
+    displayName: 'Maintenance',
+    iconColor: 'text-green-600'
   }
 };
 interface SkillCategoryCardProps {

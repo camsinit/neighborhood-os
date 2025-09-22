@@ -32,6 +32,8 @@ export const ROUTE_MAP: Record<HighlightableItemType, string> = {
   skills: BASE_ROUTES.skills,
   neighbors: BASE_ROUTES.neighbors,
   group: BASE_ROUTES.neighbors, // Groups are served at the neighbors route
+  goods: BASE_ROUTES.goods,
+  safety: BASE_ROUTES.safety,
 };
 
 /**

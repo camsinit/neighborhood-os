@@ -104,7 +104,8 @@ export const SkillsProvider = ({ children }: { children: ReactNode }) => {
     emergency: { offers: [], requests: [] },
     professional: { offers: [], requests: [] },
     care: { offers: [], requests: [] },
-    education: { offers: [], requests: [] }
+    education: { offers: [], requests: [] },
+    maintenance: { offers: [], requests: [] }
   }, isLoading: isPreviewLoading } = useQuery({
     queryKey: ['skills-preview', neighborhood?.id],
     queryFn: async () => {
@@ -113,7 +114,8 @@ export const SkillsProvider = ({ children }: { children: ReactNode }) => {
         emergency: { offers: [], requests: [] },
         professional: { offers: [], requests: [] },
         care: { offers: [], requests: [] },
-        education: { offers: [], requests: [] }
+        education: { offers: [], requests: [] },
+        maintenance: { offers: [], requests: [] }
       };
       
       const { data: skills, error } = await supabase
@@ -134,7 +136,8 @@ export const SkillsProvider = ({ children }: { children: ReactNode }) => {
         emergency: { offers: [], requests: [] },
         professional: { offers: [], requests: [] },
         care: { offers: [], requests: [] },
-        education: { offers: [], requests: [] }
+        education: { offers: [], requests: [] },
+        maintenance: { offers: [], requests: [] }
       };
 
       skills?.forEach(skill => {

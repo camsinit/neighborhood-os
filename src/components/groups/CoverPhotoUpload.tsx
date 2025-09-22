@@ -65,12 +65,11 @@ export const CoverPhotoUpload: React.FC<CoverPhotoUploadProps> = ({
 
   // Drag and drop handlers
   const {
-    isDragging,
-    handleDragEnter,
-    handleDragOver,
-    handleDragLeave,
-    handleDrop
-  } = useDragAndDrop(handleFileUpload);
+    isDragOver,
+    onDragOver,
+    onDragLeave,
+    onDrop
+  } = useDragAndDrop({ onFileDrop: handleFileUpload });
   return <div className="space-y-4">
       {/* Header */}
       <div className="space-y-2">
@@ -92,7 +91,7 @@ export const CoverPhotoUpload: React.FC<CoverPhotoUploadProps> = ({
             </div>
           </div>
         </div> : (/* Upload area */
-    <div className={`relative h-40 w-full border-2 border-dashed rounded-lg transition-colors ${isDragging ? 'border-blue-400 bg-blue-50' : 'border-gray-300 hover:border-gray-400'} ${uploading ? 'opacity-50 pointer-events-none' : ''}`} onDragEnter={handleDragEnter} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}>
+    <div className={`relative h-40 w-full border-2 border-dashed rounded-lg transition-colors ${isDragOver ? 'border-blue-400 bg-blue-50' : 'border-gray-300 hover:border-gray-400'} ${uploading ? 'opacity-50 pointer-events-none' : ''}`} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
           <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
             {uploading ? <div className="text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2" />
@@ -104,7 +103,7 @@ export const CoverPhotoUpload: React.FC<CoverPhotoUploadProps> = ({
                   </div>
                   <div className="text-center">
                     <p className="text-sm font-medium text-gray-700">
-                      {isDragging ? 'Drop image here' : 'Upload cover photo'}
+                      {isDragOver ? 'Drop image here' : 'Upload cover photo'}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">
                       Drag & drop or click to select

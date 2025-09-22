@@ -210,95 +210,75 @@ const EventSheetContent = ({
             </div>
           ) : (
             <>
-              {/* Enhanced Event Details Card with Gradient Background */}
+              {/* Event Title */}
+              <div className="mb-4">
+                <h1 className="text-2xl font-bold text-gray-900">{event.title}</h1>
+              </div>
+
+              {/* Condensed Event Details Card */}
               <div 
-                className="p-6 rounded-xl border-2" 
+                className="p-4 rounded-xl border-2" 
                 style={{
                   background: 'linear-gradient(135deg, hsl(var(--calendar-light)) 0%, hsl(var(--background)) 100%)',
                   borderColor: 'hsl(var(--calendar-color) / 0.2)'
                 }}
               >
-                {/* Event Details Grid */}
-                <div className="space-y-4">
-                  {/* Date and Time */}
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center" style={{
-                      backgroundColor: 'hsl(var(--calendar-color) / 0.1)'
-                    }}>
-                      <Calendar className="h-5 w-5" style={{ color: 'hsl(var(--calendar-color))' }} />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-semibold text-gray-900">
-                        {formatInNeighborhoodTimezone(
-                          parseISO(event.time), 
-                          'EEEE, MMMM d, yyyy', 
-                          neighborhoodTimezone
-                        )}
-                      </div>
-                      <div className="text-sm text-gray-600 flex items-center gap-1 mt-1">
-                        <Clock className="h-4 w-4" />
-                        {formatInNeighborhoodTimezone(
-                          parseISO(event.time), 
-                          'h:mm a', 
-                          neighborhoodTimezone
-                        )} ({neighborhoodTimezone.replace('_', ' ')})
-                      </div>
+                {/* Condensed Date, Time and Location - Single Row */}
+                <div className="flex flex-wrap items-center gap-4 text-sm">
+                  {/* Date and Time - Condensed */}
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" style={{ color: 'hsl(var(--calendar-color))' }} />
+                    <div className="flex items-center gap-1">
+                      <span className="font-medium">
+                        {formatInNeighborhoodTimezone(parseISO(event.time), 'MMM d', neighborhoodTimezone)}
+                      </span>
+                      <span className="text-gray-600">•</span>
+                      <Clock className="h-3 w-3 text-gray-500" />
+                      <span className="text-gray-600">
+                        {formatInNeighborhoodTimezone(parseISO(event.time), 'h:mm a', neighborhoodTimezone)}
+                      </span>
                     </div>
                   </div>
 
-                  {/* Location */}
+                  {/* Location - Condensed */}
                   {event.location && (
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center" style={{
-                        backgroundColor: 'hsl(var(--calendar-color) / 0.1)'
-                      }}>
-                        <MapPin className="h-5 w-5" style={{ color: 'hsl(var(--calendar-color))' }} />
-                      </div>
-                      <div className="flex-1">
-                        <div className="font-semibold text-gray-900">Location</div>
-                        <div className="text-sm text-gray-600 mt-1">{event.location}</div>
-                      </div>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4" style={{ color: 'hsl(var(--calendar-color))' }} />
+                      <span className="text-gray-600">{event.location}</span>
                     </div>
                   )}
 
-                  {/* Description */}
-                  {event.description && (
-                    <div className="pt-2">
-                      <div className="font-semibold text-gray-900 mb-2">Details</div>
-                      <p className="text-sm text-gray-600 whitespace-pre-wrap">{event.description}</p>
+                  {/* Host - Condensed in same line as date/location */}
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                      {event.profiles?.avatar_url ? (
+                        <img 
+                          src={event.profiles.avatar_url} 
+                          alt={event.profiles.display_name || 'Host'} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-xs font-medium text-gray-600">
+                          {event.profiles?.display_name?.[0] || '?'}
+                        </span>
+                      )}
                     </div>
-                  )}
-
-                  {/* Host Information */}
-                  <div className="flex items-start gap-3 pt-2">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center" style={{
-                      backgroundColor: 'hsl(var(--calendar-color) / 0.1)'
-                    }}>
-                      <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                        {event.profiles?.avatar_url ? (
-                          <img 
-                            src={event.profiles.avatar_url} 
-                            alt={event.profiles.display_name || 'Host'} 
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <span className="text-xs font-medium text-gray-600">
-                            {event.profiles?.display_name?.[0] || '?'}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-semibold text-gray-900">Host</div>
-                      <div className="text-sm text-gray-600 mt-1">
-                        {event.profiles?.display_name || 'Anonymous'}
-                        {isHost && <span className="ml-2 text-xs text-gray-500">(You)</span>}
-                      </div>
-                    </div>
+                    <span className="text-gray-600">
+                      {event.profiles?.display_name || 'Anonymous'}
+                      {isHost && <span className="ml-1 text-xs text-gray-500">(You)</span>}
+                    </span>
                   </div>
                 </div>
 
-                {/* Action Buttons */}
+                {/* Description - Separate section if exists */}
+                {event.description && (
+                  <div className="mt-3 pt-3 border-t border-gray-200">
+                    <p className="text-sm text-gray-600 whitespace-pre-wrap">{event.description}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons */}
                 <div className="flex gap-3 mt-6 pt-4 border-t border-gray-200">
                   {isHost && (
                     <Button
@@ -334,7 +314,6 @@ const EventSheetContent = ({
                     neighborhoodId={event.neighborhood_id}
                   />
                 </div>
-              </div>
               
               {/* Secondary information with consistent spacing */}
               <div className="space-y-6">

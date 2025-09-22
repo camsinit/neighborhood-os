@@ -16,7 +16,7 @@ import { BASE_ROUTES } from '@/utils/routes';
  */
 interface SharedItemData {
   id: string;
-  content_type: 'events' | 'skills' | 'groups';
+  content_type: 'events' | 'skills' | 'groups' | 'goods' | 'safety';
   content_id: string;
   neighborhood_id: string;
   share_code: string;

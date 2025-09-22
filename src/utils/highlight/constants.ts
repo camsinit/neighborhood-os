@@ -25,7 +25,9 @@ export const dataAttributeMap: Record<HighlightableItemType, string> = {
   event: "data-event-id",
   skills: "data-skill-id",
   neighbors: "data-neighbor-id",
-  group: "data-group-id"
+  group: "data-group-id",
+  goods: "data-goods-id",
+  safety: "data-safety-id"
 };
 
 /**
@@ -35,5 +37,7 @@ export const readableTypeNames: Record<HighlightableItemType, string> = {
   event: "Event",
   skills: "Skill",
   neighbors: "Neighbor Profile",
-  group: "Group"
+  group: "Group",
+  goods: "Good",
+  safety: "Safety Update"
 };

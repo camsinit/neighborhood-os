@@ -1,5 +1,5 @@
 // Define the skill category type - now matching onboarding categories exactly
-export type SkillCategory = 'technology' | 'emergency' | 'professional' | 'care' | 'education';
+export type SkillCategory = 'technology' | 'emergency' | 'professional' | 'care' | 'education' | 'maintenance';
 
 /**
  * Legacy category mapping for backwards compatibility

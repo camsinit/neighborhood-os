@@ -56,7 +56,7 @@ export const createManualSignupFormData = (): SurveyFormData => {
       respectfulness: false,
     },
     password: '',
-    
+    contactPreference: 'email'
   };
 };
 

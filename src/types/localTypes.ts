@@ -91,3 +91,24 @@ export interface SkillExchangeItem {
   profiles?: Profile; // Profile of the provider/requester
 }
 
+/**
+ * Goods exchange item - used exclusively on the Goods page
+ * This interface represents items in the goods_exchange table
+ */
+export interface GoodsExchangeItem {
+  id: string;
+  goods_id: string; // Added redundant ID field
+  title: string;
+  description: string;
+  request_type: 'need' | 'offer';
+  user_id: string;
+  valid_until: string;
+  created_at: string;
+  is_archived: boolean | null;
+  is_read: boolean | null;
+  category: string;
+  neighborhood_id: string;
+  image_url?: string | null;
+  profiles?: Profile; // Profile of the provider/requester
+}
+
