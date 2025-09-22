@@ -6,8 +6,8 @@ import React from 'npm:react@18.3.1';
 import { OnboardingCommunityEmail } from './_templates/onboarding-1-community.tsx';
 import { OnboardingEventsEmail } from './_templates/onboarding-2-events.tsx';
 import { OnboardingSkillsEmail } from './_templates/onboarding-3-skills.tsx';
-import { OnboardingGoodsEmail } from './_templates/onboarding-4-goods.tsx';
-import { OnboardingSafetyEmail } from './_templates/onboarding-5-safety.tsx';
+// import { OnboardingGoodsEmail } from './_templates/onboarding-4-goods.tsx'; // Removed feature
+// import { OnboardingSafetyEmail } from './_templates/onboarding-5-safety.tsx'; // Removed feature
 import { OnboardingDirectoryEmail } from './_templates/onboarding-6-directory.tsx';
 import { OnboardingModulesEmail } from './_templates/onboarding-7-modules.tsx';
 import { handleCorsPreflightRequest, errorResponse, successResponse, createLogger } from '../_shared/cors.ts';
@@ -127,23 +127,23 @@ const getOnboardingTemplate = (emailNumber: number, firstName: string, neighborh
         skillsLink: getOnboardingURL(getSkillsLink, 3)
       }
     },
-    4: {
-      subject: subjects[4],
-      component: OnboardingGoodsEmail,
-      props: {
-        firstName,
-        neighborhoodName,
-        goodsLink: getOnboardingURL(getFreebiesLink, 4)
-      }
-    },
-    5: {
-      subject: subjects[5],
-      component: OnboardingSafetyEmail,
-      props: {
-        firstName,
-        safetyLink: getOnboardingURL(getUpdatesLink, 5)
-      }
-    },
+    // 4: {
+    //   subject: subjects[4],
+    //   component: OnboardingGoodsEmail, // Removed feature
+    //   props: {
+    //     firstName,
+    //     neighborhoodName,
+    //     goodsLink: getOnboardingURL(getFreebiesLink, 4)
+    //   }
+    // },
+    // 5: {
+    //   subject: subjects[5],
+    //   component: OnboardingSafetyEmail, // Removed feature
+    //   props: {
+    //     firstName,
+    //     safetyLink: getOnboardingURL(getUpdatesLink, 5)
+    //   }
+    // },
     6: {
       subject: subjects[6],
       component: OnboardingDirectoryEmail,
