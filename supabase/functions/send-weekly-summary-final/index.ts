@@ -94,7 +94,22 @@ Write exactly 3 sections in a personal, letter-like tone:
 
 2. pastWeekRecap: Share what happened this week like you're catching up with a friend. ${isLowActivity ? 'Since things were quiet, gently suggest that this might be a perfect time for someone to organize something simple. Include activity creation links naturally: "It was one of those peaceful weeks in the neighborhood - maybe the perfect time for someone to <a href=\\"' + createEventUrl + '\\">organize a coffee meet-up</a> or <a href=\\"' + createSkillUrl + '\\">share a skill</a> they have?"' : 'Celebrate what actually happened and mention any highlights with enthusiasm.'}
 
-3. weekAheadPreview: Create SPECIFIC, timely suggestions based on current neighbor activity and skills. Connect actual neighbor names to opportunities. Examples: "With Rascal Raccoon's tech skills available, this is perfect timing to <a href=\\"' + createEventUrl + '\\">organize a neighborhood WiFi workshop</a>." or "Mac's carpentry request could spark a <a href=\\"' + createGroupUrl + '\\">DIY home improvement group</a> - who else has projects?" Make suggestions feel connected to real activity, mention specific skills that could be shared, groups that could be created, or events that would complement current neighborhood interests. Change suggestions weekly based on actual data.
+3. weekAheadPreview: Generate DYNAMIC weekly suggestions that change based on actual neighborhood data. Create 3 specific, actionable suggestions (one for each page: Calendar, Skills, Groups) that feel timely and connected to current activity. 
+
+CURRENT NEIGHBORHOOD CONTEXT:
+Skills Available: ${upcomingActivities.skills.map(s => `${s.neighborName} offers ${s.title}`).join(', ')}
+Skills Needed: ${upcomingActivities.skills.filter(s => s.requestType === 'request').map(s => `${s.neighborName} needs ${s.title}`).join(', ')}
+Recent Events Created: ${pastWeekActivities.createdEvents.map(e => e.title).join(', ')}
+Active Groups: ${upcomingActivities.activeGroups?.map(g => g.name).join(', ') || 'None'}
+
+Generate suggestions in this format:
+{
+  "calendarSuggestion": "One sentence about organizing an event that connects to current activity with clickable link: <a href=\\"' + createEventUrl + '\\">specific event idea</a>",
+  "skillsSuggestion": "One sentence about sharing/requesting skills that connects to current neighbors with clickable link: <a href=\\"' + createSkillUrl + '\\">specific skill action</a>", 
+  "groupsSuggestion": "One sentence about creating/joining groups that connects to current interests with clickable link: <a href=\\"' + createGroupUrl + '\\">specific group idea</a>"
+}
+
+Make each suggestion feel timely - mention specific neighbors, skills, or complement existing activity. Change these weekly based on what's actually happening.
 
 WRITING GUIDELINES:
 - Write like you're talking to a neighbor over the fence
@@ -103,7 +118,7 @@ WRITING GUIDELINES:
 - Include clickable links naturally in the conversation
 - Avoid corporate language, emojis, or formal headers
 - Make it feel personal and authentic
-- Return as JSON: {"newNeighborWelcome": "", "pastWeekRecap": "", "weekAheadPreview": ""}`;
+- Return as JSON: {"newNeighborWelcome": "", "pastWeekRecap": "", "weekAheadPreview": {"calendarSuggestion": "", "skillsSuggestion": "", "groupsSuggestion": ""}}`;
 
     // Call Claude API
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -115,7 +130,7 @@ WRITING GUIDELINES:
       },
       body: JSON.stringify({
         model: 'claude-3-haiku-20240307',
-        max_tokens: 1000,
+        max_tokens: 1500,
         messages: [
           {
             role: 'user',
@@ -139,25 +154,41 @@ WRITING GUIDELINES:
       return aiContent;
     } catch (parseError) {
       console.error('Failed to parse AI response as JSON:', parseError);
-      // Return default content in new 3-section format if parsing fails
+      // Return default content with dynamic suggestions structure
+      const createEventUrl = `https://neighborhoodos.com/n/${neighborhoodId}/calendar?create=true`;
+      const createSkillUrl = `https://neighborhoodos.com/n/${neighborhoodId}/skills?create=true`;
+      const createGroupUrl = `https://neighborhoodos.com/n/${neighborhoodId}/groups?create=true`;
+      
       return {
         newNeighborWelcome: newNeighbors.length > 0 ? 
           `Welcome to our newest neighbors: ${newNeighbors.map(n => `<a href="${n.profileUrl}">${n.name}</a>`).join(', ')}! We're excited to have you join our ${neighborhoodName} community.` : 
           '',
         pastWeekRecap: "This past week brought new connections and community activity. Thank you to everyone who participated in making our neighborhood more vibrant.",
-        weekAheadPreview: "The upcoming week has exciting opportunities to connect with your neighbors. Check out what's happening and get involved!"
+        weekAheadPreview: {
+          calendarSuggestion: `<a href="${createEventUrl}">Organize a neighborhood coffee meetup or potluck</a> to bring everyone together this weekend.`,
+          skillsSuggestion: `<a href="${createSkillUrl}">Share a skill you're passionate about</a> or ask for help with a project you've been putting off.`,
+          groupsSuggestion: `<a href="${createGroupUrl}">Start a group for something you love</a> to connect with neighbors who share your interests.`
+        }
       };
     }
 
   } catch (error) {
     console.error('Error generating AI content:', error);
-    // Return default content in new 3-section format if AI generation fails
+    // Return default content with dynamic suggestions structure
+    const createEventUrl = `https://neighborhoodos.com/n/${neighborhoodId}/calendar?create=true`;
+    const createSkillUrl = `https://neighborhoodos.com/n/${neighborhoodId}/skills?create=true`;
+    const createGroupUrl = `https://neighborhoodos.com/n/${neighborhoodId}/groups?create=true`;
+    
     return {
       newNeighborWelcome: newNeighbors.length > 0 ? 
         `Welcome to our newest neighbors: ${newNeighbors.map(n => `<a href="${n.profileUrl}">${n.name}</a>`).join(', ')}! We're excited to have you join our ${neighborhoodName} community.` : 
         '',
       pastWeekRecap: "This past week brought new connections and community activity. Thank you to everyone who participated in making our neighborhood more vibrant.",
-      weekAheadPreview: "The upcoming week has exciting opportunities to connect with your neighbors. Check out what's happening and get involved!"
+      weekAheadPreview: {
+        calendarSuggestion: `<a href="${createEventUrl}">Organize a neighborhood coffee meetup or potluck</a> to bring everyone together this weekend.`,
+        skillsSuggestion: `<a href="${createSkillUrl}">Share a skill you're passionate about</a> or ask for help with a project you've been putting off.`,
+        groupsSuggestion: `<a href="${createGroupUrl}">Start a group for something you love</a> to connect with neighbors who share your interests.`
+      }
     };
   }
 }
