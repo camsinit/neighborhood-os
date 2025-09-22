@@ -312,12 +312,6 @@ const EventSheetContent = ({
                   />
                 </div>
               </div>
-              
-              {/* Secondary information with consistent spacing */}
-              <div className="space-y-6">
-                {/* Attendees section */}
-                <EventAttendeesList eventId={event.id} />
-              </div>
             </>
           )}
         </div>
