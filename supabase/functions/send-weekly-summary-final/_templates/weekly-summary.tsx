@@ -51,21 +51,32 @@ interface WeeklySummaryEmailProps {
     activeGroups: number     
   }
   highlights: {
-    events: Array<{
+    createdEvents: Array<{
+      title: string
+      url: string
+      createdAt: string
+      eventTime: string
+    }>
+    upcomingEvents: Array<{
       title: string
       date: string
       attendees: number
       isGroupEvent?: boolean
     }>
-    skills: Array<{
-      id: string
-      title: string
-      category: string
-      requestType: string
+    skillsByPerson: Array<{
       neighborName: string
       neighborUserId: string
       neighborProfileUrl: string
+      skillCount: number
+      topSkills: Array<{
+        id: string
+        title: string
+        category: string
+        requestType: string
+      }>
+      allSkills: Array<any>
     }>
+    totalSkills: number
     groups: {
       newGroups: Array<{
         name: string
@@ -123,53 +134,59 @@ export const WeeklySummaryEmail = ({
         {/* Visual separator */}
         <Text style={separator}>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</Text>
 
-        {/* SKILLS EXCHANGE section */}
+        {/* SKILLS EXCHANGE section - Curated community approach */}
         <Text style={skillsHeader}>🛠️ SKILLS EXCHANGE</Text>
         <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.skillsExchange }} />
 
-        {/* Fresh offers from neighbors */}
-        {highlights.skills.filter(s => s.requestType === 'offer').length > 0 && (
-          <>
-            <Text style={subsectionTitle}>Fresh offers from your neighbors:</Text>
-            <div style={skillsList}>
-              {highlights.skills.filter(s => s.requestType === 'offer').slice(0, 8).map((skill, index) => (
-                <Text key={index} style={skillItem}>
-                  →{' '}
-                  <Link href={`${baseUrl}/n/${neighborhoodId}/skills?highlight=skill&type=skills_exchange&id=${skill.id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_skill`} style={skillNameLink}>
-                    {skill.title}
-                  </Link>
-                  {' '}- <Link href={skill.neighborProfileUrl} style={neighborNameLink}><strong>{skill.neighborName}</strong></Link>{' '}
-                  {getSkillContext(skill.title, skill.category, skill.neighborName, skill.requestType)}
-                </Text>
-              ))}
-            </div>
-          </>
+        {/* Curated highlights by person */}
+        {highlights.skillsByPerson.length > 0 && (
+          <div style={skillsList}>
+            {highlights.skillsByPerson.map((person, index) => (
+              <div key={index} style={personSkillGroup}>
+                {person.skillCount === 1 ? (
+                  // Single skill - show normally
+                  <Text style={skillItem}>
+                    →{' '}
+                    <Link href={`${baseUrl}/n/${neighborhoodId}/skills?highlight=skill&type=skills_exchange&id=${person.topSkills[0].id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_skill`} style={skillNameLink}>
+                      {person.topSkills[0].title}
+                    </Link>
+                    {' '}- <Link href={person.neighborProfileUrl} style={neighborNameLink}><strong>{person.neighborName}</strong></Link>{' '}
+                    {getSkillContext(person.topSkills[0].title, person.topSkills[0].category, person.neighborName, person.topSkills[0].requestType)}
+                  </Text>
+                ) : (
+                  // Multiple skills - group them
+                  <Text style={skillItem}>
+                    →{' '}
+                    <Link href={person.neighborProfileUrl} style={neighborNameLink}><strong>{person.neighborName}</strong></Link>
+                    {' '}shared {person.skillCount} skills this week, including{' '}
+                    {person.topSkills.map((skill, skillIndex) => (
+                      <span key={skillIndex}>
+                        <Link href={`${baseUrl}/n/${neighborhoodId}/skills?highlight=skill&type=skills_exchange&id=${skill.id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_skill`} style={skillNameLink}>
+                          {skill.title}
+                        </Link>
+                        {skillIndex < person.topSkills.length - 1 ? ', ' : ''}
+                      </span>
+                    ))}
+                    {person.skillCount > 3 && (
+                      <>
+                        {' '}and {person.skillCount - 3} more.{' '}
+                        <Link href={person.neighborProfileUrl} style={browseAllLink}>
+                          View all of {person.neighborName}'s offerings →
+                        </Link>
+                      </>
+                    )}
+                  </Text>
+                )}
+              </div>
+            ))}
+          </div>
         )}
 
-        {/* Neighbors looking for help */}
-        {highlights.skills.filter(s => s.requestType === 'request').length > 0 && (
-          <>
-            <Text style={subsectionTitle}>Neighbors looking for help:</Text>
-            <div style={skillsList}>
-              {highlights.skills.filter(s => s.requestType === 'request').map((skill, index) => (
-                <Text key={index} style={skillItem}>
-                  →{' '}
-                  <Link href={`${baseUrl}/n/${neighborhoodId}/skills?highlight=skill&type=skills_exchange&id=${skill.id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_skill`} style={skillNameLink}>
-                    {skill.title}
-                  </Link>
-                  {' '}- <Link href={skill.neighborProfileUrl} style={neighborNameLink}><strong>{skill.neighborName}</strong></Link>{' '}
-                  {getSkillContext(skill.title, skill.category, skill.neighborName, skill.requestType)}
-                </Text>
-              ))}
-            </div>
-          </>
-        )}
-
-        {stats.availableSkills > 8 && (
+        {highlights.totalSkills > highlights.skillsByPerson.reduce((sum, p) => sum + p.skillCount, 0) && (
           <Text style={moreSkills}>
-            Plus {stats.availableSkills - 8} more skills just waiting for the right moment...{' '}
+            Plus {highlights.totalSkills - highlights.skillsByPerson.reduce((sum, p) => sum + p.skillCount, 0)} more skills from other neighbors...{' '}
             <Link href={`${baseUrl}/n/${neighborhoodId}/skills?utm_source=email&utm_medium=email&utm_campaign=weekly_summary_skills_all`} style={browseAllLink}>
-              Browse all {stats.availableSkills} skills
+              Browse all {highlights.totalSkills} skills
             </Link>
           </Text>
         )}
@@ -207,45 +224,88 @@ export const WeeklySummaryEmail = ({
         {/* Visual separator */}
         <Text style={separator}>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</Text>
 
-        {/* THE WEEK AHEAD section */}
+        {/* CALENDAR EVENTS section - Curated community approach */}
+        {highlights.createdEvents.length > 0 && (
+          <>
+            <Text style={calendarHeader}>📅 CALENDAR EVENTS</Text>
+            <Text style={paragraph}>
+              Your neighbors have been busy planning! This week brought {highlights.createdEvents.length} new events to the calendar, including{' '}
+              {highlights.createdEvents.slice(0, 2).map((event, index) => (
+                <span key={index}>
+                  <Link href={event.url} style={eventNameLink}>
+                    {event.title}
+                  </Link>
+                  {index < Math.min(highlights.createdEvents.length, 2) - 1 ? ' and ' : ''}
+                </span>
+              ))}
+              {highlights.createdEvents.length > 2 && (
+                <>
+                  {' '}plus {highlights.createdEvents.length - 2} more gathering{highlights.createdEvents.length > 3 ? 's' : ''}.{' '}
+                  <Link href={`${baseUrl}/n/${neighborhoodId}/calendar?utm_source=email&utm_medium=email&utm_campaign=weekly_summary_calendar_all`} style={eventNameLink}>
+                    Check out all the upcoming events →
+                  </Link>
+                </>
+              )}
+            </Text>
+            
+            {/* Visual separator */}
+            <Text style={separator}>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</Text>
+          </>
+        )}
+
+        {/* THE WEEK AHEAD section - Two clear subsections */}
         <Text style={weekAheadHeader}>THE WEEK AHEAD</Text>
-        <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.weekAhead }} />
+        
+        {/* 1. Upcoming Events Subsection */}
+        <Text style={subsectionTitle}>🗓️ Upcoming Events</Text>
+        {highlights.upcomingEvents.length > 0 ? (
+          <div style={eventsList}>
+            {highlights.upcomingEvents.map((event, index) => (
+              <Text key={index} style={eventItem}>
+                →{' '}
+                <Link href={`${baseUrl}/n/${neighborhoodId}/calendar?highlight=event&type=event&id=${event.id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_upcoming_event`} style={eventNameLink}>
+                  {event.title}
+                </Link>
+                {' '}on {event.date}
+                {event.attendees > 0 && ` (${event.attendees} attending)`}
+              </Text>
+            ))}
+          </div>
+        ) : (
+          <Text style={paragraph}>
+            The calendar is wide open this week - check out the suggestions below for ways to get involved!
+          </Text>
+        )}
+
+        {/* 2. Ways to be Neighborly Subsection */}
+        <Text style={subsectionTitle}>🤝 Ways to be Neighborly</Text>
+        <Text style={paragraph}>
+          •{' '}
+          <Link href={`${baseUrl}/n/${neighborhoodId}/calendar?create=true&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_create_event`} style={eventNameLink}>
+            Organize a neighborhood coffee meetup, potluck, or group walk
+          </Link>
+          {' '}to bring everyone together this weekend.
+        </Text>
+        <Text style={paragraph}>
+          •{' '}
+          <Link href={`${baseUrl}/n/${neighborhoodId}/skills?create=true&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_share_skill`} style={skillNameLink}>
+            Share a skill you're passionate about or ask for help with a project
+          </Link>
+          {' '}you've been putting off - your neighbors are here to help.
+        </Text>
+        <Text style={paragraph}>
+          •{' '}
+          <Link href={`${baseUrl}/n/${neighborhoodId}/groups?create=true&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_create_group`} style={groupNameLink}>
+            Start a group for something you love or join an existing one
+          </Link>
+          {' '}to connect with neighbors who share your interests.
+        </Text>
 
         <Text style={paragraph}>
           <Link href={`${baseUrl}/n/${neighborhoodId}?utm_source=email&utm_medium=email&utm_campaign=weekly_summary_dashboard`} style={ctaButton}>
             Visit Your Neighborhood Dashboard
           </Link>
         </Text>
-
-        {/* Quick Actions Section */}
-        <Text style={quickActionsHeader}>🚀 WAYS TO GET INVOLVED THIS WEEK</Text>
-        <div style={quickActionsList}>
-          <Text style={quickActionItem}>
-            • <Link href={`${baseUrl}/n/${neighborhoodId}/calendar?create=true&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_create_event`} style={eventActionLink}>
-              Organize a neighborhood coffee meetup this Saturday morning
-            </Link>
-          </Text>
-          <Text style={quickActionItem}>
-            • <Link href={`${baseUrl}/n/${neighborhoodId}/skills?create=true&type=offer&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_offer_skill`} style={skillActionLink}>
-              Share a skill you're good at (cooking, tech help, gardening tips)
-            </Link>
-          </Text>
-          <Text style={quickActionItem}>
-            • <Link href={`${baseUrl}/n/${neighborhoodId}/skills?create=true&type=request&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_request_skill`} style={skillActionLink}>
-              Ask for help with a home project or learning something new
-            </Link>
-          </Text>
-          <Text style={quickActionItem}>
-            • <Link href={`${baseUrl}/n/${neighborhoodId}/groups?create=true&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_create_group`} style={groupActionLink}>
-              Start a group for dog walkers, book club, or weekend hikers
-            </Link>
-          </Text>
-          <Text style={quickActionItem}>
-            • <Link href={`${baseUrl}/n/${neighborhoodId}/groups?utm_source=email&utm_medium=email&utm_campaign=weekly_summary_join_group`} style={groupActionLink}>
-              Post an update or event idea in one of your existing groups
-            </Link>
-          </Text>
-        </div>
 
         <Text style={signoff}>
           Stay neighborly,<br />
@@ -411,6 +471,13 @@ const groupsHeader = {
   margin: '20px 0 12px 0',
 };
 
+const calendarHeader = {
+  color: '#2563eb', // Blue theme for calendar
+  fontSize: '18px',
+  fontWeight: 'bold',
+  margin: '20px 0 12px 0',
+};
+
 const weekAheadHeader = {
   color: '#2563eb', // Blue theme for future/calendar
   fontSize: '18px',
@@ -538,4 +605,27 @@ const groupActionLink = {
   color: '#7c3aed', // Purple for groups
   textDecoration: 'none',
   fontWeight: '500',
+};
+
+// Event styles
+const eventsList = {
+  margin: '12px 0',
+};
+
+const eventItem = {
+  color: '#404040',
+  fontSize: '15px',
+  lineHeight: '22px',
+  margin: '0 0 8px 0',
+};
+
+const eventNameLink = {
+  color: '#2563eb', // Blue theme for events
+  textDecoration: 'none',
+  fontWeight: '600',
+};
+
+// Person skill grouping styles
+const personSkillGroup = {
+  margin: '0 0 12px 0',
 };

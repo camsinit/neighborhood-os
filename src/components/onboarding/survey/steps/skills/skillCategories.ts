@@ -37,7 +37,7 @@ export const SKILL_CATEGORIES = {
     title: "Life Skills",
     skills: [
       "Resume & Job Application Help",
-      "Language Translation & Practice",
+      "Language Practice",
       "Basic Accounting Support",
       "College/School Application Help",
       "Interview Practice",
@@ -75,7 +75,7 @@ export const SKILL_CATEGORIES = {
  * These skills will trigger a custom input dialog for specificity
  */
 export const SPECIAL_SKILLS = {
-  "Language Translation & Practice": {
+  "Language Practice": {
     prompt: "Which languages?",
     placeholder: "Spanish, Mandarin, French"
   },

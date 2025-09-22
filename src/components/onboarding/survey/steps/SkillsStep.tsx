@@ -25,7 +25,7 @@ export const SKILLS_OPTIONS = [
   
   // Life Skills
   "Resume & Job Application Help",
-  "Language Translation & Practice",
+  "Language Practice",
   "Basic Accounting Support",
   "College/School Application Help",
   "Interview Practice",

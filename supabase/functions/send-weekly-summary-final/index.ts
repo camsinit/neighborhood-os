@@ -94,7 +94,7 @@ Write exactly 3 sections in a personal, letter-like tone:
 
 2. pastWeekRecap: Share what happened this week like you're catching up with a friend. ${isLowActivity ? 'Since things were quiet, gently suggest that this might be a perfect time for someone to organize something simple. Include activity creation links naturally: "It was one of those peaceful weeks in the neighborhood - maybe the perfect time for someone to <a href=\\"' + createEventUrl + '\\">organize a coffee meet-up</a> or <a href=\\"' + createSkillUrl + '\\">share a skill</a> they have?"' : 'Celebrate what actually happened and mention any highlights with enthusiasm.'}
 
-3. weekAheadPreview: Look ahead with optimism about what neighbors could do together. ${isLowActivity ? 'Since the calendar is open, paint a picture of possibilities: "The week ahead is full of possibility! Perfect timing for someone to <a href=\\"' + createEventUrl + '\\">organize a neighborhood walk</a>, <a href=\\"' + createGoodsUrl + '\\">share something they no longer need</a>, or <a href=\\"' + createSkillUrl + '\\">offer to help with something they\'re good at</a>. Sometimes the best connections start with the simplest gestures."' : 'Build excitement about what people can join and participate in.'}
+3. weekAheadPreview: Create SPECIFIC, timely suggestions based on current neighbor activity and skills. Connect actual neighbor names to opportunities. Examples: "With Rascal Raccoon's tech skills available, this is perfect timing to <a href=\\"' + createEventUrl + '\\">organize a neighborhood WiFi workshop</a>." or "Mac's carpentry request could spark a <a href=\\"' + createGroupUrl + '\\">DIY home improvement group</a> - who else has projects?" Make suggestions feel connected to real activity, mention specific skills that could be shared, groups that could be created, or events that would complement current neighborhood interests. Change suggestions weekly based on actual data.
 
 WRITING GUIDELINES:
 - Write like you're talking to a neighbor over the fence
@@ -206,31 +206,32 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Gather comprehensive weekly activity data
     const [
-      upcomingEventsData, 
-      completedEventsData,
+      upcomingEventsData,
+      createdEventsData, 
       availableSkillsData, 
       completedSkillsData,
       newMembersData
     ] = await Promise.all([
-      // Recent events (past 30 days to catch more activity)
+      // Events happening in next 7 days (for Week Ahead section)
       supabase
         .from('events')
         .select('id, title, time, event_rsvps(count)')
         .eq('neighborhood_id', neighborhoodId)
-        .gte('time', weekAgoISO)
+        .gte('time', new Date().toISOString())
+        .lte('time', new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString())
         .eq('is_archived', false)
-        .order('time', { ascending: false })
+        .order('time')
         .limit(10),
 
-      // Past week's completed events
+      // Events created in past week (for Calendar Events section)
       supabase
         .from('events')
-        .select('id, title, time, event_rsvps(count)')
+        .select('id, title, time, created_at, event_rsvps(count)')
         .eq('neighborhood_id', neighborhoodId)
-        .gte('time', weekAgoISO)
-        .lte('time', new Date().toISOString())
-        .order('time', { ascending: false })
-        .limit(5),
+        .gte('created_at', weekAgoISO)
+        .eq('is_archived', false)
+        .order('created_at', { ascending: false })
+        .limit(10),
 
 
       // Current available skills (recent posts) with user profiles
@@ -302,10 +303,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Process past week activities with URLs (current system only)
     const pastWeekActivities = {
-      completedEvents: completedEventsData.data?.map(event => ({
+      createdEvents: createdEventsData.data?.map(event => ({
         title: event.title,
         url: getEventURL(neighborhoodId, event.id),
-        attendees: Array.isArray(event.event_rsvps) ? event.event_rsvps.length : 0
+        createdAt: event.created_at,
+        eventTime: event.time
       })) || [],
       
       completedSkills: completedSkillsData.data?.map(skill => ({
@@ -351,18 +353,41 @@ const handler = async (req: Request): Promise<Response> => {
       availableSkills: upcomingActivities.skills.filter(s => s.requestType === 'offer').length,
     };
 
-    // Format highlights for email template (current system only)
+    // CURATED HIGHLIGHTS - Focus on community story, not data dump
+    
+    // Group skills by person to avoid one person dominating
+    const skillsByPerson = {};
+    upcomingActivities.skills.forEach(skill => {
+      const personKey = skill.neighborName;
+      if (!skillsByPerson[personKey]) {
+        skillsByPerson[personKey] = {
+          neighborName: skill.neighborName,
+          neighborUserId: skill.neighborUserId,
+          neighborProfileUrl: skill.neighborProfileUrl,
+          skills: []
+        };
+      }
+      skillsByPerson[personKey].skills.push(skill);
+    });
+
+    // Create curated highlights - max 3-4 people, prioritize variety
+    const curatedSkills = Object.values(skillsByPerson)
+      .sort((a, b) => b.skills.length - a.skills.length) // People with more skills first
+      .slice(0, 4) // Max 4 people
+      .map(person => ({
+        neighborName: person.neighborName,
+        neighborUserId: person.neighborUserId,
+        neighborProfileUrl: person.neighborProfileUrl,
+        skillCount: person.skills.length,
+        topSkills: person.skills.slice(0, 3), // Show top 3 skills per person
+        allSkills: person.skills
+      }));
+
     const highlights = {
-      events: upcomingActivities.events.slice(0, 5),
-      skills: upcomingActivities.skills.slice(0, 8).map(skill => ({
-        id: skill.id,
-        title: skill.title,
-        category: skill.category,
-        requestType: skill.requestType,
-        neighborName: skill.neighborName,
-        neighborUserId: skill.neighborUserId,
-        neighborProfileUrl: skill.neighborProfileUrl
-      })),
+      createdEvents: pastWeekActivities.createdEvents.slice(0, 4), // Max 4 events
+      upcomingEvents: upcomingActivities.events.slice(0, 3), // Max 3 upcoming events
+      skillsByPerson: curatedSkills,
+      totalSkills: upcomingActivities.skills.length,
       groups: {
         newGroups: [],
         recentJoins: [],
