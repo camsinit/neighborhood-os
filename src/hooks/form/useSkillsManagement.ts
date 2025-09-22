@@ -17,12 +17,12 @@ export const useSkillsManagement = () => {
       'technology': 'technology',
       'emergency': 'emergency', 
       'professional': 'professional',
-      'maintenance': 'maintenance',
       'care': 'care',
       'education': 'education',
       // Fallback mappings for any legacy categories
       'creative': 'education', // Map old creative to education & arts
-      'trade': 'maintenance',  // Map old trade to maintenance
+      'trade': 'care',         // Map old trade to care (since maintenance category is removed)
+      'maintenance': 'care',   // Map old maintenance to care
       'wellness': 'care'       // Map old wellness to care
     };
     

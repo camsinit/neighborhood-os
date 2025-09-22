@@ -28,8 +28,8 @@ const SkillCategoryGrid: React.FC<SkillCategoryGridProps> = ({ onCategoryClick }
   // Get the current neighborhood context
   const neighborhood = useCurrentNeighborhood();
 
-  // All available skill categories - now using the 6 standardized onboarding categories
-  const categories: SkillCategory[] = ['technology', 'emergency', 'professional', 'maintenance', 'care', 'education'];
+  // All available skill categories - now using the 5 standardized onboarding categories
+  const categories: SkillCategory[] = ['technology', 'emergency', 'professional', 'care', 'education'];
 
   // Handle category card click - check if empty
   const handleCategoryCardClick = (category: SkillCategory) => {
