@@ -1,6 +1,4 @@
-import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Confetti, ConfettiRef } from "@/components/ui/confetti";
 import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
 import { Sparkles, X } from "lucide-react";
 
@@ -8,7 +6,7 @@ import { Sparkles, X } from "lucide-react";
  * WelcomePopover component
  * 
  * A centered popover that appears over the dashboard after completing onboarding.
- * Features confetti animation, backdrop blur, and dismissible via button or outside click.
+ * Features backdrop blur and dismissible via button or outside click.
  * Shows a welcome message specific to the neighborhood the user just joined.
  */
 interface WelcomePopoverProps {
@@ -19,41 +17,6 @@ interface WelcomePopoverProps {
 export const WelcomePopover = ({ isVisible, onDismiss }: WelcomePopoverProps) => {
   // Get the current neighborhood data for personalized welcome message
   const neighborhood = useCurrentNeighborhood();
-  const confettiRef = useRef<ConfettiRef>(null);
-
-  // Trigger confetti effects when component becomes visible
-  useEffect(() => {
-    if (!isVisible) return;
-
-    // Initial burst from center-top
-    const timer1 = setTimeout(() => {
-      confettiRef.current?.fire({
-        particleCount: 150,
-        spread: 70,
-        origin: { y: 0.2, x: 0.5 },
-        colors: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'],
-      });
-    }, 300);
-
-    // Gentle continuous rain from various points
-    const rainInterval = setInterval(() => {
-      confettiRef.current?.fire({
-        particleCount: 3,
-        spread: 360,
-        startVelocity: 15,
-        origin: { 
-          x: Math.random(),
-          y: -0.1 
-        },
-        colors: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'],
-      });
-    }, 400);
-
-    return () => {
-      clearTimeout(timer1);
-      clearInterval(rainInterval);
-    };
-  }, [isVisible]);
 
   // Handle clicking outside the popover to dismiss
   const handleBackdropClick = (e: React.MouseEvent) => {
@@ -67,18 +30,6 @@ export const WelcomePopover = ({ isVisible, onDismiss }: WelcomePopoverProps) =>
 
   return (
     <>
-      {/* Full-screen confetti canvas */}
-      <Confetti
-        ref={confettiRef}
-        className="fixed inset-0 pointer-events-none z-50"
-        manualstart={true}
-        options={{
-          particleCount: 150,
-          spread: 70,
-          origin: { y: 0.2 },
-        }}
-      />
-
       {/* Backdrop with blur effect - animated entrance */}
       <div 
         className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 flex items-center justify-center p-4 fade-in"
