@@ -132,7 +132,11 @@ serve(async (req) => {
         to: [email],
         subject: 'Welcome to neighborhoodOS - You\'re on the waitlist!',
         html,
-      });
+      ,        // Disable Resend's automatic link tracking to prevent URL wrapping
+        tracking: {
+          opens: true,
+          clicks: false, // This prevents the long tracking URLs
+        },});
 
       emailSent = true;
       logger.info(`Welcome email sent successfully to: ${email}`);

@@ -57,7 +57,11 @@ const handler = async (req: Request): Promise<Response> => {
           subject: template.subject,
           text: template.text,
           html: template.html,
-        });
+        ,        // Disable Resend's automatic link tracking to prevent URL wrapping
+        tracking: {
+          opens: true,
+          clicks: false, // This prevents the long tracking URLs
+        },});
 
         // Mark as sent
         await supabase

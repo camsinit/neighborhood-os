@@ -76,6 +76,11 @@ const handler = async (req: Request): Promise<Response> => {
       to: [recipientEmail],
       subject: `Test Email - ${testType === 'survey' ? 'Survey Submitted' : 'Waitlist Welcome'}`,
       html: html,
+      // Disable Resend's automatic link tracking to prevent URL wrapping
+      tracking: {
+        opens: true,
+        clicks: false, // This prevents the long tracking URLs
+      },
     });
 
     console.log("Email sent successfully:", emailResponse);

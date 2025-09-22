@@ -121,10 +121,10 @@ export const WeeklySummaryEmail = ({
         <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.weekInReview }} />
 
         {/* Visual separator */}
-        <Text style={separator}>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</Text>
+        <Text style={separator}>————————————————————————————————————————</Text>
 
-        {/* SKILLS EXCHANGE section */}
-        <Text style={skillsHeader}>🛠️ SKILLS EXCHANGE</Text>
+        {/* Skills Exchange section */}
+        <Text style={skillsHeader}>🛠️ Skills Exchange</Text>
         <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.skillsExchange }} />
 
         {/* Fresh offers from neighbors */}
@@ -175,10 +175,10 @@ export const WeeklySummaryEmail = ({
         )}
 
         {/* Visual separator */}
-        <Text style={separator}>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</Text>
+        <Text style={separator}>————————————————————————————————————————</Text>
 
-        {/* COMMUNITY GROUPS section */}
-        <Text style={groupsHeader}>👥 COMMUNITY GROUPS</Text>
+        {/* Community Groups section */}
+        <Text style={groupsHeader}>👥 Community Groups</Text>
         <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.communityGroups }} />
 
         {/* Individual group links with recent updates */}
@@ -205,7 +205,7 @@ export const WeeklySummaryEmail = ({
         </Text>
 
         {/* Visual separator */}
-        <Text style={separator}>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</Text>
+        <Text style={separator}>————————————————————————————————————————</Text>
 
         {/* THE WEEK AHEAD section */}
         <Text style={weekAheadHeader}>THE WEEK AHEAD</Text>
@@ -218,7 +218,7 @@ export const WeeklySummaryEmail = ({
         </Text>
 
         {/* Quick Actions Section */}
-        <Text style={quickActionsHeader}>🚀 WAYS TO GET INVOLVED THIS WEEK</Text>
+        <Text style={quickActionsHeader}>🚀 Ways to Get Involved This Week</Text>
         <div style={quickActionsList}>
           <Text style={quickActionItem}>
             • <Link href={`${baseUrl}/n/${neighborhoodId}/calendar?create=true&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_create_event`} style={eventActionLink}>
@@ -253,7 +253,7 @@ export const WeeklySummaryEmail = ({
         </Text>
 
         {/* Visual separator */}
-        <Text style={separator}>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</Text>
+        <Text style={separator}>————————————————————————————————————————</Text>
 
         {/* Footer */}
         <Section style={footer}>

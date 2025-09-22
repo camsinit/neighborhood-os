@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { 
   createTabChangeHandler,
@@ -61,6 +61,19 @@ function SkillsPage() {
     fetchItem: fetchSkillByTitle,
     pageName: 'SkillsPage'
   });
+
+  // Handle email URL parameters to open skill sheet
+  useEffect(() => {
+    const highlightParam = searchParams.get('highlight');
+    const typeParam = searchParams.get('type');
+    const idParam = searchParams.get('id');
+    
+    // Check if this is a skill highlight from email URL
+    if (highlightParam === 'skill' && typeParam === 'skills_exchange' && idParam) {
+      console.log('Opening skill sheet from email URL:', idParam);
+      openSheet(idParam);
+    }
+  }, [searchParams, openSheet]);
 
   // Create handler functions using the utility factory functions
   const handleTabChange = createTabChangeHandler(setSearchParams, searchParams);

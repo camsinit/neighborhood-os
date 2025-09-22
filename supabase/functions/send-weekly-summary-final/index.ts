@@ -505,6 +505,11 @@ const handler = async (req: Request): Promise<Response> => {
         to: [recipient.email],
         subject: `Your ${neighborhood.name} weekly summary`,
         html,
+        // Disable Resend's automatic link tracking to prevent URL wrapping
+        tracking: {
+          opens: true,
+          clicks: false, // This prevents the long tracking URLs
+        },
       });
     });
 
