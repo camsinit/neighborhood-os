@@ -274,9 +274,8 @@ const EventSheetContent = ({
                     <p className="text-sm text-gray-600 whitespace-pre-wrap">{event.description}</p>
                   </div>
                 )}
-              </div>
 
-              {/* Action Buttons */}
+                {/* Action Buttons at bottom of card */}
                 <div className="flex gap-3 mt-6 pt-4 border-t border-gray-200">
                   {isHost && (
                     <Button
@@ -312,6 +311,7 @@ const EventSheetContent = ({
                     neighborhoodId={event.neighborhood_id}
                   />
                 </div>
+              </div>
               
               {/* Secondary information with consistent spacing */}
               <div className="space-y-6">
