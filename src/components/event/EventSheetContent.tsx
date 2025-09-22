@@ -210,11 +210,6 @@ const EventSheetContent = ({
             </div>
           ) : (
             <>
-              {/* Event Title */}
-              <div className="mb-4">
-                <h1 className="text-2xl font-bold text-gray-900">{event.title}</h1>
-              </div>
-
               {/* Condensed Event Details Card */}
               <div 
                 className="p-4 rounded-xl border-2" 
@@ -223,6 +218,9 @@ const EventSheetContent = ({
                   borderColor: 'hsl(var(--calendar-color) / 0.2)'
                 }}
               >
+                {/* Event Title at top of card */}
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{event.title}</h3>
+
                 {/* Condensed Date, Time and Location - Single Row */}
                 <div className="flex flex-wrap items-center gap-4 text-sm">
                   {/* Date and Time - Condensed */}
