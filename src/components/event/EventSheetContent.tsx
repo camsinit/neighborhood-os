@@ -191,40 +191,6 @@ const EventSheetContent = ({
         moduleTheme="calendar"
         className="space-y-0"
       >
-        {/* Action buttons positioned in top-right like other panels */}
-        <div className="flex items-center justify-end gap-2 mb-6">
-          {!isEditing && (
-            <ShareButton
-              contentType="events"
-              contentId={event.id}
-              neighborhoodId={event.neighborhood_id}
-              size="sm"
-              variant="ghost"
-            />
-          )}
-          {(EditButton && <EditButton onSheetClose={handleSheetClose} />) || 
-           (isHost && !isEditing && (
-             <Button
-               variant="ghost"
-               size="sm"
-               onClick={() => setIsEditing(true)}
-               className="text-foreground hover:bg-accent"
-             >
-               <Edit className="h-4 w-4 mr-2" />
-               Edit
-             </Button>
-           ))}
-          {isEditing && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsEditing(false)}
-              className="text-muted-foreground hover:bg-accent"
-            >
-              Cancel
-            </Button>
-          )}
-        </div>
 
         {/* Main content with consistent spacing pattern */}
         <div className="space-y-6 pt-6">
