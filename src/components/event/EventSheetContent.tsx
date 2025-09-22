@@ -261,7 +261,7 @@ const EventSheetContent = ({
                       )}
                     </div>
                     <span className="text-gray-600">
-                      {event.profiles?.display_name || 'Anonymous'}
+                      {event.profiles?.display_name?.split(' ')[0] || 'Anonymous'}
                       {isHost && <span className="ml-1 text-xs text-gray-500">(You)</span>}
                     </span>
                   </div>
