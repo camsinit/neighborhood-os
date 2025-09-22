@@ -203,10 +203,11 @@ const DebugPage = () => {
                   
                   {/* Direct Skills Mini Survey Test */}
                   {showSkillsDirectTest && (
-                    <div className="mt-6 p-4 border rounded-lg bg-gray-50">
+                    <div className="mt-6">
                       <h4 className="font-medium mb-3">Direct Skills Selection Test</h4>
-                      <div className="bg-white p-4 rounded border">
-                        <SkillsMiniSurvey
+                      <div className="mx-auto sm:max-w-[600px] max-h-[90vh] overflow-y-auto bg-white rounded-lg border shadow-lg">
+                        <div className="py-4 px-6">
+                          <SkillsMiniSurvey
                           selectedSkills={testSelectedSkills}
                           onSkillsChange={setTestSelectedSkills}
                           onSurveyStateChange={(hasCompleted) => {
@@ -215,9 +216,10 @@ const DebugPage = () => {
                           onGoBackToWelcome={() => {
                             console.log('Go back to welcome clicked');
                           }}
-                        />
+                          />
+                        </div>
                       </div>
-                      <div className="mt-3 text-xs text-gray-600">
+                      <div className="mt-3 text-xs text-gray-600 text-center">
                         Selected skills: {testSelectedSkills.length} | {testSelectedSkills.join(', ')}
                       </div>
                     </div>
