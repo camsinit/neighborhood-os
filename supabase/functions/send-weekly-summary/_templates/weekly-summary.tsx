@@ -11,17 +11,33 @@ import {
   Hr,
 } from 'npm:@react-email/components@0.0.22'
 import * as React from 'npm:react@18.3.1'
-import {
-  getWeeklySummaryEventsURL,
-  getWeeklySummarySkillsURL,
-  getWeeklySummaryGoodsURL,
-  getWeeklySummarySafetyURL,
-  getWeeklySummaryDashboardURL,
-  getWeeklySummarySettingsURL,
-} from '../_utils/urlGenerator.ts'
+
+// Helper function to add context about how skills are useful with neighbor names
+const getSkillContext = (skillTitle: string, category: string, neighborName: string, requestType: string): string => {
+  const contexts = {
+    'Internet Safety': `is offering their skills to help protect against online scams and keep your digital life secure`,
+    'Transportation': `is available for rides when you need them, from grocery runs to appointments`,
+    'Gardening/Landscaping': `can help transform your outdoor space with expert guidance`,
+    'Notary Public': `offers official document services right in the neighborhood, no downtown trips needed`,
+    'Crisis Management': `provides emergency planning expertise to keep your family prepared`,
+    'Smart Home Setup': `offers tech installation help to modernize your home`,
+    'Chucking Wood': `provides firewood prep services for cozy winter evenings`,
+    'Computer Troubleshooting': `offers tech support from someone who actually knows what they're doing`,
+    'Photography': `can help capture life's moments with professional guidance`,
+    'Carpentry': `offers handy skills for home projects and repairs`,
+    'Search and Rescue Experience': `provides safety expertise for outdoor adventures and emergency preparedness`
+  };
+  
+  if (requestType === 'offer') {
+    return contexts[skillTitle] || `offers ${category} expertise when you need it`;
+  } else {
+    return `needs ${category} help! This could be your moment to shine`;
+  }
+};
 
 interface WeeklySummaryEmailProps {
   neighborhoodName: string
+  neighborhoodId: string
   memberName: string
   weekOf: string
   baseUrl: string
@@ -29,40 +45,58 @@ interface WeeklySummaryEmailProps {
     newMembers: number
     upcomingEvents: number
     activeSkillRequests: number
-    availableItems: number
-    safetyUpdates: number
+    availableSkills: number
+    newGroups: number        
+    groupJoins: number       
+    activeGroups: number     
   }
   highlights: {
     events: Array<{
       title: string
       date: string
       attendees: number
-    }>
-    items: Array<{
-      title: string
-      category: string
-      daysAgo: number
+      isGroupEvent?: boolean
     }>
     skills: Array<{
+      id: string
       title: string
       category: string
       requestType: string
+      neighborName: string
+      neighborUserId: string
+      neighborProfileUrl: string
     }>
-    safety: Array<{
-      title: string
-      type: string
-      daysAgo: number
-    }>
+    groups: {
+      newGroups: Array<{
+        name: string
+        type: string
+        createdBy: string
+        unitValue?: string
+      }>
+      recentJoins: Array<{
+        memberName: string
+        groupName: string
+        groupType: string
+      }>
+      activeGroups: Array<{
+        name: string
+        type: string
+        memberCount: number
+        unitValue?: string
+      }>
+    }
   }
   aiContent: {
-    newNeighborWelcome: string
-    pastWeekRecap: string
-    weekAheadPreview: string
+    weekInReview: string
+    skillsExchange: string
+    communityGroups: string
+    weekAhead: string
   }
 }
 
 export const WeeklySummaryEmail = ({
   neighborhoodName,
+  neighborhoodId,
   memberName,
   weekOf,
   baseUrl,
@@ -72,194 +106,436 @@ export const WeeklySummaryEmail = ({
 }: WeeklySummaryEmailProps) => (
   <Html>
     <Head />
-    <Preview>Your weekly note from {neighborhoodName}</Preview>
+    <Preview>{neighborhoodName} Weekly Neighborhood Digest</Preview>
     <Body style={main}>
       <Container style={container}>
         
-        {/* Simple letter-style header */}
-        <Text style={letterHeader}>{neighborhoodName}</Text>
-        <Text style={dateText}>Week of {weekOf}</Text>
+        {/* Weekly digest header */}
+        <Text style={digestHeader}>{neighborhoodName}</Text>
+        <Text style={digestSubheader}>Week of {weekOf}</Text>
         
-        <Text style={greeting}>Hi {memberName},</Text>
+        <Text style={greeting}>Hey neighbors! 👋</Text>
         
-        {/* AI-Generated New Neighbor Welcome - simple paragraph style */}
-        {aiContent.newNeighborWelcome && (
-          <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.newNeighborWelcome }} />
+        {/* THE WEEK IN REVIEW section */}
+        <Text style={sectionTitle}>THE WEEK IN REVIEW</Text>
+        <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.weekInReview }} />
+
+        {/* Visual separator */}
+        <Text style={separator}>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</Text>
+
+        {/* SKILLS EXCHANGE section */}
+        <Text style={skillsHeader}>🛠️ SKILLS EXCHANGE</Text>
+        <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.skillsExchange }} />
+
+        {/* Fresh offers from neighbors */}
+        {highlights.skills.filter(s => s.requestType === 'offer').length > 0 && (
+          <>
+            <Text style={subsectionTitle}>Fresh offers from your neighbors:</Text>
+            <div style={skillsList}>
+              {highlights.skills.filter(s => s.requestType === 'offer').slice(0, 8).map((skill, index) => (
+                <Text key={index} style={skillItem}>
+                  →{' '}
+                  <Link href={`${baseUrl}/n/${neighborhoodId}/skills?highlight=skill&type=skills_exchange&id=${skill.id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_skill`} style={skillNameLink}>
+                    {skill.title}
+                  </Link>
+                  {' '}- <Link href={skill.neighborProfileUrl} style={neighborNameLink}><strong>{skill.neighborName}</strong></Link>{' '}
+                  {getSkillContext(skill.title, skill.category, skill.neighborName, skill.requestType)}
+                </Text>
+              ))}
+            </div>
+          </>
         )}
 
-        {/* AI-Generated Past Week Recap - simple paragraph style */}
-        <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.pastWeekRecap }} />
+        {/* Neighbors looking for help */}
+        {highlights.skills.filter(s => s.requestType === 'request').length > 0 && (
+          <>
+            <Text style={subsectionTitle}>Neighbors looking for help:</Text>
+            <div style={skillsList}>
+              {highlights.skills.filter(s => s.requestType === 'request').map((skill, index) => (
+                <Text key={index} style={skillItem}>
+                  →{' '}
+                  <Link href={`${baseUrl}/n/${neighborhoodId}/skills?highlight=skill&type=skills_exchange&id=${skill.id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_skill`} style={skillNameLink}>
+                    {skill.title}
+                  </Link>
+                  {' '}- <Link href={skill.neighborProfileUrl} style={neighborNameLink}><strong>{skill.neighborName}</strong></Link>{' '}
+                  {getSkillContext(skill.title, skill.category, skill.neighborName, skill.requestType)}
+                </Text>
+              ))}
+            </div>
+          </>
+        )}
 
-        {/* Simple activity summary */}
-        {(stats.newMembers > 0 || stats.upcomingEvents > 0 || stats.activeSkillRequests > 0 || stats.availableItems > 0) && (
-          <Text style={paragraph}>
-            This week in numbers: {stats.newMembers > 0 && `${stats.newMembers} new neighbors joined us`}
-            {stats.newMembers > 0 && (stats.upcomingEvents > 0 || stats.activeSkillRequests > 0 || stats.availableItems > 0) && ', '}
-            {stats.upcomingEvents > 0 && `${stats.upcomingEvents} gatherings coming up`}
-            {stats.upcomingEvents > 0 && (stats.activeSkillRequests > 0 || stats.availableItems > 0) && ', '}
-            {stats.activeSkillRequests > 0 && `${stats.activeSkillRequests} neighbors looking for help`}
-            {stats.activeSkillRequests > 0 && stats.availableItems > 0 && ', '}
-            {stats.availableItems > 0 && `${stats.availableItems} free items shared`}.
+        {stats.availableSkills > 8 && (
+          <Text style={moreSkills}>
+            Plus {stats.availableSkills - 8} more skills just waiting for the right moment...{' '}
+            <Link href={`${baseUrl}/n/${neighborhoodId}/skills?utm_source=email&utm_medium=email&utm_campaign=weekly_summary_skills_all`} style={browseAllLink}>
+              Browse all {stats.availableSkills} skills
+            </Link>
           </Text>
         )}
 
-        {/* Upcoming events - simple list */}
-        {highlights.events.length > 0 && (
-          <>
-            <Text style={sectionHeading}>Coming up this week:</Text>
-            {highlights.events.map((event, index) => (
-              <Text key={index} style={listItemText}>
-                • <strong>{event.title}</strong> on {event.date} ({event.attendees} neighbors attending)
+        {/* Visual separator */}
+        <Text style={separator}>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</Text>
+
+        {/* COMMUNITY GROUPS section */}
+        <Text style={groupsHeader}>👥 COMMUNITY GROUPS</Text>
+        <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.communityGroups }} />
+
+        {/* Individual group links with recent updates */}
+        {highlights.groups.activeGroups.length > 0 && (
+          <div style={groupsList}>
+            {highlights.groups.activeGroups.map((group, index) => (
+              <Text key={index} style={groupItem}>
+                <Link href={`${baseUrl}/n/${neighborhoodId}/groups?highlight=group&type=group&id=${group.id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_group`} style={groupNameLink}>
+                  {group.name}
+                </Link>
+                {' '}({group.memberCount} members){group.type === 'physical' && group.unitValue ? ` - ${group.unitValue}` : ''}
+                <br />
+                Recent activity: Planning neighborhood coffee meetup
               </Text>
             ))}
-            <Text style={paragraph}>
-              <Link href={getWeeklySummaryEventsURL()} style={link}>See all upcoming gatherings</Link>
-            </Text>
-          </>
+          </div>
         )}
-
-        {/* Skills - simple list */}
-        {highlights.skills.length > 0 && (
-          <>
-            <Text style={sectionHeading}>Skills & help available:</Text>
-            {highlights.skills.map((skill, index) => (
-              <Text key={index} style={listItemText}>
-                • <strong>{skill.title}</strong> ({skill.requestType === 'offered' ? 'someone offering help' : 'help needed'})
-              </Text>
-            ))}
-            <Text style={paragraph}>
-              <Link href={getWeeklySummarySkillsURL()} style={link}>Browse all skills and requests</Link>
-            </Text>
-          </>
-        )}
-
-        {/* Items - simple list */}
-        {highlights.items.length > 0 && (
-          <>
-            <Text style={sectionHeading}>Free items available:</Text>
-            {highlights.items.map((item, index) => (
-              <Text key={index} style={listItemText}>
-                • <strong>{item.title}</strong> ({item.category}, posted {item.daysAgo} day{item.daysAgo !== 1 ? 's' : ''} ago)
-              </Text>
-            ))}
-            <Text style={paragraph}>
-              <Link href={getWeeklySummaryGoodsURL()} style={link}>See all available items</Link>
-            </Text>
-          </>
-        )}
-
-        {/* Safety updates - simple list */}
-        {highlights.safety.length > 0 && (
-          <>
-            <Text style={sectionHeading}>Neighborhood safety updates:</Text>
-            {highlights.safety.map((update, index) => (
-              <Text key={index} style={listItemText}>
-                • <strong>{update.title}</strong> ({update.daysAgo} day{update.daysAgo !== 1 ? 's' : ''} ago)
-              </Text>
-            ))}
-            <Text style={paragraph}>
-              <Link href={getWeeklySummarySafetyURL()} style={link}>View all safety updates</Link>
-            </Text>
-          </>
-        )}
-
-        {/* AI-Generated Week Ahead Preview - simple paragraph */}
-        <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.weekAheadPreview }} />
 
         <Text style={paragraph}>
-          <Link href={getWeeklySummaryDashboardURL()} style={ctaLink}>
-            Visit your neighborhood dashboard
+          Got an idea for a new group?{' '}
+          <Link href={`${baseUrl}/n/${neighborhoodId}/groups?create=true&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_create_group`} style={createGroupLink}>
+            Start your own group
           </Link>
         </Text>
 
-        {/* Simple footer */}
-        <Text style={footerText}>
-          Thanks for being part of what makes {neighborhoodName} a great place to live.{' '}
-          <Link href={getWeeklySummarySettingsURL()} style={link}>Update your email preferences</Link>
+        {/* Visual separator */}
+        <Text style={separator}>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</Text>
+
+        {/* THE WEEK AHEAD section */}
+        <Text style={weekAheadHeader}>THE WEEK AHEAD</Text>
+        <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.weekAhead }} />
+
+        <Text style={paragraph}>
+          <Link href={`${baseUrl}/n/${neighborhoodId}?utm_source=email&utm_medium=email&utm_campaign=weekly_summary_dashboard`} style={ctaButton}>
+            Visit Your Neighborhood Dashboard
+          </Link>
         </Text>
+
+        {/* Quick Actions Section */}
+        <Text style={quickActionsHeader}>🚀 WAYS TO GET INVOLVED THIS WEEK</Text>
+        <div style={quickActionsList}>
+          <Text style={quickActionItem}>
+            • <Link href={`${baseUrl}/n/${neighborhoodId}/calendar?create=true&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_create_event`} style={eventActionLink}>
+              Organize a neighborhood coffee meetup this Saturday morning
+            </Link>
+          </Text>
+          <Text style={quickActionItem}>
+            • <Link href={`${baseUrl}/n/${neighborhoodId}/skills?create=true&type=offer&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_offer_skill`} style={skillActionLink}>
+              Share a skill you're good at (cooking, tech help, gardening tips)
+            </Link>
+          </Text>
+          <Text style={quickActionItem}>
+            • <Link href={`${baseUrl}/n/${neighborhoodId}/skills?create=true&type=request&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_request_skill`} style={skillActionLink}>
+              Ask for help with a home project or learning something new
+            </Link>
+          </Text>
+          <Text style={quickActionItem}>
+            • <Link href={`${baseUrl}/n/${neighborhoodId}/groups?create=true&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_create_group`} style={groupActionLink}>
+              Start a group for dog walkers, book club, or weekend hikers
+            </Link>
+          </Text>
+          <Text style={quickActionItem}>
+            • <Link href={`${baseUrl}/n/${neighborhoodId}/groups?utm_source=email&utm_medium=email&utm_campaign=weekly_summary_join_group`} style={groupActionLink}>
+              Post an update or event idea in one of your existing groups
+            </Link>
+          </Text>
+        </div>
+
+        <Text style={signoff}>
+          Stay neighborly,<br />
+          The {neighborhoodName} Community
+        </Text>
+
+        {/* Visual separator */}
+        <Text style={separator}>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</Text>
+
+        {/* Footer */}
+        <Section style={footer}>
+          <Text style={footerText}>
+            You're getting this because you're part of the {neighborhoodName} family.{' '}
+            <Link href={`${baseUrl}/n/${neighborhoodId}/settings?utm_source=email&utm_medium=email&utm_campaign=weekly_summary_settings`} style={link}>
+              Update your notification preferences →
+            </Link>
+          </Text>
+        </Section>
       </Container>
     </Body>
   </Html>
-)
+);
 
-export default WeeklySummaryEmail
+export default WeeklySummaryEmail;
 
-// Letter-style simple formatting
+// GAZETTE STYLES - Updated for bulletin board format
 const main = {
   backgroundColor: '#ffffff',
-  fontFamily: 'Georgia, "Times New Roman", serif', // More letter-like font
-  lineHeight: '1.6',
-}
+  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+};
 
 const container = {
   margin: '0 auto',
-  padding: '30px 40px',
+  padding: '20px 12px',
   maxWidth: '600px',
-}
+};
 
-const letterHeader = {
-  color: '#2c3e50',
-  fontSize: '22px',
-  fontWeight: 'normal',
-  margin: '0 0 5px 0',
+// Weekly Neighborhood Digest header styles
+const digestHeader = {
+  color: '#1a1a1a',
+  fontSize: '28px',
+  fontWeight: 'bold',
+  margin: '0 0 4px 0',
   textAlign: 'center' as const,
-}
+};
+
+const digestSubheader = {
+  color: '#666666',
+  fontSize: '16px',
+  margin: '0 0 24px 0',
+  textAlign: 'center' as const,
+};
 
 const dateText = {
-  color: '#7f8c8d',
-  fontSize: '14px',
-  margin: '0 0 30px 0',
-  textAlign: 'center' as const,
-  fontStyle: 'italic',
-}
+  color: '#666666',
+  fontSize: '16px',
+  margin: '0 0 32px 0',
+};
 
 const greeting = {
-  color: '#2c3e50',
+  color: '#1a1a1a',
   fontSize: '16px',
-  margin: '0 0 20px 0',
-}
+  margin: '0 0 16px 0',
+};
 
 const paragraph = {
-  color: '#34495e',
+  color: '#404040',
   fontSize: '16px',
-  lineHeight: '1.7',
-  margin: '0 0 20px 0',
-}
+  lineHeight: '24px',
+  margin: '0 0 24px 0',
+};
 
-const sectionHeading = {
-  color: '#2c3e50',
+const sectionHeader = {
+  color: '#1a1a1a',
+  fontSize: '18px',
+  fontWeight: '600',
+  margin: '24px 0 12px 0',
+};
+
+const subsection = {
+  margin: '0 0 16px 0',
+};
+
+const subsectionTitle = {
+  color: '#1a1a1a',
   fontSize: '16px',
   fontWeight: '600',
-  margin: '25px 0 10px 0',
-}
+  margin: '12px 0 8px 0',
+};
 
-const listItemText = {
-  color: '#34495e',
-  fontSize: '15px',
-  lineHeight: '1.6',
-  margin: '0 0 8px 0',
-  paddingLeft: '10px',
-}
+const listItem = {
+  color: '#404040',
+  fontSize: '14px',
+  lineHeight: '20px',
+  margin: '0 0 4px 0',
+};
 
-const link = {
-  color: '#3498db',
-  textDecoration: 'underline',
-}
-
-const ctaLink = {
-  color: '#2980b9',
+const sectionLink = {
+  color: '#2563eb',
+  fontSize: '14px',
   textDecoration: 'none',
+  fontWeight: '500',
+  margin: '8px 0 0 0',
+  display: 'block',
+};
+
+const divider = {
+  border: 'none',
+  borderTop: '1px solid #e5e7eb',
+  margin: '32px 0',
+};
+
+const ctaButton = {
+  backgroundColor: '#667eea',
+  color: '#ffffff',
+  padding: '12px 24px',
+  borderRadius: '6px',
+  textDecoration: 'none',
+  display: 'inline-block',
   fontWeight: '600',
-  borderBottom: '2px solid #3498db',
-  paddingBottom: '2px',
-}
+  fontSize: '16px',
+  marginTop: '16px',
+};
+
+const footer = {
+  borderTop: '1px solid #e5e7eb',
+  paddingTop: '24px',
+  marginTop: '32px',
+};
 
 const footerText = {
-  color: '#7f8c8d',
+  color: '#666666',
   fontSize: '14px',
-  lineHeight: '1.5',
-  margin: '30px 0 0 0',
-  paddingTop: '20px',
-  borderTop: '1px solid #ecf0f1',
+  lineHeight: '20px',
+  margin: '0 0 12px 0',
+};
+
+const link = {
+  color: '#2563eb',
+  textDecoration: 'none',
+};
+
+// NEW: Weekly Neighborhood Digest styles with theme colors
+const sectionTitle = {
+  color: '#1a1a1a',
+  fontSize: '18px',
+  fontWeight: 'bold',
+  margin: '20px 0 12px 0',
+};
+
+// Theme-colored section headers
+const skillsHeader = {
+  color: '#059669', // Green theme for skills
+  fontSize: '18px',
+  fontWeight: 'bold',
+  margin: '20px 0 12px 0',
+};
+
+const groupsHeader = {
+  color: '#7c3aed', // Purple theme for groups  
+  fontSize: '18px',
+  fontWeight: 'bold',
+  margin: '20px 0 12px 0',
+};
+
+const weekAheadHeader = {
+  color: '#2563eb', // Blue theme for future/calendar
+  fontSize: '18px',
+  fontWeight: 'bold',
+  margin: '20px 0 12px 0',
+};
+
+const separator = {
+  color: '#cccccc',
+  fontSize: '14px',
+  margin: '20px 0',
+  textAlign: 'center' as const,
+  fontFamily: 'monospace',
+};
+
+const skillsList = {
+  margin: '12px 0',
+};
+
+const skillItem = {
+  color: '#404040',
+  fontSize: '15px',
+  lineHeight: '22px',
+  margin: '0 0 8px 0',
+};
+
+// NEW: Skill name links (green theme)
+const skillNameLink = {
+  color: '#059669',
+  textDecoration: 'none',
+  fontWeight: '600',
+};
+
+// NEW: Neighbor name links (green theme, bold)
+const neighborNameLink = {
+  color: '#059669',
+  textDecoration: 'none',
+  fontWeight: '700',
+};
+
+const requestsTitle = {
+  color: '#1a1a1a',
+  fontSize: '16px',
+  fontWeight: '600',
+  margin: '16px 0 8px 0',
+};
+
+const moreSkills = {
+  color: '#666666',
+  fontSize: '14px',
+  margin: '12px 0',
   fontStyle: 'italic',
-}
+};
+
+const browseAllLink = {
+  color: '#059669', // Green theme to match skills
+  textDecoration: 'none',
+  fontWeight: '500',
+};
+
+const groupsList = {
+  margin: '12px 0',
+};
+
+const groupItem = {
+  color: '#404040',
+  fontSize: '15px',
+  lineHeight: '22px',
+  margin: '0 0 8px 0',
+};
+
+// NEW: Group name links (purple theme)
+const groupNameLink = {
+  color: '#7c3aed',
+  textDecoration: 'none',
+  fontWeight: '600',
+};
+
+const createGroupLink = {
+  color: '#7c3aed', // Purple theme to match groups
+  textDecoration: 'none',
+  fontWeight: '500',
+};
+
+const signoff = {
+  color: '#404040',
+  fontSize: '16px',
+  margin: '20px 0',
+  fontStyle: 'italic',
+};
+
+// Quick Actions Styles
+const quickActionsHeader = {
+  color: '#1a1a1a',
+  fontSize: '18px',
+  fontWeight: 'bold',
+  margin: '24px 0 16px 0',
+};
+
+const quickActionsList = {
+  margin: '0 0 20px 0',
+};
+
+const quickActionItem = {
+  color: '#404040',
+  fontSize: '15px',
+  lineHeight: '24px',
+  margin: '0 0 8px 0',
+};
+
+// Color-coordinated action links
+const eventActionLink = {
+  color: '#2563eb', // Blue for events/calendar
+  textDecoration: 'none',
+  fontWeight: '500',
+};
+
+const skillActionLink = {
+  color: '#059669', // Green for skills
+  textDecoration: 'none',
+  fontWeight: '500',
+};
+
+const groupActionLink = {
+  color: '#7c3aed', // Purple for groups
+  textDecoration: 'none',
+  fontWeight: '500',
+};

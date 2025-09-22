@@ -1,13 +1,13 @@
 /**
- * FINAL URL Generation Utilities for Weekly Digest Email Templates
+ * URL Generation Utilities for Weekly Digest Email Templates
  * 
- * Updated to reflect CURRENT system state after recent deletions:
- * - Home, Calendar, Skills, Groups ONLY
- * - NO safety, NO goods (tables dropped)
+ * This utility ensures all email links use consistent production URLs
+ * with proper UTM tracking for analytics
  */
 
 /**
  * Get the production base URL for email links
+ * Always returns neighborhoodos.com for email consistency
  */
 export const getEmailBaseUrl = (): string => {
   return "https://neighborhoodos.com";
@@ -22,47 +22,45 @@ export const addEmailTrackingParams = (url: string, campaign: string, source: st
   return urlObj.toString();
 };
 
-// FINAL: Weekly digest URL generators - ONLY current features
-export const getWeeklySummaryEventsURL = (neighborhoodId?: string): string => {
-  const baseUrl = neighborhoodId ? `/n/${neighborhoodId}/calendar` : '/calendar';
-  return addEmailTrackingParams(`${getEmailBaseUrl()}${baseUrl}`, "weekly_summary_events", "email");
+// Weekly digest specific URL generators with UTM tracking
+export const getWeeklySummaryEventsURL = (): string => {
+  return addEmailTrackingParams(`${getEmailBaseUrl()}/events`, "weekly_summary_events", "email");
 };
 
-export const getWeeklySummarySkillsURL = (neighborhoodId?: string): string => {
-  const baseUrl = neighborhoodId ? `/n/${neighborhoodId}/skills` : '/skills';
-  return addEmailTrackingParams(`${getEmailBaseUrl()}${baseUrl}`, "weekly_summary_skills", "email");
+export const getWeeklySummarySkillsURL = (): string => {
+  return addEmailTrackingParams(`${getEmailBaseUrl()}/skills`, "weekly_summary_skills", "email");
 };
 
-export const getWeeklySummaryGroupsURL = (neighborhoodId?: string): string => {
-  const baseUrl = neighborhoodId ? `/n/${neighborhoodId}/groups` : '/groups';
-  return addEmailTrackingParams(`${getEmailBaseUrl()}${baseUrl}`, "weekly_summary_groups", "email");
+export const getWeeklySummaryGoodsURL = (): string => {
+  return addEmailTrackingParams(`${getEmailBaseUrl()}/goods`, "weekly_summary_goods", "email");
 };
 
-export const getWeeklySummaryDashboardURL = (neighborhoodId?: string): string => {
-  const baseUrl = neighborhoodId ? `/n/${neighborhoodId}` : '/dashboard';
-  return addEmailTrackingParams(`${getEmailBaseUrl()}${baseUrl}`, "weekly_summary_dashboard", "email");
+export const getWeeklySummarySafetyURL = (): string => {
+  return addEmailTrackingParams(`${getEmailBaseUrl()}/safety`, "weekly_summary_safety", "email");
 };
 
-export const getWeeklySummarySettingsURL = (neighborhoodId?: string): string => {
-  const baseUrl = neighborhoodId ? `/n/${neighborhoodId}/settings` : '/settings';
-  return addEmailTrackingParams(`${getEmailBaseUrl()}${baseUrl}`, "weekly_summary_settings", "email");
+export const getWeeklySummaryDashboardURL = (): string => {
+  return addEmailTrackingParams(`${getEmailBaseUrl()}/dashboard`, "weekly_summary_dashboard", "email");
 };
 
-// Individual item URL generators - ONLY current features
+export const getWeeklySummarySettingsURL = (): string => {
+  return addEmailTrackingParams(`${getEmailBaseUrl()}/settings`, "weekly_summary_settings", "email");
+};
+
+// Individual item URL generators with deep linking support
 export const getProfileURL = (neighborhoodId: string, userId: string): string => {
-  // Groups page has directory view for neighbors
-  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/groups?view=directory&highlight=profile&type=profile&id=${userId}`;
+  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/neighbors?highlight=profile&type=profile&id=${userId}`;
   return addEmailTrackingParams(url, "weekly_summary_profile", "email");
 };
 
 export const getEventURL = (neighborhoodId: string, eventId: string): string => {
-  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/calendar?highlight=event&type=event&id=${eventId}`;
+  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/events?highlight=event&type=event&id=${eventId}`;
   return addEmailTrackingParams(url, "weekly_summary_event", "email");
 };
 
-export const getGroupURL = (neighborhoodId: string, groupId: string): string => {
-  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/groups?highlight=group&type=group&id=${groupId}`;
-  return addEmailTrackingParams(url, "weekly_summary_group", "email");
+export const getGoodsURL = (neighborhoodId: string, goodsId: string): string => {
+  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/goods?highlight=goods&type=goods_exchange&id=${goodsId}`;
+  return addEmailTrackingParams(url, "weekly_summary_goods_item", "email");
 };
 
 export const getSkillURL = (neighborhoodId: string, skillId: string): string => {
@@ -70,6 +68,7 @@ export const getSkillURL = (neighborhoodId: string, skillId: string): string => 
   return addEmailTrackingParams(url, "weekly_summary_skill", "email");
 };
 
-// REMOVED: Safety and Goods URL generators (tables dropped)
-// export const getSafetyURL = ...  // NO LONGER EXISTS
-// export const getGoodsURL = ...   // NO LONGER EXISTS
+export const getSafetyURL = (neighborhoodId: string, safetyId: string): string => {
+  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/safety?highlight=safety&type=safety_updates&id=${safetyId}`;
+  return addEmailTrackingParams(url, "weekly_summary_safety_item", "email");
+};

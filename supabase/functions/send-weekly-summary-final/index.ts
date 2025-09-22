@@ -5,7 +5,7 @@ import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import React from 'npm:react@18.3.1'
 import { WeeklySummaryEmail } from './_templates/weekly-summary.tsx'
 import { corsHeaders, handleCorsPreflightRequest, successResponse, errorResponse } from '../_shared/cors.ts'
-import { getProfileURL, getEventURL, getSkillURL, getGroupURL } from './_utils/urlGenerator.ts'
+import { getProfileURL, getEventURL, getGoodsURL, getSkillURL, getSafetyURL } from './_utils/urlGenerator.ts'
 
 // Initialize Claude API client
 const CLAUDE_API_KEY = Deno.env.get("CLAUDE_API_KEY");
@@ -14,66 +14,56 @@ const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!
 const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
+
 interface WeeklySummaryRequest {
   neighborhoodId: string;
-  testEmail?: string;
-  previewOnly?: boolean;
+  testEmail?: string; // Optional: for testing purposes
+  previewOnly?: boolean; // Optional: for preview mode (returns HTML without sending)
 }
 
 /**
- * FINAL: Generate AI-powered newsletter content using Claude
- * Based on CURRENT system: Home, Calendar, Skills, Groups only
- * NO goods, NO safety (tables were dropped)
+ * Generate AI-powered newsletter content using Claude
+ * This function takes comprehensive neighborhood activity data and creates engaging, personalized content
+ * structured in 3 sections: new neighbor welcome, past week recap, and week ahead preview
  */
-async function generateAIContent(
-  neighborhoodName: string, 
-  stats: any, 
-  highlights: any, 
-  neighborhoodId: string, 
-  newNeighbors: any[], 
-  pastWeekActivities: any, 
-  upcomingActivities: any
-) {
+async function generateAIContent(neighborhoodName: string, stats: any, highlights: any, neighborhoodId: string, newNeighbors: any[], pastWeekActivities: any, upcomingActivities: any) {
+  // If no Claude API key is available, return default content in new 3-section format
   if (!CLAUDE_API_KEY) {
     console.log('No Claude API key found, using default content');
     return {
-      weekInReview: `Calvin and Mac have been the community champions this week, keeping their groups active and our skill-sharing network buzzing. It's been one of those weeks where you can really feel the neighborly energy - people stepping up to help, offering what they know, and keeping our little corner of the world connected.`,
-      skillsExchange: `Fresh offers from your neighbors this week, from tech security to yard work to professional services. Plus someone's looking for carpentry help!`,
-      communityGroups: `Calvin's Group and Mac's Group are both going strong with 2 members each. Keep the community spirit alive!`,
-      weekAhead: `The week ahead is full of possibility! Perfect timing for someone to organize a neighborhood walk, start a group for a shared interest, or offer to help with something they're good at.`
+      newNeighborWelcome: newNeighbors.length > 0 ? 
+        `Welcome to our newest neighbors: ${newNeighbors.map(n => n.name).join(', ')}! We're excited to have you join our ${neighborhoodName} community.` : 
+        '',
+      pastWeekRecap: "This past week brought new connections and community activity. Thank you to everyone who participated in making our neighborhood more vibrant.",
+      weekAheadPreview: "The upcoming week has exciting opportunities to connect with your neighbors. Check out what's happening and get involved!"
     };
   }
 
   try {
-    // Calculate total activity count - ONLY current features
+    // Calculate total activity count to detect low-activity periods
     const totalActivities = 
       pastWeekActivities.completedEvents.length + 
-      pastWeekActivities.newGroups.length + 
-      pastWeekActivities.groupJoins.length + 
+      pastWeekActivities.archivedGoods.length + 
       pastWeekActivities.completedSkills.length + 
+      pastWeekActivities.safetyUpdates.length +
       upcomingActivities.events.length + 
-      upcomingActivities.skills.length;
+      upcomingActivities.skills.length + 
+      upcomingActivities.goods.length;
     
-    const isLowActivity = totalActivities <= 3;
+    const isLowActivity = totalActivities <= 2; // Consider 2 or fewer activities as "low"
     
-    // Create activity URLs - ONLY current features
+    // Create activity URLs for easy posting (using the same URL generation pattern)
     const createEventUrl = `https://neighborhoodos.com/n/${neighborhoodId}/calendar?create=true`;
     const createSkillUrl = `https://neighborhoodos.com/n/${neighborhoodId}/skills?create=true`;
-    const createGroupUrl = `https://neighborhoodos.com/n/${neighborhoodId}/groups?create=true`;
-    const groupsUrl = `https://neighborhoodos.com/n/${neighborhoodId}/groups`;
+    const createGoodsUrl = `https://neighborhoodos.com/n/${neighborhoodId}/goods?create=true`;
+    const createSafetyUrl = `https://neighborhoodos.com/n/${neighborhoodId}/safety?create=true`;
     
-    // Weekly Neighborhood Digest prompt - generates bulletin board content
-    const prompt = `You are writing the weekly neighborhood digest for "${neighborhoodName}" - a community bulletin that feels like it's written by a friendly neighbor who knows everyone and what's happening.
+    // Create a friendly, letter-like prompt for Claude to generate personal neighborhood content
+    const prompt = `You are writing a personal weekly letter to a neighbor in "${neighborhoodName}" - imagine you're a friendly neighbor who knows what's happening in the community and wants to share updates in a warm, conversational way.
 
 WRITING STYLE: Write like a friendly neighbor, not a corporate newsletter. Use natural, conversational language. Think "letter from a friend" not "company announcement." Be warm, inclusive, and encouraging.
 
 ACTIVITY LEVEL: ${isLowActivity ? 'LOW - Gently encourage neighbors to start activities with friendly suggestions' : 'NORMAL - Celebrate what happened and build excitement for what\'s coming'}
-
-CURRENT NEIGHBORHOOD FEATURES (these are the ONLY features that exist):
-- Home: Activity feed and notifications
-- Calendar: Events and gatherings  
-- Skills: Skills exchange (offers/requests)
-- Groups: Social groups + Physical units (streets/floors/blocks)
 
 NEW NEIGHBORS THIS WEEK:
 ${newNeighbors.length > 0 ? 
@@ -81,61 +71,39 @@ ${newNeighbors.length > 0 ?
   '- No new neighbors this week'}
 
 WHAT HAPPENED THIS WEEK:
-Events Held: ${pastWeekActivities.completedEvents.map(e => `"${e.title}" (${e.url})`).join(', ') || 'None'}
-New Groups Created: ${pastWeekActivities.newGroups.map(g => `"${g.name}" (${g.type})`).join(', ') || 'None'}
-New Group Members: ${pastWeekActivities.groupJoins.map(j => `${j.memberName} joined "${j.groupName}"`).join(', ') || 'None'}
-Skills Completed: ${pastWeekActivities.completedSkills.map(s => `"${s.title}" (${s.url})`).join(', ') || 'None'}
+Completed Events: ${pastWeekActivities.completedEvents.map(e => `"${e.title}" (${e.url})`).join(', ') || 'None'}
+Items Claimed/Archived: ${pastWeekActivities.archivedGoods.map(g => `"${g.title}" (${g.url})`).join(', ') || 'None'}
+Skills Sessions Completed: ${pastWeekActivities.completedSkills.map(s => `"${s.title}" (${s.url})`).join(', ') || 'None'}
+New Safety Updates: ${pastWeekActivities.safetyUpdates.map(s => `"${s.title}" (${s.url})`).join(', ') || 'None'}
+New Profile Updates: ${pastWeekActivities.profileUpdates || 'None'}
 
 WHAT'S COMING UP:
 Upcoming Events: ${upcomingActivities.events.map(e => `"${e.title}" on ${e.date} (${e.url})`).join(', ') || 'None'}
 New Skills Available: ${upcomingActivities.skills.map(s => `"${s.title}" - ${s.requestType} (${s.url})`).join(', ') || 'None'}
-Active Groups: ${upcomingActivities.activeGroups.map(g => `"${g.name}" (${g.memberCount} members)`).join(', ') || 'None'}
+New Items Shared: ${upcomingActivities.goods.map(g => `"${g.title}" in ${g.category} (${g.url})`).join(', ') || 'None'}
 
 WAYS TO GET INVOLVED (include these links naturally when encouraging participation):
 - Create Event: ${createEventUrl}
 - Share/Request Skills: ${createSkillUrl}  
-- Start a Group: ${createGroupUrl}
-- Browse Groups: ${groupsUrl}
+- Share/Request Items: ${createGoodsUrl}
+- Post Safety Update: ${createSafetyUrl}
 
-ACTIVE NEIGHBORS TO HIGHLIGHT:
-${newNeighbors.length > 0 ? 
-  newNeighbors.map(n => `- ${n.name} (new neighbor this week)`).join('\n') : ''}
-${pastWeekActivities.newGroups.length > 0 ? 
-  pastWeekActivities.newGroups.map(g => `- ${g.createdBy} (created "${g.name}" group)`).join('\n') : ''}
-${pastWeekActivities.groupJoins.length > 0 ? 
-  pastWeekActivities.groupJoins.map(j => `- ${j.memberName} (joined "${j.groupName}")`).join('\n') : ''}
+Write exactly 3 sections in a personal, letter-like tone:
 
-SKILLS DATA FOR BULLETIN:
-Skills Offered: ${upcomingActivities.skills.filter(s => s.requestType === 'offer').map(s => `"${s.title}" (${s.category})`).join(', ') || 'None'}
-Skills Requested: ${upcomingActivities.skills.filter(s => s.requestType === 'request').map(s => `"${s.title}" (${s.category})`).join(', ') || 'None'}
+1. newNeighborWelcome: (ONLY if new neighbors joined) Write a genuine welcome like you're introducing them at a coffee shop. Mention them by name with links to their profiles. If no new neighbors, return empty string.
 
-GROUPS DATA FOR BULLETIN:
-Active Groups: ${upcomingActivities.activeGroups.map(g => `"${g.name}" (${g.memberCount} members, ${g.type})`).join(', ') || 'None'}
-New Groups: ${pastWeekActivities.newGroups.map(g => `"${g.name}" (${g.type}, created by ${g.createdBy})`).join(', ') || 'None'}
+2. pastWeekRecap: Share what happened this week like you're catching up with a friend. ${isLowActivity ? 'Since things were quiet, gently suggest that this might be a perfect time for someone to organize something simple. Include activity creation links naturally: "It was one of those peaceful weeks in the neighborhood - maybe the perfect time for someone to <a href=\\"' + createEventUrl + '\\">organize a coffee meet-up</a> or <a href=\\"' + createSkillUrl + '\\">share a skill</a> they have?"' : 'Celebrate what actually happened and mention any highlights with enthusiasm.'}
 
-EVENTS DATA FOR BULLETIN:
-Recent Events: ${pastWeekActivities.completedEvents.map(e => `"${e.title}" (${e.attendees} attended)`).join(', ') || 'None'}
-Upcoming Events: ${upcomingActivities.events.map(e => `"${e.title}" on ${e.date}`).join(', ') || 'None'}
-
-Generate content in this EXACT format structure:
-
-{
-  "weekInReview": "Write a 2-3 sentence intro that mentions the most active neighbors by name and describes the community energy. NO bold formatting (**). Example: 'Calvin and Mac have been the community champions this week, keeping their groups active and our skill-sharing network buzzing. It's been one of those weeks where you can really feel the neighborly energy - people stepping up to help, offering what they know, and keeping our little corner of the world connected.'",
-  
-  "skillsExchange": "Write 2 sentences maximum intro text for skills section. NO bold formatting. Do NOT include individual skill listings - those will be generated separately with neighbor names and proper links.",
-  
-  "communityGroups": "Write 2 sentences maximum intro text for groups section. NO bold formatting. Do NOT include individual group listings - those will be generated separately with proper links and recent updates.",
-  
-  "weekAhead": "Write a 2-3 sentence forward-looking section about upcoming opportunities and suggestions for neighbors to populate the dashboard next week. Focus on encouraging participation in events, skills sharing, and group activities."
-}
+3. weekAheadPreview: Look ahead with optimism about what neighbors could do together. ${isLowActivity ? 'Since the calendar is open, paint a picture of possibilities: "The week ahead is full of possibility! Perfect timing for someone to <a href=\\"' + createEventUrl + '\\">organize a neighborhood walk</a>, <a href=\\"' + createGoodsUrl + '\\">share something they no longer need</a>, or <a href=\\"' + createSkillUrl + '\\">offer to help with something they\'re good at</a>. Sometimes the best connections start with the simplest gestures."' : 'Build excitement about what people can join and participate in.'}
 
 WRITING GUIDELINES:
-- Mention active neighbors by name naturally
-- Add contextual commentary ("perfect timing with...", "classic [neighborhood] energy")
-- Use the neighborhood's name in community references
-- Keep the bulletin board feel with clear sections
-- Make every activity sound appealing and accessible
-- Include the personality and energy of the community`;
+- Write like you're talking to a neighbor over the fence
+- Use "we," "our," and "us" to create community feeling  
+- Keep each section 2-3 sentences, flowing naturally
+- Include clickable links naturally in the conversation
+- Avoid corporate language, emojis, or formal headers
+- Make it feel personal and authentic
+- Return as JSON: {"newNeighborWelcome": "", "pastWeekRecap": "", "weekAheadPreview": ""}`;
 
     // Call Claude API
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -164,34 +132,38 @@ WRITING GUIDELINES:
     const data = await response.json();
     const content = data.content[0].text;
     
+    // Try to parse the JSON response
     try {
       const aiContent = JSON.parse(content);
       console.log('AI content generated successfully');
       return aiContent;
     } catch (parseError) {
       console.error('Failed to parse AI response as JSON:', parseError);
-      // Return default digest content if parsing fails
+      // Return default content in new 3-section format if parsing fails
       return {
-        weekInReview: `${neighborhoodName} has been buzzing with activity this week! It's been one of those weeks where you can really feel the neighborly energy - people stepping up to help, offering what they know, and keeping our community connected.`,
-        skillsExchange: `Fresh offers from your neighbors this week, from tech security to yard work to professional services. Plus someone's looking for carpentry help - perfect chance to be the hero of someone's home project.`,
-        communityGroups: `${upcomingActivities.activeGroups.map(g => `${g.name} (${g.memberCount} members)`).join(' and ')} ${upcomingActivities.activeGroups.length > 1 ? 'are' : 'is'} keeping the community spirit alive with regular updates and welcoming new faces.`,
-        weekAhead: `The week ahead is full of possibility! Perfect timing for someone to organize a neighborhood walk, start a group for a shared interest, or offer to help with something they're good at. Sometimes the best connections start with the simplest gestures.`
+        newNeighborWelcome: newNeighbors.length > 0 ? 
+          `Welcome to our newest neighbors: ${newNeighbors.map(n => `<a href="${n.profileUrl}">${n.name}</a>`).join(', ')}! We're excited to have you join our ${neighborhoodName} community.` : 
+          '',
+        pastWeekRecap: "This past week brought new connections and community activity. Thank you to everyone who participated in making our neighborhood more vibrant.",
+        weekAheadPreview: "The upcoming week has exciting opportunities to connect with your neighbors. Check out what's happening and get involved!"
       };
     }
 
   } catch (error) {
     console.error('Error generating AI content:', error);
-    // Return default digest content if AI generation fails
+    // Return default content in new 3-section format if AI generation fails
     return {
-      weekInReview: `${neighborhoodName} has been buzzing with activity this week! It's been one of those weeks where you can really feel the neighborly energy - people stepping up to help, offering what they know, and keeping our community connected.`,
-      skillsExchange: `Fresh offers from your neighbors this week, from tech security to yard work to professional services. Plus someone's looking for carpentry help - perfect chance to be the hero of someone's home project.`,
-      communityGroups: `${upcomingActivities.activeGroups.map(g => `${g.name} (${g.memberCount} members)`).join(' and ')} ${upcomingActivities.activeGroups.length > 1 ? 'are' : 'is'} keeping the community spirit alive with regular updates and welcoming new faces.`,
-      weekAhead: `The week ahead is full of possibility! Perfect timing for someone to organize a neighborhood walk, start a group for a shared interest, or offer to help with something they're good at. Sometimes the best connections start with the simplest gestures.`
+      newNeighborWelcome: newNeighbors.length > 0 ? 
+        `Welcome to our newest neighbors: ${newNeighbors.map(n => `<a href="${n.profileUrl}">${n.name}</a>`).join(', ')}! We're excited to have you join our ${neighborhoodName} community.` : 
+        '',
+      pastWeekRecap: "This past week brought new connections and community activity. Thank you to everyone who participated in making our neighborhood more vibrant.",
+      weekAheadPreview: "The upcoming week has exciting opportunities to connect with your neighbors. Check out what's happening and get involved!"
     };
   }
 }
 
 const handler = async (req: Request): Promise<Response> => {
+  // Handle CORS preflight requests
   const corsResponse = handleCorsPreflightRequest(req);
   if (corsResponse) return corsResponse;
 
@@ -199,19 +171,10 @@ const handler = async (req: Request): Promise<Response> => {
     const supabase = createClient(supabaseUrl, supabaseKey)
     const { neighborhoodId, testEmail, previewOnly }: WeeklySummaryRequest = await req.json();
     
-    // Better weekly date range (Sunday to Sunday)
-    const now = new Date();
-    const thisWeekStart = new Date(now);
-    thisWeekStart.setDate(now.getDate() - now.getDay()); // Last Sunday
-    thisWeekStart.setHours(0, 0, 0, 0);
-    
-    const lastWeekStart = new Date(thisWeekStart);
-    lastWeekStart.setDate(thisWeekStart.getDate() - 7);
-    
-    const weekAgoISO = lastWeekStart.toISOString();
-    const thisWeekISO = thisWeekStart.toISOString();
-    
-    console.log(`FINAL newsletter date range: ${weekAgoISO} to ${thisWeekISO}`);
+    // Calculate date range for the past week (expanded to 30 days to catch more activity)
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 30);
+    const weekAgoISO = weekAgo.toISOString();
     
     // Get neighborhood info
     const { data: neighborhood } = await supabase
@@ -224,7 +187,7 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('Neighborhood not found');
     }
 
-    // Get member emails with preferences
+    // Use the new efficient function to get member emails with preferences
     const { data: memberEmails, error: emailsError } = await supabase
       .rpc('get_neighborhood_emails_for_digest', { 
         target_neighborhood_id: neighborhoodId 
@@ -235,42 +198,40 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error(`Failed to get member emails: ${emailsError.message}`);
     }
 
+    // Transform the data to match expected format
     const formattedEmails = memberEmails?.map(member => ({
       email: member.email,
       name: member.display_name || 'Neighbor'
     })) || [];
 
-    // FINAL: Only query tables that actually exist
+    // Gather comprehensive weekly activity data
     const [
       upcomingEventsData, 
       completedEventsData,
       availableSkillsData, 
       completedSkillsData,
-      newMembersData,
-      newGroupsData,        
-      groupJoinsData,       
-      activeGroupsData      
+      newMembersData
     ] = await Promise.all([
-      // Upcoming events (next week) 
+      // Recent events (past 30 days to catch more activity)
       supabase
         .from('events')
-        .select('id, title, time, group_id, event_rsvps(count)')
+        .select('id, title, time, event_rsvps(count)')
         .eq('neighborhood_id', neighborhoodId)
-        .gte('time', now.toISOString())
-        .lte('time', new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString())
+        .gte('time', weekAgoISO)
         .eq('is_archived', false)
-        .order('time')
+        .order('time', { ascending: false })
         .limit(10),
 
       // Past week's completed events
       supabase
         .from('events')
-        .select('id, title, time, group_id, event_rsvps(count)')
+        .select('id, title, time, event_rsvps(count)')
         .eq('neighborhood_id', neighborhoodId)
         .gte('time', weekAgoISO)
-        .lte('time', thisWeekISO)
+        .lte('time', new Date().toISOString())
         .order('time', { ascending: false })
-        .limit(10),
+        .limit(5),
+
 
       // Current available skills (recent posts) with user profiles
       supabase
@@ -282,11 +243,10 @@ const handler = async (req: Request): Promise<Response> => {
           request_type, 
           created_at,
           user_id,
-          profiles(display_name, user_id)
+          profiles!skills_exchange_user_id_fkey(id, display_name)
         `)
         .eq('neighborhood_id', neighborhoodId)
         .eq('is_archived', false)
-        .gte('created_at', weekAgoISO)
         .order('created_at', { ascending: false })
         .limit(15),
 
@@ -300,153 +260,62 @@ const handler = async (req: Request): Promise<Response> => {
         .order('archived_at', { ascending: false })
         .limit(10),
 
-      // FIXED: New members this week - ROBUST QUERY
+      // New members this week with profiles
       supabase
         .from('neighborhood_members')
         .select(`
           user_id,
-          joined_at,
-          status,
-          profiles(display_name, created_at)
+          profiles!inner(display_name)
         `)
         .eq('neighborhood_id', neighborhoodId)
-        .eq('status', 'active')
         .gte('joined_at', weekAgoISO)
-        .lte('joined_at', thisWeekISO)
-        .order('joined_at', { ascending: false })
-        .limit(20),
-
-      // Groups created this week
-      supabase
-        .from('groups')
-        .select(`
-          id,
-          name,
-          group_type,
-          physical_unit_value,
-          description,
-          created_at,
-          created_by,
-          profiles!groups_created_by_fkey(display_name)
-        `)
-        .eq('neighborhood_id', neighborhoodId)
-        .eq('status', 'active')
-        .gte('created_at', weekAgoISO)
-        .lte('created_at', thisWeekISO)
-        .order('created_at', { ascending: false })
         .limit(10),
 
-      // Group joins this week
+      // Profile updates this week
       supabase
-        .from('group_members')
-        .select(`
-          joined_at,
-          role,
-          profiles!group_members_user_id_fkey(display_name),
-          groups!inner(
-            id,
-            name,
-            neighborhood_id,
-            group_type
-          )
-        `)
-        .eq('groups.neighborhood_id', neighborhoodId)
-        .gte('joined_at', weekAgoISO)
-        .lte('joined_at', thisWeekISO)
-        .neq('role', 'owner') // Don't count initial owner joins
-        .order('joined_at', { ascending: false })
-        .limit(15),
-
-      // Active groups with member counts
-      supabase
-        .from('groups')
-        .select(`
-          id,
-          name,
-          group_type,
-          physical_unit_value,
-          description,
-          is_private,
-          created_at,
-          group_members(count)
-        `)
-        .eq('neighborhood_id', neighborhoodId)
-        .eq('status', 'active')
-        .order('created_at', { ascending: false })
-        .limit(10)
+        .from('profiles')
+        .select('id, display_name, updated_at')
+        .gte('updated_at', weekAgoISO)
+        .order('updated_at', { ascending: false })
+        .limit(5)
     ]);
 
-    // Enhanced error logging
-    if (newMembersData.error) {
-      console.error('Failed to fetch new members:', newMembersData.error);
+    // DEBUG: Log the raw query results
+    console.log('🔍 DEBUG: Raw query results:');
+    console.log('📅 Events data:', upcomingEventsData.data?.length || 0, 'items');
+    console.log('🧠 Skills data:', availableSkillsData.data?.length || 0, 'items');
+    console.log('👥 Members data:', newMembersData.data?.length || 0, 'items');
+    
+    if (availableSkillsData.error) {
+      console.log('❌ Skills query error:', availableSkillsData.error);
     }
-    if (newGroupsData.error) {
-      console.error('Failed to fetch new groups:', newGroupsData.error);
-    }
-    if (groupJoinsData.error) {
-      console.error('Failed to fetch group joins:', groupJoinsData.error);
+    if (upcomingEventsData.error) {
+      console.log('❌ Events query error:', upcomingEventsData.error);
     }
 
-    // Process new neighbors with better fallbacks
+    // Process new neighbors with profile URLs
     const newNeighbors = newMembersData.data?.map(member => ({
-      name: member.profiles?.display_name || `New Neighbor (${member.user_id.substring(0, 8)})`,
+      name: member.profiles?.display_name || 'New Neighbor',
       userId: member.user_id,
-      profileUrl: getProfileURL(neighborhoodId, member.user_id),
-      joinedAt: member.joined_at
+      profileUrl: getProfileURL(neighborhoodId, member.user_id)
     })) || [];
 
-    console.log(`Found ${newNeighbors.length} new members:`, newNeighbors);
-
-    // Process group activities
-    const newGroups = newGroupsData.data?.map(group => ({
-      id: group.id,
-      name: group.name,
-      type: group.group_type,
-      unitValue: group.physical_unit_value,
-      createdBy: group.profiles?.display_name || 'Someone',
-      createdAt: group.created_at,
-      url: getGroupURL(neighborhoodId, group.id)
-    })) || [];
-
-    const groupJoins = groupJoinsData.data?.map(join => ({
-      memberName: join.profiles?.display_name || 'Someone',
-      groupName: join.groups?.name || 'a group',
-      groupType: join.groups?.group_type,
-      joinedAt: join.joined_at
-    })) || [];
-
-    const activeGroups = activeGroupsData.data?.map(group => ({
-      id: group.id,
-      name: group.name,
-      type: group.group_type,
-      memberCount: group.group_members?.[0]?.count || 0,
-      unitValue: group.physical_unit_value,
-      url: getGroupURL(neighborhoodId, group.id)
-    })) || [];
-
-    console.log(`Found ${newGroups.length} new groups, ${groupJoins.length} group joins, ${activeGroups.length} active groups`);
-
-    // Process past week activities - ONLY current features
+    // Process past week activities with URLs (current system only)
     const pastWeekActivities = {
       completedEvents: completedEventsData.data?.map(event => ({
         title: event.title,
         url: getEventURL(neighborhoodId, event.id),
-        attendees: Array.isArray(event.event_rsvps) ? event.event_rsvps.length : 0,
-        isGroupEvent: !!event.group_id
+        attendees: Array.isArray(event.event_rsvps) ? event.event_rsvps.length : 0
       })) || [],
       
       completedSkills: completedSkillsData.data?.map(skill => ({
         title: skill.title,
         url: getSkillURL(neighborhoodId, skill.id),
         category: skill.skill_category
-      })) || [],
-
-      // Group activities
-      newGroups: newGroups,
-      groupJoins: groupJoins
+      })) || []
     };
 
-    // Process upcoming activities - ONLY current features
+    // Process upcoming activities with URLs
     const upcomingActivities = {
       events: upcomingEventsData.data?.map(event => ({
         title: event.title,
@@ -458,9 +327,9 @@ const handler = async (req: Request): Promise<Response> => {
           hour: 'numeric',
           minute: '2-digit'
         }),
-        attendees: Array.isArray(event.event_rsvps) ? event.event_rsvps.length : 0,
-        isGroupEvent: !!event.group_id
+        attendees: Array.isArray(event.event_rsvps) ? event.event_rsvps.length : 0
       })) || [],
+      
       
       skills: availableSkillsData.data?.map(skill => ({
         id: skill.id,
@@ -468,26 +337,21 @@ const handler = async (req: Request): Promise<Response> => {
         url: getSkillURL(neighborhoodId, skill.id),
         category: skill.skill_category,
         requestType: skill.request_type,
-        neighborName: skill.profiles?.display_name || 'A neighbor',
-        neighborUserId: skill.profiles?.user_id || skill.user_id,
-        neighborProfileUrl: getProfileURL(neighborhoodId, skill.profiles?.user_id || skill.user_id)
-      })) || [],
-
-      activeGroups: activeGroups
+        neighborName: skill.profiles?.display_name || `Neighbor ${skill.user_id.substring(0, 8)}`,
+        neighborUserId: skill.profiles?.id || skill.user_id,
+        neighborProfileUrl: getProfileURL(neighborhoodId, skill.profiles?.id || skill.user_id)
+      })) || []
     };
 
-    // FINAL: Stats for current features only
+    // Format stats for email template (current system only)
     const stats = {
       newMembers: newNeighbors.length,
       upcomingEvents: upcomingActivities.events.length,
       activeSkillRequests: upcomingActivities.skills.filter(s => s.requestType === 'request').length,
       availableSkills: upcomingActivities.skills.filter(s => s.requestType === 'offer').length,
-      newGroups: newGroups.length,
-      groupJoins: groupJoins.length,
-      activeGroups: activeGroups.length
     };
 
-    // FINAL: Highlights for current features only
+    // Format highlights for email template (current system only)
     const highlights = {
       events: upcomingActivities.events.slice(0, 5),
       skills: upcomingActivities.skills.slice(0, 8).map(skill => ({
@@ -500,15 +364,17 @@ const handler = async (req: Request): Promise<Response> => {
         neighborProfileUrl: skill.neighborProfileUrl
       })),
       groups: {
-        newGroups: newGroups.slice(0, 5),
-        recentJoins: groupJoins.slice(0, 5),
-        activeGroups: activeGroups.slice(0, 5)
+        newGroups: [],
+        recentJoins: [],
+        activeGroups: [],
+        groupEvents: [],
+        groupUpdates: []
       }
     };
 
     // Format week date range
-    const weekStart = new Date(lastWeekStart);
-    const weekEnd = new Date(thisWeekStart);
+    const weekStart = new Date(weekAgo);
+    const weekEnd = new Date();
     const weekOf = `${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
 
     // Generate AI-powered content for the newsletter
@@ -516,7 +382,6 @@ const handler = async (req: Request): Promise<Response> => {
     console.log('New neighbors:', newNeighbors);
     console.log('Past week activities:', pastWeekActivities);
     console.log('Upcoming activities:', upcomingActivities);
-    console.log('Stats:', stats);
     
     const aiContent = await generateAIContent(
       neighborhood.name, 
@@ -527,20 +392,18 @@ const handler = async (req: Request): Promise<Response> => {
       pastWeekActivities,
       upcomingActivities
     );
-
     console.log('AI content generated:', aiContent);
 
     // Generate the email HTML
     const html = await renderAsync(
       React.createElement(WeeklySummaryEmail, {
         neighborhoodName: neighborhood.name,
-        neighborhoodId: neighborhoodId,
         memberName: testEmail ? 'Test User' : 'Neighbor',
         weekOf,
-        baseUrl: 'https://neighborhoodos.com',
+        baseUrl: 'https://neighborhoodos.com', // Use production URL directly
         stats,
         highlights,
-        aiContent,
+        aiContent, // Pass AI-generated content to email template
       })
     );
 
@@ -553,17 +416,7 @@ const handler = async (req: Request): Promise<Response> => {
           html,
           stats,
           highlights,
-          preview: true,
-          debug: {
-            dateRange: { weekAgoISO, thisWeekISO },
-            newNeighbors,
-            newGroups,
-            groupJoins,
-            activeGroups,
-            currentFeatures: ['Home', 'Calendar', 'Skills', 'Groups'],
-            removedFeatures: ['Safety', 'Goods'],
-            tablesDropped: ['safety_updates', 'goods_exchange']
-          }
+          preview: true
         }), 
         {
           status: 200,
@@ -597,21 +450,13 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Weekly summary sent: ${successful} successful, ${failed} failed`);
 
     return new Response(
-      JSON.stringify({
-        success: true,
-        sent: successful,
-        failed: failed,
-        recipients: recipients.length,
+      JSON.stringify({ 
+        success: true, 
+        sent: successful, 
+        failed,
         stats,
-        debug: {
-          dateRange: { weekAgoISO, thisWeekISO },
-          newNeighbors: newNeighbors.length,
-          newGroups: newGroups.length,
-          groupJoins: groupJoins.length,
-          activeGroups: activeGroups.length,
-          currentFeatures: ['Home', 'Calendar', 'Skills', 'Groups']
-        }
-      }),
+        highlights 
+      }), 
       {
         status: 200,
         headers: {
@@ -620,10 +465,15 @@ const handler = async (req: Request): Promise<Response> => {
         },
       }
     );
-
   } catch (error: any) {
-    console.error('Error in send-weekly-summary-final:', error);
-    return errorResponse(error);
+    console.error("Error in send-weekly-summary function:", error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      }
+    );
   }
 };
 

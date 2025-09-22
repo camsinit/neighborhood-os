@@ -208,13 +208,9 @@ const handler = async (req: Request): Promise<Response> => {
     const [
       upcomingEventsData, 
       completedEventsData,
-      availableGoodsData, 
-      archivedGoodsData,
       availableSkillsData, 
       completedSkillsData,
-      safetyData, 
-      newMembersData,
-      profileUpdatesData
+      newMembersData
     ] = await Promise.all([
       // Upcoming events (next week)
       supabase
@@ -237,55 +233,34 @@ const handler = async (req: Request): Promise<Response> => {
         .order('time', { ascending: false })
         .limit(5),
 
-      // Current available goods (recent offers)
-      supabase
-        .from('goods_exchange')
-        .select('id, title, goods_category, created_at, request_type')
-        .eq('neighborhood_id', neighborhoodId)
-        .eq('is_archived', false)
-        .eq('request_type', 'offer')
-        .gte('created_at', weekAgoISO)
-        .order('created_at', { ascending: false })
-        .limit(5),
 
-      // Past week's archived/claimed goods  
-      supabase
-        .from('goods_exchange')
-        .select('id, title, goods_category, archived_at')
-        .eq('neighborhood_id', neighborhoodId)
-        .eq('is_archived', true)
-        .gte('archived_at', weekAgoISO)
-        .order('archived_at', { ascending: false })
-        .limit(5),
-
-      // Current available skills (recent posts)
+      // Current available skills (recent posts) with user profiles
       supabase
         .from('skills_exchange')
-        .select('id, title, skill_category, request_type, created_at')
+        .select(`
+          id, 
+          title, 
+          skill_category, 
+          request_type, 
+          created_at,
+          user_id,
+          profiles(display_name, user_id)
+        `)
         .eq('neighborhood_id', neighborhoodId)
         .eq('is_archived', false)
         .gte('created_at', weekAgoISO)
         .order('created_at', { ascending: false })
-        .limit(5),
+        .limit(15),
 
       // Completed skills activities (recently archived)
       supabase
         .from('skills_exchange')
-        .select('id, title, skill_category, request_type')
+        .select('id, title, skill_category, request_type, archived_at')
         .eq('neighborhood_id', neighborhoodId)
         .eq('is_archived', true)
-        .order('created_at', { ascending: false })
-        .limit(3),
-
-      // Recent safety updates
-      supabase
-        .from('safety_updates')
-        .select('id, title, type, created_at')
-        .eq('neighborhood_id', neighborhoodId)
-        .eq('is_archived', false)
-        .gte('created_at', weekAgoISO)
-        .order('created_at', { ascending: false })
-        .limit(3),
+        .gte('archived_at', weekAgoISO)
+        .order('archived_at', { ascending: false })
+        .limit(10),
 
       // New members this week with profiles
       supabase
@@ -314,7 +289,7 @@ const handler = async (req: Request): Promise<Response> => {
       profileUrl: getProfileURL(neighborhoodId, member.user_id)
     })) || [];
 
-    // Process past week activities with URLs
+    // Process past week activities with URLs (current system only)
     const pastWeekActivities = {
       completedEvents: completedEventsData.data?.map(event => ({
         title: event.title,
@@ -322,25 +297,11 @@ const handler = async (req: Request): Promise<Response> => {
         attendees: Array.isArray(event.event_rsvps) ? event.event_rsvps.length : 0
       })) || [],
       
-      archivedGoods: archivedGoodsData.data?.map(item => ({
-        title: item.title,
-        url: getGoodsURL(neighborhoodId, item.id),
-        category: item.goods_category
-      })) || [],
-      
       completedSkills: completedSkillsData.data?.map(skill => ({
         title: skill.title,
         url: getSkillURL(neighborhoodId, skill.id),
         category: skill.skill_category
-      })) || [],
-      
-      safetyUpdates: safetyData.data?.map(update => ({
-        title: update.title,
-        url: getSafetyURL(neighborhoodId, update.id),
-        type: update.type
-      })) || [],
-      
-      profileUpdates: profileUpdatesData.data?.length || 0
+      })) || []
     };
 
     // Process upcoming activities with URLs
@@ -358,47 +319,46 @@ const handler = async (req: Request): Promise<Response> => {
         attendees: Array.isArray(event.event_rsvps) ? event.event_rsvps.length : 0
       })) || [],
       
-      goods: availableGoodsData.data?.map(item => ({
-        title: item.title,
-        url: getGoodsURL(neighborhoodId, item.id),
-        category: item.goods_category
-      })) || [],
       
       skills: availableSkillsData.data?.map(skill => ({
+        id: skill.id,
         title: skill.title,
         url: getSkillURL(neighborhoodId, skill.id),
         category: skill.skill_category,
-        requestType: skill.request_type
+        requestType: skill.request_type,
+        neighborName: skill.profiles?.display_name || `Neighbor ${skill.user_id.substring(0, 8)}`,
+        neighborUserId: skill.profiles?.user_id || skill.user_id,
+        neighborProfileUrl: getProfileURL(neighborhoodId, skill.profiles?.user_id || skill.user_id)
       })) || []
     };
 
-    // Format stats for email template (keeping existing structure for compatibility)
+    // Format stats for email template (current system only)
     const stats = {
       newMembers: newNeighbors.length,
       upcomingEvents: upcomingActivities.events.length,
       activeSkillRequests: upcomingActivities.skills.filter(s => s.requestType === 'request').length,
-      availableItems: upcomingActivities.goods.length,
-      safetyUpdates: safetyData.data?.length || 0,
+      availableSkills: upcomingActivities.skills.filter(s => s.requestType === 'offer').length,
     };
 
-    // Format highlights for email template (keeping existing structure for compatibility)
+    // Format highlights for email template (current system only)
     const highlights = {
-      events: upcomingActivities.events.slice(0, 3),
-      items: upcomingActivities.goods.slice(0, 3).map(item => ({
-        title: item.title,
-        category: item.category,
-        daysAgo: 0 // Recent items
-      })),
-      skills: upcomingActivities.skills.slice(0, 3).map(skill => ({
+      events: upcomingActivities.events.slice(0, 5),
+      skills: upcomingActivities.skills.slice(0, 8).map(skill => ({
+        id: skill.id,
         title: skill.title,
         category: skill.category,
-        requestType: skill.requestType
+        requestType: skill.requestType,
+        neighborName: skill.neighborName,
+        neighborUserId: skill.neighborUserId,
+        neighborProfileUrl: skill.neighborProfileUrl
       })),
-      safety: pastWeekActivities.safetyUpdates.slice(0, 2).map(update => ({
-        title: update.title,
-        type: update.type,
-        daysAgo: Math.floor((Date.now() - new Date().getTime()) / (24 * 60 * 60 * 1000))
-      }))
+      groups: {
+        newGroups: [],
+        recentJoins: [],
+        activeGroups: [],
+        groupEvents: [],
+        groupUpdates: []
+      }
     };
 
     // Format week date range
