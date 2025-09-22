@@ -30,12 +30,20 @@ async function generateAIContent(neighborhoodName: string, stats: any, highlight
   // If no Claude API key is available, return default content in new 3-section format
   if (!CLAUDE_API_KEY) {
     console.log('No Claude API key found, using default content');
+    const createEventUrl = `https://neighborhoodos.com/n/${neighborhoodId}/calendar?create=true`;
+    const createSkillUrl = `https://neighborhoodos.com/n/${neighborhoodId}/skills?create=true`;
+    const createGroupUrl = `https://neighborhoodos.com/n/${neighborhoodId}/groups?create=true`;
+    
     return {
       newNeighborWelcome: newNeighbors.length > 0 ? 
         `Welcome to our newest neighbors: ${newNeighbors.map(n => n.name).join(', ')}! We're excited to have you join our ${neighborhoodName} community.` : 
         '',
       pastWeekRecap: "This past week brought new connections and community activity. Thank you to everyone who participated in making our neighborhood more vibrant.",
-      weekAheadPreview: "The upcoming week has exciting opportunities to connect with your neighbors. Check out what's happening and get involved!"
+      weekAheadPreview: {
+        calendarSuggestion: `<a href="${createEventUrl}">Organize a neighborhood coffee meetup or potluck</a> to bring everyone together this weekend.`,
+        skillsSuggestion: `<a href="${createSkillUrl}">Share a skill you're passionate about</a> or ask for help with a project you've been putting off.`,
+        groupsSuggestion: `<a href="${createGroupUrl}">Start a group for something you love</a> to connect with neighbors who share your interests.`
+      }
     };
   }
 
@@ -454,6 +462,7 @@ const handler = async (req: Request): Promise<Response> => {
     const html = await renderAsync(
       React.createElement(WeeklySummaryEmail, {
         neighborhoodName: neighborhood.name,
+        neighborhoodId: neighborhoodId,
         memberName: testEmail ? 'Test User' : 'Neighbor',
         weekOf,
         baseUrl: 'https://neighborhoodos.com', // Use production URL directly

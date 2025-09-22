@@ -283,9 +283,31 @@ export const WeeklySummaryEmail = ({
 
         {/* 2. Ways to be Neighborly Subsection - AI Generated Dynamic Suggestions */}
         <Text style={subsectionTitle}>🤝 Ways to be Neighborly</Text>
-        <Text style={paragraph} dangerouslySetInnerHTML={{ __html: `• ${aiContent.weekAhead.calendarSuggestion}` }} />
-        <Text style={paragraph} dangerouslySetInnerHTML={{ __html: `• ${aiContent.weekAhead.skillsSuggestion}` }} />
-        <Text style={paragraph} dangerouslySetInnerHTML={{ __html: `• ${aiContent.weekAhead.groupsSuggestion}` }} />
+        {aiContent.weekAhead?.calendarSuggestion ? (
+          <>
+            <Text style={paragraph} dangerouslySetInnerHTML={{ __html: `• ${aiContent.weekAhead.calendarSuggestion}` }} />
+            <Text style={paragraph} dangerouslySetInnerHTML={{ __html: `• ${aiContent.weekAhead.skillsSuggestion}` }} />
+            <Text style={paragraph} dangerouslySetInnerHTML={{ __html: `• ${aiContent.weekAhead.groupsSuggestion}` }} />
+          </>
+        ) : (
+          <>
+            <Text style={paragraph}>
+              • <Link href={`${baseUrl}/n/${neighborhoodId}/calendar?create=true&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_create_event`} style={eventNameLink}>
+                Organize a neighborhood coffee meetup or potluck
+              </Link> to bring everyone together this weekend.
+            </Text>
+            <Text style={paragraph}>
+              • <Link href={`${baseUrl}/n/${neighborhoodId}/skills?create=true&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_share_skill`} style={skillNameLink}>
+                Share a skill you're passionate about
+              </Link> or ask for help with a project you've been putting off.
+            </Text>
+            <Text style={paragraph}>
+              • <Link href={`${baseUrl}/n/${neighborhoodId}/groups?create=true&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_create_group`} style={groupNameLink}>
+                Start a group for something you love
+              </Link> to connect with neighbors who share your interests.
+            </Text>
+          </>
+        )}
 
         <Text style={paragraph}>
           <Link href={`${baseUrl}/n/${neighborhoodId}?utm_source=email&utm_medium=email&utm_campaign=weekly_summary_dashboard`} style={ctaButton}>

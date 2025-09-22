@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft } from "lucide-react";
@@ -166,6 +166,12 @@ export const SkillsOnboardingDialog = ({
               </Button>
             )}
           </div>
+          <DialogDescription>
+            {currentStep === 0 
+              ? "Learn about sharing skills with your neighborhood community"
+              : "Choose the skills you'd like to share with your neighbors"
+            }
+          </DialogDescription>
           
           {/* Progress bar */}
           <div className="space-y-2">

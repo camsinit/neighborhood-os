@@ -5,6 +5,7 @@ import ModuleButton from "@/components/ui/module-button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { ArrowLeft, ArrowRight, X } from "lucide-react";
 import { SKILL_CATEGORIES, SPECIAL_SKILLS } from "./skillCategories";
@@ -203,14 +204,12 @@ export const SkillsMiniSurvey = ({
   const handleNext = () => {
     if (currentStep < totalSteps - 1) {
       setCurrentStep(prev => prev + 1);
-      setShowCustomInput(false); // Reset custom input when moving to next step
     }
   };
 
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(prev => prev - 1);
-      setShowCustomInput(false); // Reset custom input when moving to previous step
     }
   };
 
