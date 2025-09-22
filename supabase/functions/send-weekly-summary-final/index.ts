@@ -5,7 +5,7 @@ import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import React from 'npm:react@18.3.1'
 import { WeeklySummaryEmail } from './_templates/weekly-summary.tsx'
 import { corsHeaders, handleCorsPreflightRequest, successResponse, errorResponse } from '../_shared/cors.ts'
-import { getProfileURL, getEventURL, getGoodsURL, getSkillURL, getSafetyURL } from './_utils/urlGenerator.ts'
+import { getProfileURL, getEventURL, getSkillURL, getGroupURL } from './_utils/urlGenerator.ts'
 
 // Initialize Claude API client
 const CLAUDE_API_KEY = Deno.env.get("CLAUDE_API_KEY");

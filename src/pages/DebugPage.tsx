@@ -18,6 +18,7 @@ import { SuperAdminNeighborhoodCreation } from '@/components/debug/SuperAdminNei
 import OnboardingDialog from '@/components/onboarding/OnboardingDialog';
 import SurveyDialog from '@/components/onboarding/SurveyDialog';
 import { SkillsOnboardingDialog } from '@/components/skills/SkillsOnboardingDialog';
+import { SkillsMiniSurvey } from '@/components/onboarding/survey/steps/skills/SkillsMiniSurvey';
 import { useSkillsOnboarding } from '@/hooks/useSkillsOnboarding';
 import { SuperAdminNeighborhoodSelector } from '@/components/layout/sidebar/SuperAdminNeighborhoodSelector';
 import { WelcomePopover } from '@/components/onboarding/WelcomePopover';
@@ -39,7 +40,11 @@ const DebugPage = () => {
   const [showOnboardingTest, setShowOnboardingTest] = useState(false);
   const [showSurveyTest, setShowSurveyTest] = useState(false);
   const [showSkillsOnboardingTest, setShowSkillsOnboardingTest] = useState(false);
+  const [showSkillsDirectTest, setShowSkillsDirectTest] = useState(false);
   const [showWelcomePopoverTest, setShowWelcomePopoverTest] = useState(false);
+  
+  // State for direct skills testing
+  const [testSelectedSkills, setTestSelectedSkills] = useState<string[]>([]);
   
   // Skills onboarding hook for testing functions
   const { resetSkillsOnboarding } = useSkillsOnboarding();
@@ -173,11 +178,11 @@ const DebugPage = () => {
                   <div className="flex flex-wrap gap-3">
                     <Button 
                       variant="outline" 
-                      onClick={() => setShowSkillsOnboardingTest(true)}
+                      onClick={() => setShowSkillsDirectTest(!showSkillsDirectTest)}
                       className="flex items-center gap-2"
                     >
                       <TestTube className="w-4 h-4" />
-                      Test Skills Tutorial
+                      {showSkillsDirectTest ? 'Hide' : 'Test'} Skills Tutorial
                     </Button>
                     <Button 
                       variant="outline" 
@@ -195,6 +200,28 @@ const DebugPage = () => {
                       Reset Skills Tutorial Status
                     </Button>
                   </div>
+                  
+                  {/* Direct Skills Mini Survey Test */}
+                  {showSkillsDirectTest && (
+                    <div className="mt-6 p-4 border rounded-lg bg-gray-50">
+                      <h4 className="font-medium mb-3">Direct Skills Selection Test</h4>
+                      <div className="bg-white p-4 rounded border">
+                        <SkillsMiniSurvey
+                          selectedSkills={testSelectedSkills}
+                          onSkillsChange={setTestSelectedSkills}
+                          onSurveyStateChange={(hasCompleted) => {
+                            console.log('Survey state changed:', hasCompleted);
+                          }}
+                          onGoBackToWelcome={() => {
+                            console.log('Go back to welcome clicked');
+                          }}
+                        />
+                      </div>
+                      <div className="mt-3 text-xs text-gray-600">
+                        Selected skills: {testSelectedSkills.length} | {testSelectedSkills.join(', ')}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
