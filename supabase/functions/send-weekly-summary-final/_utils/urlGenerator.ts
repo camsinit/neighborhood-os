@@ -54,7 +54,7 @@ export const getProfileURL = (neighborhoodId: string, userId: string): string =>
 };
 
 export const getEventURL = (neighborhoodId: string, eventId: string): string => {
-  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/calendar?highlight=${eventId}&type=event&dialog=true`;
+  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/events?highlight=event&type=event&id=${eventId}`;
   return addEmailTrackingParams(url, "weekly_summary_event", "email");
 };
 
@@ -63,8 +63,11 @@ export const getGoodsURL = (neighborhoodId: string, goodsId: string): string => 
   return addEmailTrackingParams(url, "weekly_summary_goods_item", "email");
 };
 
-export const getSkillURL = (neighborhoodId: string, skillId: string): string => {
-  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/skills?highlight=${skillId}&type=skills&dialog=true`;
+export const getSkillURL = (neighborhoodId: string, skillId: string, category?: string): string => {
+  let url = `${getEmailBaseUrl()}/n/${neighborhoodId}/skills?highlight=skill&type=skills_exchange&id=${skillId}`;
+  if (category) {
+    url += `&category=${category}`;
+  }
   return addEmailTrackingParams(url, "weekly_summary_skill", "email");
 };
 

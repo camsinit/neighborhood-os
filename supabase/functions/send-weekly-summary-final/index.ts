@@ -375,7 +375,7 @@ const handler = async (req: Request): Promise<Response> => {
       skills: availableSkillsData.data?.map(skill => ({
         id: skill.id,
         title: skill.title,
-        url: getSkillURL(neighborhoodId, skill.id),
+        url: getSkillURL(neighborhoodId, skill.id, skill.skill_category),
         category: skill.skill_category,
         requestType: skill.request_type,
         neighborName: skill.profiles?.display_name || `Neighbor ${skill.user_id.substring(0, 8)}`,

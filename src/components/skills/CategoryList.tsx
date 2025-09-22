@@ -21,28 +21,21 @@ const categoryInfo = {
   },
   professional: {
     icon: Briefcase,
-    description: "Offer business advice, legal guidance, or professional services",
+    description: "Resume help, language practice, job applications, and life skills",
     borderColor: "border-[#8B5CF6]",
     iconColor: "text-[#8B5CF6]",
     hoverColor: "hover:bg-[#E5DEFF]/10"
   },
-  maintenance: {
-    icon: Wrench,
-    description: "Exchange practical skills like repairs, gardening, or home improvement",
-    borderColor: "border-[#F97316]",
-    iconColor: "text-[#F97316]",
-    hoverColor: "hover:bg-[#FDE1D3]/10"
-  },
   care: {
     icon: Heart,
-    description: "Share wellness tips, fitness advice, or caregiving support",
+    description: "Childcare, pet care, meal exchanges, and daily support",
     borderColor: "border-[#D946EF]",
     iconColor: "text-[#D946EF]",
     hoverColor: "hover:bg-[#FFDEE2]/10"
   },
   education: {
     icon: GraduationCap,
-    description: "Offer tutoring, language lessons, or academic support",
+    description: "Homework help, gardening tips, music, arts, and hobby sharing",
     borderColor: "border-emerald-600",
     iconColor: "text-emerald-600",
     hoverColor: "hover:bg-[#F2FCE2]/10"

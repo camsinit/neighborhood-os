@@ -5,7 +5,7 @@ import { useUser } from '@supabase/auth-helpers-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Loader2, MessageSquare, Edit, Trash } from 'lucide-react';
-import { SkillCategory } from '@/components/skills/types/skillTypes';
+import { SkillCategory, mapToCurrentCategory } from '@/components/skills/types/skillTypes';
 
 import { useSkillUpdate } from '@/hooks/skills/useSkillUpdate';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -56,9 +56,10 @@ const CategorySkillsList: React.FC<CategorySkillsListProps> = ({
       } = await supabase.from('neighborhood_members').select('neighborhood_id').eq('user_id', user.id).eq('status', 'active').single();
       if (!userNeighborhood) return [];
 
-      // Fetch skills with user profiles
+      // Fetch ALL skills with user profiles, then filter by mapped category
+      // This ensures we include legacy categories that map to the selected category
       const {
-        data: skills,
+        data: allSkills,
         error
       } = await supabase.from('skills_exchange').select(`
           *,
@@ -66,8 +67,13 @@ const CategorySkillsList: React.FC<CategorySkillsListProps> = ({
             display_name,
             avatar_url
           )
-        `).eq('neighborhood_id', userNeighborhood.neighborhood_id).eq('skill_category', selectedCategory).eq('request_type', 'offer').eq('is_archived', false).order('title');
+        `).eq('neighborhood_id', userNeighborhood.neighborhood_id).eq('request_type', 'offer').eq('is_archived', false).order('title');
       if (error) throw error;
+
+      // Filter skills by mapped category (includes legacy category mapping)
+      const skills = allSkills?.filter(skill => 
+        mapToCurrentCategory(skill.skill_category) === selectedCategory
+      ) || [];
 
       // Group skills by title to create stacks
       const grouped = skills?.reduce((acc, skill) => {

@@ -295,9 +295,11 @@ export class ItemNavigationService {
         case 'skills':
           if (context.skillCategory) {
             enhancedOptions.categoryContext = context.skillCategory;
+            enhancedOptions.urlParams!['category'] = context.skillCategory;
           }
           if (context.skillType) {
             enhancedOptions.tabContext = context.skillType === 'offer' ? 'offers' : 'requests';
+            enhancedOptions.urlParams!['view'] = context.skillType === 'offer' ? 'offers' : 'requests';
           }
           break;
           

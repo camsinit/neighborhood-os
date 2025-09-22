@@ -21,7 +21,7 @@ export const SKILL_CATEGORIES = {
     ],
   },
   emergency: {
-    title: "Safety & Emergency",
+    title: "Safety and Emergency",
     skills: [
       "First Aid/CPR Certified",
       "Medical Professional (Doctor, Nurse, EMT)",
@@ -58,7 +58,7 @@ export const SKILL_CATEGORIES = {
     ],
   },
   education: {
-    title: "Learning & Fun",
+    title: "Learning and Fun",
     skills: [
       "Homework Sessions",
       "Gardening Tips",
