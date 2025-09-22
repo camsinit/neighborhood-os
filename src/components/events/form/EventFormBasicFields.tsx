@@ -102,6 +102,7 @@ const EventFormBasicFields = ({
           value={location}
           onChange={(e) => setLocation(e.target.value)}
           required
+          maxLength={25}
           placeholder="Where will this event take place?"
         />
       </div>
