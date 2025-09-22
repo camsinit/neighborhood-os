@@ -22,26 +22,26 @@ export const moduleThemeColors = {
     lightVariable: "--skills-light",
     icon: "Brain"
   },
-  goods: {
-    primary: "#F97316", // orange
-    light: "#FFEDD5",
-    variable: "--goods-color",
-    lightVariable: "--goods-light",
-    icon: "Gift"
-  },
-  safety: {
-    primary: "#EA384C", // red
-    light: "#FEE2E2",
-    variable: "--safety-color", 
-    lightVariable: "--safety-light",
-    icon: "Info" // Changed from Shield to Info
-  },
   neighbors: {
     primary: "#8B5FFF", // brighter, more saturated purple
     light: "#F5F3FF",
     variable: "--neighbors-color",
     lightVariable: "--neighbors-light",
     icon: "Users"
+  },
+  goods: {
+    primary: "#F59E0B", // amber/orange
+    light: "#FEF3C7",
+    variable: "--goods-color",
+    lightVariable: "--goods-light",
+    icon: "Package"
+  },
+  safety: {
+    primary: "#EF4444", // red
+    light: "#FEE2E2",
+    variable: "--safety-color",
+    lightVariable: "--safety-light",
+    icon: "Shield"
   }
 } as const;
 
@@ -87,30 +87,30 @@ export const coreModules: ModuleDefinition[] = [
     isEnabled: true
   },
   {
-    id: 'goods',
-    name: 'Freebies',
-    description: 'Items exchange and sharing',
-    themeColor: 'goods',
-    path: BASE_ROUTES.goods,
-    icon: 'Gift',
-    isEnabled: true
-  },
-  {
-    id: 'safety',
-    name: 'Updates',
-    description: 'Neighborhood updates and information',
-    themeColor: 'safety',
-    path: BASE_ROUTES.safety,
-    icon: 'Info', // Changed from Shield to Info
-    isEnabled: true
-  },
-  {
     id: 'neighbors',
     name: 'Neighbors',
     description: 'Community members directory',
     themeColor: 'neighbors',
     path: BASE_ROUTES.neighbors,
     icon: 'Users',
+    isEnabled: true
+  },
+  {
+    id: 'goods',
+    name: 'Goods',
+    description: 'Community goods exchange',
+    themeColor: 'goods',
+    path: BASE_ROUTES.goods,
+    icon: 'Package',
+    isEnabled: true
+  },
+  {
+    id: 'safety',
+    name: 'Safety',
+    description: 'Community safety updates',
+    themeColor: 'safety',
+    path: BASE_ROUTES.safety,
+    icon: 'Shield',
     isEnabled: true
   }
 ];

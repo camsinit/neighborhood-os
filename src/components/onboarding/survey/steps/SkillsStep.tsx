@@ -3,26 +3,51 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 
 export const SKILLS_OPTIONS = [
-  "Medical (Doctor, Nurse, EMT)",
-  "Mental Health (Counselor, Therapist)",
-  "Construction/Home Repair",
-  "Electrical Work",
-  "Plumbing",
-  "Legal Knowledge",
-  "Financial/Accounting",
-  "IT/Technical Support",
+  // Technology
+  "Computer, Smartphone, Tablet Help",
+  "WiFi Troubleshooting",
+  "Social Media Help",
+  "Photo Organization & Sharing",
+  "Printer Setup & Troubleshooting",
+  "Password Management Help",
+  "Streaming Service Setup",
+  "Kid-Safe Internet Setup",
+  
+  // Safety & Emergency
   "First Aid/CPR Certified",
-  "Emergency Response Training",
-  "Search and Rescue Experience",
-  "Fire Safety Training",
-  "Childcare/Education",
-  "Elder Care",
-  "Pet Care/Veterinary",
-  "Cooking/Meal Preparation",
-  "Language Translation/Interpretation",
-  "Gardening/Landscaping",
-  "Car Maintenance/Repair",
-  "Solar/Alternative Energy Knowledge",
+  "Medical Professional (Doctor, Nurse, EMT)",
+  "Home Hazard Assessments",
+  "Babyproofing",
+  "Power Outage Help",
+  "HAM Radio",
+  "Personal Emergency Preparedness",
+  "CERT/CORE-Trained",
+  
+  // Life Skills
+  "Resume & Job Application Help",
+  "Language Practice",
+  "Basic Accounting Support",
+  "College/School Application Help",
+  "Interview Practice",
+  "Basic Legal Support",
+  "Emotional Support & Listening",
+  "Conflict Resolution",
+  
+  // Daily Support
+  "Occasional Childcare",
+  "Occasional Dog Walking",
+  "Elder Companionship",
+  "Meal Exchanges",
+  "House Sitting & Pet Sitting",
+  "Plant Watering",
+  
+  // Learning & Fun
+  "Homework Sessions",
+  "Gardening Tips",
+  "Music Jams",
+  "Arts & Crafts Activities",
+  "Sports",
+  "Hobby Sharing & Teaching",
 ];
 
 /**

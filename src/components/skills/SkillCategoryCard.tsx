@@ -23,27 +23,22 @@ const categoryConfig: Record<SkillCategory, {
   },
   emergency: {
     icon: Shield,
-    displayName: 'Emergency & Safety',
+    displayName: 'Safety and Emergency',
     iconColor: 'text-green-600'
   },
   professional: {
     icon: Briefcase,
-    displayName: 'Professional Services',
-    iconColor: 'text-green-600'
-  },
-  maintenance: {
-    icon: Wrench,
-    displayName: 'Home & Maintenance',
+    displayName: 'Life Skills',
     iconColor: 'text-green-600'
   },
   care: {
     icon: Heart,
-    displayName: 'Care & Support',
+    displayName: 'Daily Support',
     iconColor: 'text-green-600'
   },
   education: {
     icon: GraduationCap,
-    displayName: 'Education & Arts',
+    displayName: 'Learning and Fun',
     iconColor: 'text-green-600'
   }
 };

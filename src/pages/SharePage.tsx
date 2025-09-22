@@ -6,9 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import EventOverviewCard from '@/components/share/EventOverviewCard';
-import SafetyOverviewCard from '@/components/share/SafetyOverviewCard';
 import SkillsOverviewCard from '@/components/share/SkillsOverviewCard';
-import GoodsOverviewCard from '@/components/share/GoodsOverviewCard';
 import GroupOverviewCard from '@/components/share/GroupOverviewCard';
 // Centralized routes for consistent paths
 import { BASE_ROUTES } from '@/utils/routes';
@@ -18,7 +16,7 @@ import { BASE_ROUTES } from '@/utils/routes';
  */
 interface SharedItemData {
   id: string;
-  content_type: 'events' | 'safety' | 'skills' | 'goods' | 'groups';
+  content_type: 'events' | 'skills' | 'groups';
   content_id: string;
   neighborhood_id: string;
   share_code: string;
@@ -146,39 +144,9 @@ const SharePage = () => {
           .single();
         break;
         
-      case 'safety':
-        query = supabase
-          .from('safety_updates')
-          .select(`
-            *,
-            profiles:author_id (
-              id,
-              display_name,
-              avatar_url
-            )
-          `)
-          .eq('id', content_id)
-          .single();
-        break;
-        
       case 'skills':
         query = supabase
           .from('skills_exchange')
-          .select(`
-            *,
-            profiles:user_id (
-              id,
-              display_name,
-              avatar_url
-            )
-          `)
-          .eq('id', content_id)
-          .single();
-        break;
-        
-      case 'goods':
-        query = supabase
-          .from('goods_exchange')
           .select(`
             *,
             profiles:user_id (
@@ -277,9 +245,7 @@ const SharePage = () => {
       // Use centralized base routes to avoid hardcoded strings
       const routes = {
         events: BASE_ROUTES.calendar,
-        safety: BASE_ROUTES.safety,
         skills: BASE_ROUTES.skills,
-        goods: BASE_ROUTES.goods,
         groups: BASE_ROUTES.neighbors // Groups are served at the neighbors route
       } as const;
       
@@ -312,12 +278,8 @@ const SharePage = () => {
     switch (sharedItem.content_type) {
       case 'events':
         return <EventOverviewCard {...commonProps} />;
-      case 'safety':
-        return <SafetyOverviewCard {...commonProps} />;
       case 'skills':
         return <SkillsOverviewCard {...commonProps} />;
-      case 'goods':
-        return <GoodsOverviewCard {...commonProps} />;
       case 'groups':
         return <GroupOverviewCard {...commonProps} />;
       default:

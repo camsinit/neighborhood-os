@@ -190,12 +190,12 @@ const ActivityItem = ({
         neighborhoodId: activity.neighborhood_id
       });
       
-      // Pass the neighborhood_id from the activity to ensure proper navigation context
-      const result = await navigationService.navigateToItem(
+      // Use contextual navigation for better routing (especially for skills)
+      // This will fetch skill category/type and include proper URL parameters
+      const result = await navigationService.navigateToItemWithContext(
         itemType, 
         activity.content_id, 
-        { showToast: true },
-        activity.neighborhood_id // Provide neighborhood context from activity data
+        { showToast: true }
       );
       
       logger.info('Navigation result:', result);

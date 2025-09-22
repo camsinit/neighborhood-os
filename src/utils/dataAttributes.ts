@@ -12,9 +12,7 @@ import { HighlightableItemType } from '@/utils/highlight/types';
  */
 const DATA_ATTRIBUTE_MAP: Record<HighlightableItemType, string> = {
   event: 'data-event-id',
-  safety: 'data-safety-id', 
   skills: 'data-skill-id',
-  goods: 'data-goods-id',
   neighbors: 'data-neighbor-id',
   group: 'data-group-id'
 };

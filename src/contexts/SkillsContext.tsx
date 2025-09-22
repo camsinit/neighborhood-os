@@ -103,7 +103,6 @@ export const SkillsProvider = ({ children }: { children: ReactNode }) => {
     technology: { offers: [], requests: [] },
     emergency: { offers: [], requests: [] },
     professional: { offers: [], requests: [] },
-    maintenance: { offers: [], requests: [] },
     care: { offers: [], requests: [] },
     education: { offers: [], requests: [] }
   }, isLoading: isPreviewLoading } = useQuery({
@@ -113,7 +112,6 @@ export const SkillsProvider = ({ children }: { children: ReactNode }) => {
         technology: { offers: [], requests: [] },
         emergency: { offers: [], requests: [] },
         professional: { offers: [], requests: [] },
-        maintenance: { offers: [], requests: [] },
         care: { offers: [], requests: [] },
         education: { offers: [], requests: [] }
       };
@@ -135,7 +133,6 @@ export const SkillsProvider = ({ children }: { children: ReactNode }) => {
         technology: { offers: [], requests: [] },
         emergency: { offers: [], requests: [] },
         professional: { offers: [], requests: [] },
-        maintenance: { offers: [], requests: [] },
         care: { offers: [], requests: [] },
         education: { offers: [], requests: [] }
       };

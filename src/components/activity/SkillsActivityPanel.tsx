@@ -83,7 +83,8 @@ const SkillsActivityPanel = ({ group, open, onOpenChange }: SkillsActivityPanelP
     const itemType = getHighlightableType(activity.activity_type);
     
     try {
-      const result = await navigationService.navigateToItem(
+      // Use contextual navigation for better routing (especially for skills)
+      const result = await navigationService.navigateToItemWithContext(
         itemType, 
         activity.content_id, 
         { showToast: true }

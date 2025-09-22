@@ -1,5 +1,5 @@
 // Define the skill category type - now matching onboarding categories exactly
-export type SkillCategory = 'technology' | 'emergency' | 'professional' | 'maintenance' | 'care' | 'education';
+export type SkillCategory = 'technology' | 'emergency' | 'professional' | 'care' | 'education';
 
 /**
  * Legacy category mapping for backwards compatibility
@@ -8,12 +8,12 @@ export type SkillCategory = 'technology' | 'emergency' | 'professional' | 'maint
 export const LEGACY_CATEGORY_MAPPING: Record<string, SkillCategory> = {
   'wellness': 'care',
   'creative': 'education', 
-  'trade': 'maintenance',
+  'trade': 'care', // Map old trade to care (since maintenance category is removed)
+  'maintenance': 'care', // Map old maintenance to care
   // Include current categories for passthrough
   'technology': 'technology',
   'emergency': 'emergency',
   'professional': 'professional',
-  'maintenance': 'maintenance',
   'care': 'care',
   'education': 'education'
 };

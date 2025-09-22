@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Upload, X, Image } from 'lucide-react';
 import { useUser } from '@supabase/auth-helpers-react';
-import { handleImageUpload } from '@/components/goods/utils/imageHandling';
-import { useDragAndDrop } from '@/components/goods/hooks/useDragAndDrop';
+import { handleImageUpload } from '@/utils/imageHandling';
+import { useDragAndDrop } from '@/hooks/useDragAndDrop';
 interface CoverPhotoUploadProps {
   coverPhotoUrl: string | null;
   onCoverPhotoChange: (url: string | null) => void;

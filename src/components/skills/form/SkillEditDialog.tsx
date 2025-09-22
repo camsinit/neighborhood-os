@@ -149,7 +149,6 @@ const SkillEditDialog = ({ skill, open, onOpenChange, onSuccess }: SkillEditDial
                 <SelectItem value="technology">Technology</SelectItem>
                 <SelectItem value="emergency">Emergency</SelectItem>
                 <SelectItem value="professional">Professional</SelectItem>
-                <SelectItem value="maintenance">Maintenance</SelectItem>
                 <SelectItem value="care">Care</SelectItem>
                 <SelectItem value="education">Education</SelectItem>
               </SelectContent>

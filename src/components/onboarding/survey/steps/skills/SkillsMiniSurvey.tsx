@@ -7,7 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { ArrowLeft, ArrowRight, X, Plus, Check } from "lucide-react";
+import { ArrowLeft, ArrowRight, X } from "lucide-react";
 import { SKILL_CATEGORIES, SPECIAL_SKILLS } from "./skillCategories";
 import { SelectedSkillsOverlay } from "./SelectedSkillsOverlay";
 
@@ -71,9 +71,6 @@ export const SkillsMiniSurvey = ({
     details: ''
   });
 
-  // Custom skill input state for adding user-defined skills
-  const [customSkillInput, setCustomSkillInput] = useState('');
-  const [showCustomInput, setShowCustomInput] = useState(false);
 
   // Calculate total steps and current position (removed availability step)
   const categoryKeys = Object.keys(SKILL_CATEGORIES);
@@ -166,19 +163,6 @@ export const SkillsMiniSurvey = ({
     setSpecialSkillDialog({ isOpen: false, skillName: '', details: '' });
   };
 
-  /**
-   * Handle custom skill addition from user input
-   */
-  const handleCustomSkillAdd = () => {
-    if (customSkillInput.trim()) {
-      const newSkill: SelectedSkill = { name: customSkillInput.trim() };
-      const updatedSkills = [...skillsWithDetails, newSkill];
-      setSkillsWithDetails(updatedSkills);
-      updateParentSkills(updatedSkills);
-      setCustomSkillInput('');
-      setShowCustomInput(false);
-    }
-  };
 
   /**
    * Remove a skill from selections (used by overlay component)
@@ -220,14 +204,12 @@ export const SkillsMiniSurvey = ({
   const handleNext = () => {
     if (currentStep < totalSteps - 1) {
       setCurrentStep(prev => prev + 1);
-      setShowCustomInput(false); // Reset custom input when moving to next step
     }
   };
 
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(prev => prev - 1);
-      setShowCustomInput(false); // Reset custom input when moving to previous step
     }
   };
 
@@ -339,45 +321,6 @@ export const SkillsMiniSurvey = ({
         })}
       </div>
 
-      {/* Condensed custom skill input for current category */}
-      <div className="space-y-2">
-        {!showCustomInput ? (
-          <Button
-            variant="outline"
-            onClick={() => setShowCustomInput(true)}
-            className="w-full h-8 text-xs"
-          >
-            <Plus className="h-3 w-3 mr-1" />
-            Add Custom {currentCategory?.title} Skill
-          </Button>
-        ) : (
-          <div className="flex gap-1">
-            <Input
-              placeholder={`Enter custom ${currentCategory?.title.toLowerCase()} skill...`}
-              value={customSkillInput}
-              onChange={(e) => setCustomSkillInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleCustomSkillAdd()}
-              className="h-8 text-xs"
-            />
-            <ModuleButton 
-              onClick={handleCustomSkillAdd} 
-              disabled={!customSkillInput.trim()} 
-              size="sm" 
-              moduleTheme="skills"
-              variant="filled"
-              className="h-8 px-2"
-            >
-              <Check className="h-3 w-3" />
-            </ModuleButton>
-            <Button variant="outline" onClick={() => {
-              setShowCustomInput(false);
-              setCustomSkillInput('');
-            }} size="sm" className="h-8 px-2">
-              Cancel
-            </Button>
-          </div>
-        )}
-      </div>
 
       {/* Condensed navigation */}
       <div className="flex justify-between items-center pt-2">

@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@supabase/auth-helpers-react';
 import SkillCard from './list/SkillCard';
 import { Loader2 } from 'lucide-react';
-import { SkillCategory, SkillRequestType } from './types/skillTypes';
+import { SkillCategory, SkillRequestType, mapToCurrentCategory } from './types/skillTypes';
 import { useCurrentNeighborhood } from '@/hooks/useCurrentNeighborhood';
 
 /**
@@ -105,12 +105,7 @@ const SimplifiedSkillsList: React.FC<SimplifiedSkillsListProps> = ({
         query = query.eq('request_type', 'offer');
       }
 
-      // Filter by category
-      if (selectedCategory) {
-        query = query.eq('skill_category', selectedCategory);
-      }
-
-      // Search filter
+      // Search filter (apply before fetching to reduce data)
       if (searchQuery.trim()) {
         query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
       }
@@ -118,7 +113,7 @@ const SimplifiedSkillsList: React.FC<SimplifiedSkillsListProps> = ({
       // Order by creation date
       query = query.order('created_at', { ascending: false });
 
-      const { data, error } = await query;
+      const { data: allData, error } = await query;
       
       if (error) {
         console.error('[SimplifiedSkillsList] Error fetching skills:', {
@@ -127,6 +122,14 @@ const SimplifiedSkillsList: React.FC<SimplifiedSkillsListProps> = ({
           timestamp: new Date().toISOString()
         });
         throw error;
+      }
+
+      // Filter by mapped category (includes legacy category mapping)
+      let data = allData;
+      if (selectedCategory) {
+        data = allData?.filter(skill => 
+          mapToCurrentCategory(skill.skill_category) === selectedCategory
+        ) || [];
       }
 
       console.log('[SimplifiedSkillsList] Successfully fetched skills:', {

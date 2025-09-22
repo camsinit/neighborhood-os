@@ -2,7 +2,7 @@
 /**
  * Comprehensive skill categories for the neighborhood dashboard
  * 
- * This file defines six main categories of skills that neighbors can offer,
+ * This file defines five main categories of skills that neighbors can offer,
  * along with special skills that require additional details from users.
  */
 
@@ -10,82 +10,62 @@ export const SKILL_CATEGORIES = {
   technology: {
     title: "Technology",
     skills: [
-      "Website Help",
-      "Smartphone/Tablet Help", 
-      "Computer Troubleshooting",
-      "Internet Safety",
-      "Computer/Device Repair",
-      "Smart Home Setup",
-      "WiFi Network Setup",
-      "Video Call Help",
-      "Internet Account Help",
-      "Photo Organization",
-      "Data Backup & Recovery"
+      "Computer, Smartphone, Tablet Help",
+      "WiFi Troubleshooting",
+      "Social Media Help",
+      "Photo Organization & Sharing",
+      "Printer Setup & Troubleshooting",
+      "Password Management Help",
+      "Streaming Service Setup",
+      "Kid-Safe Internet Setup"
     ],
   },
   emergency: {
-    title: "Emergency & Safety",
+    title: "Safety and Emergency",
     skills: [
-      "Medical (Doctor, Nurse, EMT)",
       "First Aid/CPR Certified",
-      "Emergency Response Training",
-      "Search and Rescue Experience",
-      "Fire Safety Training",
-      "Crisis Management",
-      "Disaster Preparedness"
+      "Medical Professional (Doctor, Nurse, EMT)",
+      "Home Hazard Assessments",
+      "Babyproofing",
+      "Power Outage Help",
+      "HAM Radio",
+      "Personal Emergency Preparedness",
+      "CERT/CORE-Trained"
     ],
   },
   professional: {
-    title: "Professional Services",
+    title: "Life Skills",
     skills: [
-      "Legal Knowledge",
-      "Financial/Accounting",
-      "Tax Preparation",
-      "Mental Health Support",
-      "Language Translation",
-      "Resume/Job Search Help",
-      "Business Consulting",
-      "Notary Public"
-    ],
-  },
-  maintenance: {
-    title: "Home & Maintenance",
-    skills: [
-      "Construction/Home Repair",
-      "Electrical Work",
-      "Plumbing",
-      "Car Maintenance/Repair",
-      "Solar/Alternative Energy",
-      "Gardening/Landscaping",
-      "Furniture Repair",
-      "Painting",
-      "Yard Work"
+      "Resume & Job Application Help",
+      "Language Practice",
+      "Basic Accounting Support",
+      "College/School Application Help",
+      "Interview Practice",
+      "Basic Legal Support",
+      "Emotional Support & Listening",
+      "Conflict Resolution"
     ],
   },
   care: {
-    title: "Care & Support",
+    title: "Daily Support",
     skills: [
-      "Childcare",
-      "Pet Care",
-      "Elder Care",
-      "Cooking/Meal Preparation",
-      "Grocery Shopping",
-      "Transportation",
-      "House Sitting",
-      "Pet Sitting"
+      "Occasional Childcare",
+      "Occasional Dog Walking",
+      "Elder Companionship",
+      "Meal Exchanges",
+      "House Sitting & Pet Sitting",
+      "Plant Watering"
     ],
   },
   education: {
-    title: "Education & Arts",
+    title: "Learning and Fun",
     skills: [
-      "Tutoring",
-      "Music Lessons",
-      "Art/Craft Instruction",
-      "Language Teaching",
-      "Photography",
-      "Athletic Coaching",
-      "Mentoring",
-      "Workshop Facilitation"
+      "Homework Sessions",
+      "Gardening Tips",
+      "Music Jams",
+      "Arts & Crafts Activities",
+      "Sports",
+      "Hobby Sharing & Teaching"
     ],
   },
 };
@@ -95,25 +75,21 @@ export const SKILL_CATEGORIES = {
  * These skills will trigger a custom input dialog for specificity
  */
 export const SPECIAL_SKILLS = {
-  "Language Translation": {
+  "Language Practice": {
     prompt: "Which languages?",
     placeholder: "Spanish, Mandarin, French"
   },
-  "Tutoring": {
-    prompt: "Which subjects?",
-    placeholder: "Math, Science, English"
-  },
-  "Music Lessons": {
+  "Music Jams": {
     prompt: "Which instruments?",
     placeholder: "Piano, Guitar, Bass"
   },
-  "Athletic Coaching": {
+  "Sports": {
     prompt: "Which sports?",
     placeholder: "Soccer, Basketball, Swimming"
   },
-  "Language Teaching": {
-    prompt: "Which languages?",
-    placeholder: "Spanish, English, Japanese"
+  "Hobby Sharing & Teaching": {
+    prompt: "Which hobby?",
+    placeholder: "Photography, Woodworking, Knitting"
   }
 };
 

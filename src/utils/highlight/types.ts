@@ -4,11 +4,9 @@
  */
 
 // Valid item types that can be highlighted in the UI
-export type HighlightableItemType = 
-  | 'event' 
-  | 'safety' 
-  | 'skills' 
-  | 'goods' 
+export type HighlightableItemType =
+  | 'event'
+  | 'skills'
   | 'neighbors'
   | 'group';
 
