@@ -276,7 +276,7 @@ const EventSheetContent = ({
                 )}
 
                 {/* Action Buttons at bottom of card */}
-                <div className="flex gap-3 mt-6 pt-4 border-t border-gray-200">
+                <div className="flex gap-3 mt-6 pt-4">
                   {isHost && (
                     <Button
                       onClick={() => setIsEditing(true)}
