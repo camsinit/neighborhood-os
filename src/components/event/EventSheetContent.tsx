@@ -231,7 +231,6 @@ const EventSheetContent = ({
                         {formatInNeighborhoodTimezone(parseISO(event.time), 'MMM d', neighborhoodTimezone)}
                       </span>
                       <span className="text-gray-600">•</span>
-                      <Clock className="h-3 w-3 text-gray-500" />
                       <span className="text-gray-600">
                         {formatInNeighborhoodTimezone(parseISO(event.time), 'h:mm a', neighborhoodTimezone)}
                       </span>
