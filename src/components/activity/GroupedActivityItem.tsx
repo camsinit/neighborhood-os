@@ -87,10 +87,7 @@ const GroupedActivityItem = ({ group, onGroupClick }: GroupedActivityItemProps) 
 
   return (
     <Card 
-      className="relative p-3 transition-all duration-200 hover:shadow-md cursor-pointer border-l-4 group bg-white mb-3"
-      style={{
-        borderLeftColor: activityColor
-      }}
+      className="relative p-3 transition-all duration-200 hover:shadow-md cursor-pointer group bg-white mb-3"
       onClick={handleItemClick}
       {...dataAttributes}
     >

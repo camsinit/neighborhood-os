@@ -211,12 +211,6 @@ export const WeeklySummaryEmail = ({
         <Text style={weekAheadHeader}>THE WEEK AHEAD</Text>
         <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.weekAhead }} />
 
-        <Text style={paragraph}>
-          <Link href={`${baseUrl}/n/${neighborhoodId}?utm_source=email&utm_medium=email&utm_campaign=weekly_summary_dashboard`} style={ctaButton}>
-            Visit Your Neighborhood Dashboard
-          </Link>
-        </Text>
-
         {/* Quick Actions Section */}
         <Text style={quickActionsHeader}>🚀 Ways to Get Involved This Week</Text>
         <div style={quickActionsList}>
@@ -246,6 +240,12 @@ export const WeeklySummaryEmail = ({
             </Link>
           </Text>
         </div>
+
+        <Text style={paragraph}>
+          <Link href={`${baseUrl}/n/${neighborhoodId}?utm_source=email&utm_medium=email&utm_campaign=weekly_summary_dashboard`} style={ctaButton}>
+            Visit Your Neighborhood Dashboard
+          </Link>
+        </Text>
 
         <Text style={signoff}>
           Stay neighborly,<br />
