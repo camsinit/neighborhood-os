@@ -15,11 +15,11 @@ interface DescriptionFieldProps {
 // Component for entering the skill description
 const DescriptionField = ({ mode, value, onChange, error }: DescriptionFieldProps) => {
   const placeholder = mode === 'offer' 
-    ? 'Share your expertise and how you can help others learn'
+    ? 'Share your experience, what makes you passionate about this, and how you\'d love to help others learn'
     : 'Share what you hope to learn and achieve';
   
   const label = mode === 'offer' 
-    ? 'Describe your experience and teaching approach' 
+    ? 'Tell us about your experience and how you\'d like to help' 
     : 'What aspects would you like to learn? Any specific goals?';
   
   return (

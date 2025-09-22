@@ -173,18 +173,18 @@ const SkillOfferSheet: React.FC<SkillOfferSheetProps> = ({
         <div className="mt-6">
           <p className="text-sm text-gray-600 mb-4">
             Share your knowledge and skills with your neighbors. Be specific about your experience
-            and how you can help others learn and grow.
+            and how you can help others learn and grow. The standard for skill requests is no longer than 1 hour of help per request.
           </p>
           <div className="w-full max-w-sm mx-auto">
             <form onSubmit={handleSubmit} className="space-y-3">
               {/* Skill title input */}
               <div className="space-y-1">
-                <Label htmlFor="skill-title">What skill can you offer?</Label>
+                <Label htmlFor="skill-title">What would bring you joy to help neighbors with?</Label>
                 <Input
                   id="skill-title"
                   value={skillTitle}
                   onChange={(e) => setSkillTitle(e.target.value)}
-                  placeholder="e.g., Web Design, Guitar Lessons"
+                  placeholder="e.g., Baking, Gardening, Art & Crafts"
                   maxLength={50}
                   required
                   className="w-full"
@@ -210,12 +210,12 @@ const SkillOfferSheet: React.FC<SkillOfferSheetProps> = ({
 
               {/* Description section with compact styling */}
               <div className="space-y-1">
-                <Label htmlFor="skill-description">Describe your experience and teaching approach</Label>
+                <Label htmlFor="skill-description">Tell us about your experience and how you'd like to help</Label>
                 <Textarea
                   id="skill-description"
                   value={skillDescription}
                   onChange={(e) => setSkillDescription(e.target.value)}
-                  placeholder="Share your expertise level, teaching style, availability, and how you can help others learn this skill..."
+                  placeholder="Share your experience, what makes you passionate about this, and how you'd love to help others learn..."
                   className="min-h-[80px] w-full resize-none"
                   maxLength={1000}
                   required

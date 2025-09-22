@@ -17,8 +17,8 @@ interface TitleFieldProps {
 // Component for entering the skill title
 const TitleField = ({ mode, value, onChange, duplicateWarning, error }: TitleFieldProps) => {
   const placeholder = mode === 'offer' 
-    ? 'e.g., Python Programming, Guitar Lessons' 
-    : 'e.g., Learn Python, Guitar Basics';
+    ? 'e.g., Baking, Gardening, Art & Crafts' 
+    : 'e.g., Learn Baking, Basic Gardening';
   
   const label = mode === 'offer' 
     ? 'What would you enjoy helping a neighbor with?' 
