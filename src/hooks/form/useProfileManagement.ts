@@ -27,8 +27,8 @@ export const useProfileManagement = () => {
         address_visible: false,
         years_lived_here: calculateYearsLived(formData.yearMovedIn),
         // skills removed - no longer collected during onboarding
-        // Only mark onboarding as complete if user has uploaded a profile photo
-        completed_onboarding: !!avatarUrl,
+        // Mark onboarding as complete regardless of profile photo upload
+        completed_onboarding: true,
       };
 
       console.log("[useProfileManagement] Upserting profile for user:", userId);
