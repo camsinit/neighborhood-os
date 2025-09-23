@@ -262,6 +262,8 @@ const UnifiedInviteDialog = ({
             inviterName: inviterDisplayName,
             neighborhoodName: currentNeighborhood.name,
             inviteUrl,
+            inviterId: user.id,
+            neighborhoodId: currentNeighborhood.id,
             // Pass context flag so template can say "invited to be an admin" (function can ignore if unsupported)
             isAdminInvite: isAdminMode,
           },

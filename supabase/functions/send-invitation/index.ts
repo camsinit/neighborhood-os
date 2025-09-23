@@ -4,6 +4,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import * as React from 'npm:react@18.3.1'
+import { Resend } from "npm:resend@2.0.0"
 import { BasicInvitationEmail } from './_templates/basic-invitation.tsx'
 import { 
   handleCorsPreflightRequest, 
@@ -18,6 +19,7 @@ const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const resendApiKey = Deno.env.get('RESEND_API_KEY')!
 
 const supabase = createClient(supabaseUrl, supabaseServiceRoleKey)
+const resend = new Resend(resendApiKey)
 
 // Create a logger for this function
 const logger = createLogger('send-invitation');
@@ -199,34 +201,29 @@ serve(async (req) => {
       })
     )
 
-    // Send the email via Resend using consistent from address and subject
-    const emailResponse = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${resendApiKey}`,
-        'Content-Type': 'application/json',
+    // Send the email via Resend using the SDK
+    const emailResponse = await resend.emails.send({
+      from: 'neighborhoodOS <hello@updates.neighborhoodos.com>',
+      to: [recipientEmail],
+      subject: 'Your neighborhood is ready!',
+      html: emailHtml,
+      // Disable Resend's automatic link tracking to prevent URL wrapping
+      tracking: {
+        opens: true,
+        clicks: false,
       },
-      body: JSON.stringify({
-        from: 'neighborhoodOS <hello@updates.neighborhoodos.com>',
-        to: [recipientEmail],
-        // Updated subject to match the requested copy
-        subject: 'Your neighborhood is ready!',
-        html: emailHtml,
-      }),
     })
 
-    if (!emailResponse.ok) {
-      const errorData = await emailResponse.json()
-      logger.error('Resend API error:', errorData);
-      throw new Error(`Resend API error: ${errorData.message || 'Unknown error'}`)
+    if (emailResponse.error) {
+      logger.error('Resend API error:', emailResponse.error);
+      throw new Error(`Resend API error: ${emailResponse.error.message || 'Unknown error'}`)
     }
 
-    const emailData = await emailResponse.json()
-    logger.info(`Invitation email sent successfully to: ${recipientEmail}`, emailData);
+    logger.info(`Invitation email sent successfully to: ${recipientEmail}`, emailResponse.data);
 
     return successResponse(
       { 
-        emailId: emailData.data?.id,
+        emailId: emailResponse.data?.id,
         resolvedData: {
           actorName,
           neighborhoodName: resolvedNeighborhoodName,

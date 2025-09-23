@@ -26,6 +26,16 @@ import { createLogger } from "@/utils/logger";
 const logger = createLogger('InviteDialog');
 
 /**
+ * Get the correct base URL for invite links
+ * Uses production domain in production, fallback to current origin for development
+ */
+const getBaseUrl = (): string => {
+  // For email links we want a stable, public domain that works for recipients
+  // outside our preview environment. So we ALWAYS use production here.
+  return 'https://neighborhoodos.com';
+};
+
+/**
  * InviteDialog Component
  * 
  * This component allows existing neighborhood members to invite others.
@@ -216,10 +226,12 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
 
       const { error: emailError } = await supabase.functions.invoke('send-invitation', {
         body: {
-          email: email.trim(),
+          recipientEmail: email.trim(),
           inviterName: inviterDisplayName,
           neighborhoodName: currentNeighborhood.name,
-          inviteCode: inviteCode
+          inviteUrl: `${getBaseUrl()}/join/${inviteCode}`,
+          inviterId: user.id,
+          neighborhoodId: currentNeighborhood.id
         }
       });
 
