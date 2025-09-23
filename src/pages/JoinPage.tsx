@@ -99,12 +99,25 @@ const JoinPage = () => {
         const result = neighborhoodData[0];
         console.log("[JoinPage] Neighborhood data loaded:", result);
 
-        // Check if invitation is still pending
+        // Check if invitation is still pending (unless it's a group invite)
         if (result.invitation_status !== 'pending') {
-          console.error("[JoinPage] Invitation status is not pending:", result.invitation_status);
-          setError("This invite link has already been used.");
-          setIsLoading(false);
-          return;
+          // For group invites (email is null), allow reuse even if status is 'accepted'
+          const { data: inviteRow } = await supabase
+            .from('invitations')
+            .select('email')
+            .eq('invite_code', inviteCode)
+            .maybeSingle();
+          
+          const isGroupInvite = inviteRow?.email === null;
+          
+          if (!isGroupInvite) {
+            console.error("[JoinPage] Invitation status is not pending and not a group invite:", result.invitation_status);
+            setError("This invite link has already been used.");
+            setIsLoading(false);
+            return;
+          } else {
+            console.log("[JoinPage] Group invite detected - allowing reuse despite status:", result.invitation_status);
+          }
         }
 
         // Set the neighborhood preview data with inviter information
@@ -201,7 +214,7 @@ const JoinPage = () => {
         throw memberError;
       }
 
-      console.log("[JoinPage] Marking invitation as accepted");
+      console.log("[JoinPage] Getting invitation details");
       
       // Get invitation details to notify inviter and admin
       const { data: inviteData } = await supabase
@@ -209,24 +222,34 @@ const JoinPage = () => {
         .select(`
           inviter_id,
           neighborhood_id,
+          email,
           neighborhoods:neighborhood_id (created_by)
         `)
         .eq('invite_code', inviteCode)
         .single();
       
-      // Mark the invitation as accepted
-      const { error: inviteError } = await supabase
-        .from('invitations')
-        .update({
-          status: 'accepted',
-          accepted_by_id: user.id,
-          accepted_at: new Date().toISOString()
-        })
-        .eq('invite_code', inviteCode);
+      // Check if this is a group invite (email is null)
+      const isGroupInvite = inviteData?.email === null;
+      
+      if (!isGroupInvite) {
+        console.log("[JoinPage] Marking regular invitation as accepted");
+        // Mark regular invitations as accepted (single-use)
+        const { error: inviteError } = await supabase
+          .from('invitations')
+          .update({
+            status: 'accepted',
+            accepted_by_id: user.id,
+            accepted_at: new Date().toISOString()
+          })
+          .eq('invite_code', inviteCode);
 
-      if (inviteError) {
-        console.warn("[JoinPage] Failed to update invitation status:", inviteError);
-        // Don't fail the join process for this
+        if (inviteError) {
+          console.warn("[JoinPage] Failed to update invitation status:", inviteError);
+          // Don't fail the join process for this
+        }
+      } else {
+        console.log("[JoinPage] Group invite detected - keeping status unchanged for reusability");
+        // For group invites, don't change the status - keep them reusable
       }
 
       // Send invitation accepted notifications
