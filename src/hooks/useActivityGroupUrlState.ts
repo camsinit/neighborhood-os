@@ -43,7 +43,7 @@ export function useActivityGroupUrlState(
     ? detailParam
     : null;
 
-  // Debug initial URL parsing
+  // Debug initial URL parsing - force deploy test
   logger.info(`🚀 useActivityGroupUrlState initialized - detail: "${detailParam}", type: "${typeParam}", groupId: "${groupId}"`);
 
   // Sheet should be open if we have a valid activity group URL
