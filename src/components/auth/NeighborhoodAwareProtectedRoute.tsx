@@ -1,10 +1,11 @@
 /**
  * NeighborhoodAwareProtectedRoute component
- * 
+ *
  * Enhanced version of ProtectedRoute that handles neighborhood-specific routing.
  * Supports both legacy routes and new neighborhood-specific URLs.
  * Provides special handling for super admins to access any neighborhood.
  */
+import { useEffect } from "react";
 import { useUser, useSessionContext } from "@supabase/auth-helpers-react";
 import { Navigate, useLocation, useParams } from "react-router-dom";
 import { useNeighborhood } from "@/contexts/neighborhood";
@@ -42,6 +43,27 @@ const NeighborhoodAwareProtectedRoute = ({ children }: NeighborhoodAwareProtecte
   // Check if we're on a neighborhood-specific route
   const neighborhoodIdFromUrl = params.neighborhoodId;
   const isNeighborhoodRoute = location.pathname.startsWith('/n/');
+
+  // Add debug logging for specific user having issues
+  useEffect(() => {
+    if (user?.id === '74bf3085-8275-4eb2-a721-8c8e91b3d3d8') {
+      console.log('[DEBUG - User 74bf...] NeighborhoodAwareProtectedRoute - Analysis:', {
+        fullPath: location.pathname,
+        search: location.search,
+        allParams: params,
+        neighborhoodIdFromUrl,
+        isNeighborhoodRoute,
+        currentNeighborhoodId: currentNeighborhood?.id,
+        isSuperAdmin,
+        isLoadingAuth,
+        isLoadingNeighborhood,
+        isLoadingSuperAdmin,
+        willRedirectToLanding: !user || !session,
+        hasNeighborhood: !!currentNeighborhood,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }, [location.pathname, location.search, neighborhoodIdFromUrl, currentNeighborhood?.id, user?.id, session, isSuperAdmin]);
 
   const isDebugMode = window.location.search.includes('debug=true');
   if (isDebugMode) {
