@@ -199,7 +199,13 @@ const App = () => {
                       </NeighborhoodAwareProtectedRoute>
                     }
                   />
-                  
+
+                  {/* Base neighborhood route - redirect to home */}
+                  <Route
+                    path="/n/:neighborhoodId"
+                    element={<Navigate to="/n/:neighborhoodId/home" replace />}
+                  />
+
                   {/* Neighborhood-specific routes with MainLayout */}
                   <Route
                     path="/n/:neighborhoodId/home"
