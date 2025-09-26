@@ -43,12 +43,16 @@ export function useActivityGroupUrlState(
     ? detailParam
     : null;
 
+  // Debug initial URL parsing
+  logger.info(`🚀 useActivityGroupUrlState initialized - detail: "${detailParam}", type: "${typeParam}", groupId: "${groupId}"`);
+
   // Sheet should be open if we have a valid activity group URL
   const isSheetOpen = Boolean(groupId && typeParam === 'activity_group');
 
   // Effect to find and set the active group based on URL
   useEffect(() => {
-    logger.info(`Activity group URL state - groupId: ${groupId}, availableGroups: ${availableGroups.length}`);
+    logger.info(`🔍 Activity group URL state - groupId: ${groupId}, availableGroups: ${availableGroups.length}`);
+    logger.info(`🔍 URL params - detail: ${detailParam}, type: ${typeParam}`);
 
     if (groupId && availableGroups.length > 0) {
       // Log all available group IDs for debugging
@@ -59,25 +63,26 @@ export function useActivityGroupUrlState(
         activityType: g.primaryActivity.activity_type,
         actorId: g.primaryActivity.actor_id
       }));
-      logger.info(`Available activity groups:`, availableIds);
+      logger.info(`🔍 Available activity groups:`, availableIds);
+      logger.info(`🔍 Looking for group ID: ${groupId}`);
 
       // Find the group by ID
       const group = availableGroups.find(g => createGroupUrlId(g) === groupId);
 
       if (group) {
         setActiveGroup(group);
-        logger.info(`Found activity group for URL ID: ${groupId}`, group);
+        logger.info(`✅ Found activity group for URL ID: ${groupId}`, group);
       } else {
-        logger.warn(`No activity group found for URL ID: ${groupId}`);
-        logger.warn(`Expected one of: ${availableIds.map(g => g.id).join(', ')}`);
-        logger.warn(`URL will not work - no real grouped activities match this pattern`);
+        logger.warn(`❌ No activity group found for URL ID: ${groupId}`);
+        logger.warn(`❌ Expected one of: ${availableIds.map(g => g.id).join(', ')}`);
+        logger.warn(`❌ URL will not work - no real grouped activities match this pattern`);
         setActiveGroup(null);
       }
     } else if (!groupId) {
       // Clear active group when no group ID
       setActiveGroup(null);
     } else if (groupId && availableGroups.length === 0) {
-      logger.warn(`Activity group URL provided but no groups available yet: ${groupId}`);
+      logger.warn(`⏳ Activity group URL provided but no groups available yet: ${groupId}`);
     }
   }, [groupId, availableGroups]);
 
