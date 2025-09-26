@@ -80,3 +80,13 @@ export const getSafetyURL = (neighborhoodId: string, safetyId: string): string =
   const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/safety?highlight=safety&type=safety_updates&id=${safetyId}`;
   return addEmailTrackingParams(url, "weekly_summary_safety_item", "email");
 };
+
+/**
+ * Generate URL for activity groups (like neighbor's skills panel)
+ * Uses the new activity group URL pattern: ?detail=group-{userId}-{activityType}&type=activity_group
+ */
+export const getNeighborSkillsGroupURL = (neighborhoodId: string, userId: string): string => {
+  const groupId = `group-${userId}-skill-offered`;
+  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}?detail=${groupId}&type=activity_group`;
+  return addEmailTrackingParams(url, "weekly_summary_neighbor_skills", "email");
+};

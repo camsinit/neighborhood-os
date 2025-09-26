@@ -107,6 +107,7 @@ interface WeeklySummaryEmailProps {
       groupsSuggestion: string
     }
   }
+  getNeighborSkillsGroupURL: (neighborhoodId: string, userId: string) => string
 }
 
 export const WeeklySummaryEmail = ({
@@ -118,6 +119,7 @@ export const WeeklySummaryEmail = ({
   stats,
   highlights,
   aiContent,
+  getNeighborSkillsGroupURL,
 }: WeeklySummaryEmailProps) => (
   <Html>
     <Head />
@@ -154,14 +156,14 @@ export const WeeklySummaryEmail = ({
                     <Link href={`${baseUrl}/n/${neighborhoodId}/skills?highlight=skill&type=skills_exchange&id=${person.topSkills[0].id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_skill`} style={skillNameLink}>
                       {person.topSkills[0].title}
                     </Link>
-                    {' '}- <Link href={person.neighborProfileUrl} style={neighborNameLink}><strong>{person.neighborName}</strong></Link>{' '}
+                    {' '}- <Link href={person.neighborProfileUrl} style={neighborNameLink}><strong>{person.neighborName.split(' ')[0]}</strong></Link>{' '}
                     {getSkillContext(person.topSkills[0].title, person.topSkills[0].category, person.neighborName, person.topSkills[0].requestType)}
                   </Text>
                 ) : (
                   // Multiple skills - group them
                   <Text style={skillItem}>
                     →{' '}
-                    <Link href={person.neighborProfileUrl} style={neighborNameLink}><strong>{person.neighborName}</strong></Link>
+                    <Link href={person.neighborProfileUrl} style={neighborNameLink}><strong>{person.neighborName.split(' ')[0]}</strong></Link>
                     {' '}shared {person.skillCount} skills this week, including{' '}
                     {person.topSkills.map((skill, skillIndex) => (
                       <span key={skillIndex}>
@@ -174,8 +176,8 @@ export const WeeklySummaryEmail = ({
                     {person.skillCount > 3 && (
                       <>
                         {' '}and {person.skillCount - 3} more.{' '}
-                        <Link href={person.neighborProfileUrl} style={browseAllLink}>
-                          View all of {person.neighborName}'s offerings →
+                        <Link href={getNeighborSkillsGroupURL(neighborhoodId, person.neighborUserId)} style={browseAllLink}>
+                          View all of {person.neighborName.split(' ')[0]}'s offerings →
                         </Link>
                       </>
                     )}

@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { createLogger } from '@/utils/logger';
 import { groupByTimeInterval, getNonEmptyTimeGroups } from '@/utils/timeGrouping';
 import { groupActivities, ActivityGroup } from '@/utils/activityGrouping';
+import { useActivityGroupUrlState } from '@/hooks/useActivityGroupUrlState';
 
 // Create a dedicated logger for this component
 const logger = createLogger('ActivityFeed');
@@ -36,9 +37,7 @@ const ActivityFeed = () => {
   } = usePaginatedActivities();
   
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
-  const [selectedGroup, setSelectedGroup] = useState<ActivityGroup | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [groupPanelOpen, setGroupPanelOpen] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
   // Enhanced logging for debugging
@@ -127,11 +126,10 @@ const ActivityFeed = () => {
     setSheetOpen(true);
   };
 
-  // Handler for grouped activity clicks
+  // Handler for grouped activity clicks - now uses URL state
   const handleGroupClick = (group: ActivityGroup) => {
     logger.info(`Group clicked with ${group.count} activities`);
-    setSelectedGroup(group);
-    setGroupPanelOpen(true);
+    openGroupSheet(group);
   };
 
   // Filter out deleted activities
@@ -145,6 +143,15 @@ const ActivityFeed = () => {
 
   // Group activities to prevent flooding
   const activityGroups = groupActivities(filteredActivities);
+
+  // URL-based state management for activity groups
+  const {
+    isSheetOpen: isGroupSheetOpen,
+    groupId: urlGroupId,
+    activeGroup: urlActiveGroup,
+    openGroupSheet,
+    closeGroupSheet
+  } = useActivityGroupUrlState(activityGroups);
   
   // Enhanced logging for what we're displaying
   useEffect(() => {
@@ -279,11 +286,15 @@ const ActivityFeed = () => {
         onOpenChange={setSheetOpen} 
       />
 
-      {/* Grouped activities panel */}
+      {/* Grouped activities panel - now with URL state */}
       <SkillsActivityPanel
-        group={selectedGroup}
-        open={groupPanelOpen}
-        onOpenChange={setGroupPanelOpen}
+        group={urlActiveGroup}
+        open={isGroupSheetOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            closeGroupSheet();
+          }
+        }}
       />
     </>
   );

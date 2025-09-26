@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+import { execSync } from 'child_process';
+
 /**
  * Test Weekly Neighborhood Digest Script
  * 
@@ -111,7 +113,15 @@ async function testFinalNewsletter() {
       console.log('✅ NO safety content (table dropped)');
       console.log('✅ NO goods content (table dropped)');
       console.log('✅ Enhanced error logging and debugging');
-      
+
+      // Clean up old newsletter previews automatically
+      try {
+        console.log(`\n🧹 Cleaning up old newsletter previews...`);
+        execSync('node scripts/cleanup-newsletter-previews.js', { stdio: 'inherit' });
+      } catch (error) {
+        console.log(`⚠️  Note: Could not clean up old previews (${error.message})`);
+      }
+
     } else {
       console.log('\n✅ FINAL Test email sent successfully!');
       console.log('📧 Check your inbox for the current-system newsletter');
