@@ -173,9 +173,9 @@ export const WeeklySummaryEmail = ({
                         {skillIndex < person.topSkills.length - 1 ? ', ' : ''}
                       </span>
                     ))}
-                    {person.skillCount > 3 && (
+                    {person.skillCount > 1 && (
                       <>
-                        {' '}and {person.skillCount - 3} more.{' '}
+                        {person.skillCount > 3 ? ` and ${person.skillCount - 3} more.` : ''}{' '}
                         <Link href={getNeighborSkillsGroupURL(neighborhoodId, person.neighborUserId)} style={browseAllLink}>
                           View all of {person.neighborName.split(' ')[0]}'s offerings →
                         </Link>

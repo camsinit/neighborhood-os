@@ -86,7 +86,9 @@ export const getSafetyURL = (neighborhoodId: string, safetyId: string): string =
  * Uses the new activity group URL pattern: ?detail=group-{userId}-{activityType}&type=activity_group
  */
 export const getNeighborSkillsGroupURL = (neighborhoodId: string, userId: string): string => {
-  const groupId = `group-${userId}-skill-offered`;
+  // Match the frontend logic exactly: activity_type='skill_offered' gets converted to 'skill-offered'
+  const activityType = 'skill_offered'.replace('_', '-'); // Converts to 'skill-offered'
+  const groupId = `group-${userId}-${activityType}`;
   const url = `${getEmailBaseUrl()}/n/${neighborhoodId}?detail=${groupId}&type=activity_group`;
   return addEmailTrackingParams(url, "weekly_summary_neighbor_skills", "email");
 };

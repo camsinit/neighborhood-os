@@ -81,7 +81,7 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
   return (
     <div className="space-y-1">
 
-      {/* Invite button - moved below settings, using bold on hover instead of color change */}
+      {/* Invite button - using bold on hover instead of color change */}
       <button
         onClick={handleInviteClick}
         className="flex items-center gap-3 px-3 py-2 text-gray-900 rounded-lg transition-all hover:font-semibold w-full text-left"
@@ -89,6 +89,22 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
         <UserPlus className="h-5 w-5 flex-shrink-0" />
         Invite Neighbor
       </button>
+
+      {/* Settings navigation - right below Invite Neighbor, using bold on hover instead of color change */}
+      <NavLink
+        to={getNeighborhoodAwarePath("/settings")}
+        className={({ isActive }) =>
+          cn(
+            "flex items-center gap-3 px-3 py-2 text-gray-900 rounded-lg transition-all",
+            isActive
+              ? "text-gray-900 font-semibold"
+              : "hover:font-semibold"
+          )
+        }
+      >
+        <Settings className="h-5 w-5 flex-shrink-0" />
+        Settings
+      </NavLink>
 
       {/* Modules navigation - using bold on hover instead of color change */}
       <NavLink

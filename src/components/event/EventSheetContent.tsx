@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import ShareButton from "@/components/ui/share-button";
 import EventForm from "../events/EventForm";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash, Calendar, MapPin, Clock, Download } from "lucide-react";
+import { Edit, Trash, Calendar, MapPin, Clock, Download, Users } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -30,6 +30,8 @@ import EventDescription from "./details/EventDescription";
 import EventRSVPButton from "./details/EventRSVPButton";
 import EventAttendeesList from "./details/EventAttendeesList";
 import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
+import { useNavigate } from "react-router-dom";
+import { createItemNavigationService } from "@/services/navigation/ItemNavigationService";
 
 /**
  * EventSheetContent component displays the full details of an event
@@ -51,6 +53,7 @@ const EventSheetContent = ({
   // Get current authenticated user
   const user = useUser();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   
   // State for neighborhood timezone and edit mode
   const [neighborhoodTimezone, setNeighborhoodTimezone] = useState<string>('America/Los_Angeles');
@@ -67,6 +70,16 @@ const EventSheetContent = ({
   
   // Check if current user is the event host
   const isHost = user?.id === event.host_id;
+
+  // Handle group navigation
+  const handleGroupClick = () => {
+    if (event.group?.id) {
+      const navigationService = createItemNavigationService(navigate);
+      navigationService.navigateToItem('group', event.group.id, { 
+        showToast: false 
+      });
+    }
+  };
 
   // Prepare initial values for the event form
   const initialValues = {
@@ -271,6 +284,21 @@ const EventSheetContent = ({
                 {event.description && (
                   <div className="mt-3 pt-3 border-t border-gray-200">
                     <p className="text-sm text-gray-600 whitespace-pre-wrap">{event.description}</p>
+                  </div>
+                )}
+
+                {/* Group Affiliation - Purple section if event belongs to a group */}
+                {event.group && (
+                  <div className="mt-3 pt-3 border-t border-gray-200">
+                    <div 
+                      className="flex items-center gap-2 cursor-pointer hover:bg-purple-50 p-2 rounded-lg transition-colors"
+                      onClick={handleGroupClick}
+                    >
+                      <Users className="h-4 w-4 text-purple-600" />
+                      <span className="text-sm font-bold text-purple-700 hover:text-purple-800">
+                        {event.group.name}
+                      </span>
+                    </div>
                   </div>
                 )}
 

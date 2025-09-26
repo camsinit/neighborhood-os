@@ -48,7 +48,19 @@ export function useActivityGroupUrlState(
 
   // Effect to find and set the active group based on URL
   useEffect(() => {
+    logger.info(`Activity group URL state - groupId: ${groupId}, availableGroups: ${availableGroups.length}`);
+
     if (groupId && availableGroups.length > 0) {
+      // Log all available group IDs for debugging
+      const availableIds = availableGroups.map(g => ({
+        id: createGroupUrlId(g),
+        type: g.type,
+        count: g.count,
+        activityType: g.primaryActivity.activity_type,
+        actorId: g.primaryActivity.actor_id
+      }));
+      logger.info(`Available activity groups:`, availableIds);
+
       // Find the group by ID
       const group = availableGroups.find(g => createGroupUrlId(g) === groupId);
 
@@ -57,11 +69,15 @@ export function useActivityGroupUrlState(
         logger.info(`Found activity group for URL ID: ${groupId}`, group);
       } else {
         logger.warn(`No activity group found for URL ID: ${groupId}`);
+        logger.warn(`Expected one of: ${availableIds.map(g => g.id).join(', ')}`);
+        logger.warn(`URL will not work - no real grouped activities match this pattern`);
         setActiveGroup(null);
       }
     } else if (!groupId) {
       // Clear active group when no group ID
       setActiveGroup(null);
+    } else if (groupId && availableGroups.length === 0) {
+      logger.warn(`Activity group URL provided but no groups available yet: ${groupId}`);
     }
   }, [groupId, availableGroups]);
 

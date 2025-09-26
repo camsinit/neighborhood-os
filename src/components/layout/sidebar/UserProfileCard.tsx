@@ -1,7 +1,6 @@
-import { Link } from "react-router-dom";
 import { useUser } from "@supabase/auth-helpers-react";
 import { useNeighborhood } from "@/contexts/neighborhood";
-import { Settings, Eye } from "lucide-react";
+import { Eye } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -101,14 +100,6 @@ const UserProfileCard = () => {
           )}
         </div>
         
-        {/* Settings Gear Icon */}
-        <Link 
-          to={currentNeighborhood ? `/n/${currentNeighborhood.id}/settings` : "/settings"}
-          className="p-1 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
-          aria-label="Open settings"
-        >
-          <Settings className="h-4 w-4" />
-        </Link>
       </div>
     </div>
   );

@@ -44,8 +44,8 @@ export const groupActivities = (activities: Activity[]): ActivityGroup[] => {
     // Create group with the primary activity plus similar ones
     const groupActivities = [activity, ...similarActivities];
     
-    // Only group if we have 3 or more activities
-    if (groupActivities.length >= 3) {
+    // Only group if we have 2 or more activities
+    if (groupActivities.length >= 2) {
       groups.push({
         id: `group-${activity.id}`,
         type: 'grouped',

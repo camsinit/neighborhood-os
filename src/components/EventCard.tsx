@@ -127,8 +127,17 @@ const EventCard = ({
     </EditEventDialog>
   ) : null;
 
-  // Determine event color based on RSVP status
+  // Determine event color based on RSVP status and group affiliation
   const getEventColor = () => {
+    // Group events get purple styling
+    if (event.group) {
+      if (isRsvped) {
+        return "border-purple-400 bg-purple-200";
+      }
+      return "border-purple-300 bg-purple-100";
+    }
+    
+    // Regular events use blue/gray styling
     if (isRsvped) {
       return "border-blue-300 bg-blue-100";
     }
@@ -166,7 +175,7 @@ const EventCard = ({
         <div className="mt-1">
           <Badge 
             variant="secondary" 
-            className="text-xs px-1 py-0 h-4 bg-purple-100 text-purple-700 border-purple-200"
+            className="text-xs px-1 py-0 h-4 bg-purple-200 text-purple-800 border-purple-300 font-medium"
           >
             {event.group.name}
           </Badge>
