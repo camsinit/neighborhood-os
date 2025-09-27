@@ -5,3 +5,4 @@
 [build.environment]
   NODE_VERSION = "20"
   NPM_FLAGS = "--legacy-peer-deps"
+  FORCE_REBUILD = "2025-09-27-12:20"
