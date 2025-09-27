@@ -24,6 +24,9 @@ const logger = createLogger('ActivityFeed');
  * Also listens for events to auto-refresh the feed when new content is added
  */
 const ActivityFeed = () => {
+  // Basic component rendering verification
+  console.log('🎯 ActivityFeed component is rendering');
+
   // State for controlling displayed items
   const [displayCount, setDisplayCount] = useState(4);
   const {
