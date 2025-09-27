@@ -9,7 +9,7 @@ import { WelcomePopover } from "@/components/onboarding/WelcomePopover";
 
 const HomePage = () => {
   // Debug log to verify HomePage rendering
-  console.log('🏠 HomePage component is rendering');
+  console.error('🏠 HomePage component is rendering - DEBUG LOG');
 
   // State for controlling the welcome popover visibility
   const [showWelcomePopover, setShowWelcomePopover] = useState(false);

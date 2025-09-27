@@ -25,7 +25,7 @@ const logger = createLogger('ActivityFeed');
  */
 const ActivityFeed = () => {
   // Basic component rendering verification
-  console.log('🎯 ActivityFeed component is rendering');
+  console.error('🎯 ActivityFeed component is rendering - DEBUG LOG');
 
   // State for controlling displayed items
   const [displayCount, setDisplayCount] = useState(4);

@@ -31,7 +31,7 @@ interface UseActivityGroupUrlStateReturn {
 export function useActivityGroupUrlState(
   availableGroups: ActivityGroup[]
 ): UseActivityGroupUrlStateReturn {
-  console.log('🎯 useActivityGroupUrlState hook called with', availableGroups.length, 'groups');
+  console.error('🎯 useActivityGroupUrlState hook called with', availableGroups.length, 'groups - DEBUG LOG');
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeGroup, setActiveGroup] = useState<ActivityGroup | null>(null);

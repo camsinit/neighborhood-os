@@ -126,7 +126,7 @@ const NeighborhoodAwareProtectedRoute = ({ children }: NeighborhoodAwareProtecte
     }
     
     // Regular users can only access their own neighborhood
-    console.log('🔐 Neighborhood access check:', {
+    console.error('🔐 Neighborhood access check - DEBUG LOG:', {
       currentNeighborhoodId: currentNeighborhood?.id,
       neighborhoodIdFromUrl,
       match: currentNeighborhood?.id === neighborhoodIdFromUrl
