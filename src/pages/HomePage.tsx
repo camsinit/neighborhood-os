@@ -8,8 +8,9 @@ import { NotificationsList } from "@/notifications/NotificationsList";
 import { WelcomePopover } from "@/components/onboarding/WelcomePopover";
 
 const HomePage = () => {
-  // Debug log to verify HomePage rendering
-  console.error('🏠 HomePage component is rendering - DEBUG LOG');
+  // Debug log to verify HomePage rendering - FORCE DEPLOY TEST
+  console.error('🏠🏠🏠 HomePage component is rendering - FORCE DEPLOY TEST 🏠🏠🏠');
+  alert('HOMEPAGE IS RENDERING - DEPLOY TEST!');
 
   // State for controlling the welcome popover visibility
   const [showWelcomePopover, setShowWelcomePopover] = useState(false);
