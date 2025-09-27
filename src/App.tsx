@@ -200,12 +200,6 @@ const App = () => {
                     }
                   />
 
-                  {/* Base neighborhood route - redirect to home page */}
-                  <Route
-                    path="/n/:neighborhoodId"
-                    element={<Navigate to="/n/:neighborhoodId/home" replace />}
-                  />
-
                   {/* Neighborhood-specific routes with MainLayout */}
                   <Route
                     path="/n/:neighborhoodId/home"
