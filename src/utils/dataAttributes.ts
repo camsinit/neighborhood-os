@@ -16,7 +16,8 @@ const DATA_ATTRIBUTE_MAP: Record<HighlightableItemType, string> = {
   neighbors: 'data-neighbor-id',
   group: 'data-group-id',
   goods: 'data-goods-id',
-  safety: 'data-safety-id'
+  safety: 'data-safety-id',
+  activity_group: 'data-activity-group-id'
 };
 
 /**

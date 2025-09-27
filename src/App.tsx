@@ -59,10 +59,10 @@ const App = () => {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <SessionContextProvider supabaseClient={supabase}>
-          <NeighborhoodProvider>
-            <TooltipProvider>
-              <Toaster />
-              <BrowserRouter>
+          <TooltipProvider>
+            <Toaster />
+            <BrowserRouter>
+              <NeighborhoodProvider>
                 <Routes>
                   {/* Public routes - accessible without authentication */}
                   <Route path="/" element={<LandingPage />} />
@@ -229,9 +229,9 @@ const App = () => {
                   {/* Catch-all: send any unknown route to LandingPage */}
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
-              </BrowserRouter>
-            </TooltipProvider>
-          </NeighborhoodProvider>
+              </NeighborhoodProvider>
+            </BrowserRouter>
+          </TooltipProvider>
         </SessionContextProvider>
       </QueryClientProvider>
     </ErrorBoundary>

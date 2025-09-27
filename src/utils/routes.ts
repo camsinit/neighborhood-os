@@ -34,6 +34,7 @@ export const ROUTE_MAP: Record<HighlightableItemType, string> = {
   group: BASE_ROUTES.neighbors, // Groups are served at the neighbors route
   goods: BASE_ROUTES.goods,
   safety: BASE_ROUTES.safety,
+  activity_group: BASE_ROUTES.home, // Activity groups are served at the home route
 };
 
 /**

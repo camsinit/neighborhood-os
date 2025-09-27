@@ -27,7 +27,8 @@ const CONTENT_TYPE_NAMES: Record<HighlightableItemType, string> = {
   skills: 'Skill',
   goods: 'Item',
   neighbors: 'Neighbor',
-  group: 'Group'
+  group: 'Group',
+  activity_group: 'Activity Group'
 };
 
 /**
