@@ -126,18 +126,34 @@ const NeighborhoodAwareProtectedRoute = ({ children }: NeighborhoodAwareProtecte
     }
     
     // Regular users can only access their own neighborhood
+    console.log('🔐 Neighborhood access check:', {
+      currentNeighborhoodId: currentNeighborhood?.id,
+      neighborhoodIdFromUrl,
+      match: currentNeighborhood?.id === neighborhoodIdFromUrl
+    });
+
     if (currentNeighborhood?.id === neighborhoodIdFromUrl) {
+      console.log('✅ Neighborhood access granted - rendering children');
       return <>{children}</>;
     }
     
     // If user tries to access a neighborhood they don't belong to, redirect to their neighborhood
     if (currentNeighborhood?.id && currentNeighborhood.id !== neighborhoodIdFromUrl) {
       const redirectPath = location.pathname.replace(`/n/${neighborhoodIdFromUrl}`, `/n/${currentNeighborhood.id}`);
+      console.log('🚫 Neighborhood access denied - redirecting:', { redirectPath });
       if (isDebugMode) {
         logger.info("Redirecting to user's neighborhood", { redirectPath });
       }
       return <Navigate to={redirectPath} replace />;
     }
+
+    // If we get here, something unexpected happened
+    console.log('❓ Unexpected neighborhood routing state:', {
+      currentNeighborhood,
+      neighborhoodIdFromUrl,
+      isNeighborhoodRoute,
+      location: location.pathname
+    });
   }
   
   // Handle legacy routes - redirect to neighborhood-aware URLs if we have a neighborhood
