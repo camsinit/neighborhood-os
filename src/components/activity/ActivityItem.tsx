@@ -83,6 +83,12 @@ const getActivityBadgeLabel = (activityType: string, metadata?: any): string => 
     case 'profile_updated':
       return 'Profile Updated';
       
+    // Group activities
+    case 'group_created':
+      return 'New Group';
+    case 'group_joined':
+      return 'Group Joined';
+      
     default:
       return 'Update';
   }
@@ -315,6 +321,8 @@ const ActivityItem = ({
                           ? 'joined the neighborhood!'
                           : activity.activity_type === 'profile_updated'
                           ? 'updated profile'
+                          : activity.activity_type === 'group_created'
+                          ? 'created the group'
                           : 'updated'
                         }
                       </span>
