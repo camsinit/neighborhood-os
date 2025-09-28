@@ -329,10 +329,10 @@ const handler = async (req: Request): Promise<Response> => {
     weekAgo.setDate(weekAgo.getDate() - 7);
     const weekAgoISO = weekAgo.toISOString();
     
-    // Get neighborhood info
+    // Get neighborhood info including cover image
     const { data: neighborhood } = await supabase
       .from('neighborhoods')
-      .select('name')
+      .select('name, invite_header_image_url')
       .eq('id', neighborhoodId)
       .single();
     
@@ -710,6 +710,7 @@ const handler = async (req: Request): Promise<Response> => {
         memberName: testEmail ? 'Test User' : 'Neighbor',
         weekOf,
         baseUrl: 'https://neighborhoodos.com', // Use production URL directly
+        coverImageUrl: neighborhood.invite_header_image_url,
         stats,
         highlights,
         aiContent // Pass AI-generated content to email template

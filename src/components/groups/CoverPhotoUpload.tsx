@@ -35,8 +35,8 @@ export const CoverPhotoUpload: React.FC<CoverPhotoUploadProps> = ({
         return;
       }
 
-      // Upload the image directly to the images bucket with user-specific folder
-      const imageUrl = await handleImageUpload(file, 'images', `groups/${user.id}`);
+      // Upload the image directly to the neighborhood-assets bucket with user-specific folder
+      const imageUrl = await handleImageUpload(file, 'neighborhood-assets', `group-covers/${user.id}`);
       if (imageUrl) {
         onCoverPhotoChange(imageUrl);
       } else {

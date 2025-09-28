@@ -41,6 +41,7 @@ interface WeeklySummaryEmailProps {
   memberName: string
   weekOf: string
   baseUrl: string
+  coverImageUrl?: string
   stats: {
     newMembers: number
     upcomingEvents: number
@@ -110,6 +111,7 @@ export const WeeklySummaryEmail = ({
   memberName,
   weekOf,
   baseUrl,
+  coverImageUrl,
   stats,
   highlights,
   aiContent,
@@ -119,11 +121,23 @@ export const WeeklySummaryEmail = ({
     <Preview>{neighborhoodName} Weekly Neighborhood Digest</Preview>
     <Body style={main}>
       <Container style={container}>
-        
-        {/* Weekly digest header */}
-        <Text style={digestHeader}>{neighborhoodName}</Text>
-        <Text style={digestSubheader}>Week of {weekOf}</Text>
-        
+
+        {/* Cover image header or text fallback */}
+        {coverImageUrl ? (
+          <div style={coverImageContainer}>
+            <img src={coverImageUrl} alt={`${neighborhoodName} neighborhood`} style={coverImageStyle} />
+            <div style={overlayContainer}>
+              <Text style={overlayTitle}>{neighborhoodName}</Text>
+              <Text style={overlayDate}>Week of {weekOf}</Text>
+            </div>
+          </div>
+        ) : (
+          <>
+            <Text style={digestHeader}>{neighborhoodName}</Text>
+            <Text style={digestSubheader}>Week of {weekOf}</Text>
+          </>
+        )}
+
         <Text style={greeting}>Hey neighbors!</Text>
 
         {/* This Week Section */}
@@ -257,7 +271,54 @@ const container = {
   maxWidth: '600px',
 };
 
-// Weekly Neighborhood Digest header styles
+// Cover image styles
+const coverImageContainer = {
+  position: 'relative' as const,
+  width: '100%',
+  height: '200px',
+  margin: '0 0 24px 0',
+  borderRadius: '8px',
+  overflow: 'hidden',
+};
+
+const coverImageStyle = {
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover' as const,
+  display: 'block',
+};
+
+const overlayContainer = {
+  position: 'absolute' as const,
+  bottom: '0',
+  left: '0',
+  right: '0',
+  background: 'linear-gradient(transparent, rgba(0, 0, 0, 0.6))',
+  padding: '20px',
+  display: 'flex',
+  flexDirection: 'column' as const,
+  justifyContent: 'flex-end',
+};
+
+const overlayTitle = {
+  fontSize: '24px',
+  lineHeight: '24px',
+  margin: '0 0 4px 0',
+  color: '#ffffff',
+  fontWeight: 'bold',
+  textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)',
+};
+
+const overlayDate = {
+  fontSize: '16px',
+  lineHeight: '24px',
+  margin: '0',
+  color: '#ffffff',
+  textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)',
+  opacity: '0.9',
+};
+
+// Weekly Neighborhood Digest header styles (fallback)
 const digestHeader = {
   color: '#1a1a1a',
   fontSize: '28px',
