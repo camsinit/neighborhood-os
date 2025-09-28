@@ -186,9 +186,13 @@ export const NotificationSettingsTab: React.FC = () => {
   };
 
   /**
-   * Update an email type preference field (disabled for now)
+   * Update an email type preference field (disabled for weekly_summary)
    */
   const updateEmailType = (type: keyof NotificationPreferences['email']['types'], value: boolean) => {
+    // Weekly summary is always enabled - don't allow changes
+    if (type === 'weekly_summary') {
+      return;
+    }
     setPreferences(prev => ({
       ...prev,
       email: {
@@ -283,8 +287,9 @@ const allNotificationSettings = [
                   <div className="flex justify-center">
                     {setting.hasEmail ? (
                       <Switch
-                        checked={setting.emailChecked}
-                        onCheckedChange={setting.onEmailChange}
+                        checked={true}  // Always enabled
+                        onCheckedChange={() => {}}  // Disabled - no change allowed
+                        disabled={true}  // Make it visually disabled
                       />
                     ) : (
                       <span className="text-gray-400 text-sm">—</span>
@@ -298,7 +303,7 @@ const allNotificationSettings = [
           {/* Weekly newsletter info */}
           <div className="mt-6 p-4 bg-blue-50 rounded-lg">
             <p className="text-sm text-blue-700">
-              Your weekly newsletter is sent every Sunday at 9:00 AM with a summary of neighborhood activity and updates.
+              Your weekly newsletter is sent every Sunday at 11:00 AM with a summary of neighborhood activity and updates. The weekly newsletter is enabled for all members to keep everyone connected with the neighborhood.
             </p>
           </div>
         </div>
