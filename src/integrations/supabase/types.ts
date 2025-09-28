@@ -1329,7 +1329,7 @@ export type Database = {
         Returns: number
       }
       check_neighborhood_access: {
-        Args: { neighborhood_id: string }
+        Args: { target_neighborhood_id: string }
         Returns: boolean
       }
       check_neighborhood_limit: {
