@@ -84,11 +84,14 @@ export const getSafetyURL = (neighborhoodId: string, safetyId: string): string =
 /**
  * Generate URL for activity groups (like neighbor's skills panel)
  * Uses the new activity group URL pattern: /home?detail=group-{userId}-{activityType}&type=activity_group
+ *
+ * NOTE: This function is deprecated. Newsletter now uses real activity group IDs
+ * from the actual activity grouping logic instead of synthetic user-based URLs.
  */
-export const getNeighborSkillsGroupURL = (neighborhoodId: string, userId: string): string => {
-  // Match the frontend logic exactly: activity_type='skill_offered' gets converted to 'skill-offered'
-  const activityType = 'skill_offered'.replace('_', '-'); // Converts to 'skill-offered'
-  const groupId = `group-${userId}-${activityType}`;
-  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/home?detail=${groupId}&type=activity_group`;
-  return addEmailTrackingParams(url, "weekly_summary_neighbor_skills", "email");
-};
+// export const getNeighborSkillsGroupURL = (neighborhoodId: string, userId: string): string => {
+//   // Match the frontend logic exactly: activity_type='skill_offered' gets converted to 'skill-offered'
+//   const activityType = 'skill_offered'.replace('_', '-'); // Converts to 'skill-offered'
+//   const groupId = `group-${userId}-${activityType}`;
+//   const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/home?detail=${groupId}&type=activity_group`;
+//   return addEmailTrackingParams(url, "weekly_summary_neighbor_skills", "email");
+// };
