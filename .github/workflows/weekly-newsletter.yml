@@ -1,0 +1,52 @@
+name: Weekly Newsletter Scheduler
+
+on:
+  schedule:
+    # Run every hour on Sundays to catch different timezones
+    # This ensures we hit the 9 AM window for each neighborhood's timezone
+    - cron: '0 * * * 0'  # Every hour on Sunday
+  workflow_dispatch:  # Allow manual triggering for testing
+
+jobs:
+  trigger-newsletter:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Trigger Weekly Digest Scheduler
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          echo "🕐 Checking for neighborhoods ready for Sunday 9 AM digest..."
+
+          # Use curl to call the Supabase edge function
+          RESPONSE=$(curl -X POST \
+            "$SUPABASE_URL/functions/v1/schedule-weekly-digests" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{"trigger": "github-action"}' \
+            --silent --show-error)
+
+          echo "Response: $RESPONSE"
+
+          # Check if the response contains an error
+          if echo "$RESPONSE" | grep -q "error"; then
+            echo "❌ Error triggering newsletter scheduler"
+            exit 1
+          else
+            echo "✅ Newsletter scheduler triggered successfully"
+          fi
+
+      - name: Log Results
+        if: always()
+        run: |
+          echo "Newsletter scheduler run completed at $(date)"
+          echo "Next run will be in 1 hour (if still Sunday)"
