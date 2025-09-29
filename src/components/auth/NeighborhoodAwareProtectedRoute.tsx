@@ -126,11 +126,6 @@ const NeighborhoodAwareProtectedRoute = ({ children }: NeighborhoodAwareProtecte
     }
     
     // Regular users can only access their own neighborhood
-    console.error('🔐 Neighborhood access check - DEBUG LOG:', {
-      currentNeighborhoodId: currentNeighborhood?.id,
-      neighborhoodIdFromUrl,
-      match: currentNeighborhood?.id === neighborhoodIdFromUrl
-    });
 
     if (currentNeighborhood?.id === neighborhoodIdFromUrl) {
       console.log('✅ Neighborhood access granted - rendering children');
