@@ -6,6 +6,7 @@ import React from 'npm:react@18.3.1'
 import { WeeklySummaryEmail } from './_templates/weekly-summary.tsx'
 import { corsHeaders, handleCorsPreflightRequest, successResponse, errorResponse } from '../_shared/cors.ts'
 import { getProfileURL, getEventURL, getSkillURL, getGroupURL } from './_utils/urlGenerator.ts'
+import { convertToSendingDomainUrl } from './_utils/imageProxy.ts'
 
 // Activity grouping logic (copied from frontend)
 interface Activity {
@@ -710,7 +711,7 @@ const handler = async (req: Request): Promise<Response> => {
         memberName: testEmail ? 'Test User' : 'Neighbor',
         weekOf,
         baseUrl: 'https://neighborhoodos.com', // Use production URL directly
-        coverImageUrl: neighborhood.invite_header_image_url,
+        coverImageUrl: convertToSendingDomainUrl(neighborhood.invite_header_image_url),
         stats,
         highlights,
         aiContent // Pass AI-generated content to email template
