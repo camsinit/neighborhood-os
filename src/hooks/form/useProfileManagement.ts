@@ -29,6 +29,19 @@ export const useProfileManagement = () => {
         // skills removed - no longer collected during onboarding
         // Mark onboarding as complete regardless of profile photo upload
         completed_onboarding: true,
+        // IMPORTANT: Set default notification preferences to enable email and weekly digest
+        notification_preferences: {
+          email: {
+            enabled: true,
+            types: {
+              weekly_summary: true,
+              neighbor_activity: true,
+              skill_requests: true,
+              calendar_events: true,
+              group_activity: true
+            }
+          }
+        },
       };
 
       console.log("[useProfileManagement] Upserting profile for user:", userId);

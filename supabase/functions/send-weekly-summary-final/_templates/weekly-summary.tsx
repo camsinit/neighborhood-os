@@ -117,7 +117,10 @@ export const WeeklySummaryEmail = ({
   aiContent,
 }: WeeklySummaryEmailProps) => (
   <Html>
-    <Head />
+    <Head>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <meta httpEquiv="Content-Type" content="text/html; charset=UTF-8" />
+    </Head>
     <Preview>{neighborhoodName} Weekly Neighborhood Digest</Preview>
     <Body style={main}>
       <Container style={container}>
@@ -269,6 +272,12 @@ const container = {
   margin: '0 auto',
   padding: '20px 12px',
   maxWidth: '600px',
+  width: '100%',
+  // Mobile optimization
+  '@media (max-width: 600px)': {
+    padding: '16px 8px',
+    maxWidth: '100%',
+  },
 };
 
 // Cover image styles
@@ -279,6 +288,12 @@ const coverImageContainer = {
   margin: '0 0 24px 0',
   borderRadius: '8px',
   overflow: 'hidden',
+  // Mobile optimization
+  '@media (max-width: 600px)': {
+    height: '150px',
+    margin: '0 0 16px 0',
+    borderRadius: '4px',
+  },
 };
 
 const coverImageStyle = {
@@ -298,6 +313,10 @@ const overlayContainer = {
   display: 'flex',
   flexDirection: 'column' as const,
   justifyContent: 'flex-end',
+  // Mobile optimization
+  '@media (max-width: 600px)': {
+    padding: '12px',
+  },
 };
 
 const overlayTitle = {
@@ -307,6 +326,11 @@ const overlayTitle = {
   color: '#ffffff',
   fontWeight: 'bold',
   textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)',
+  // Mobile optimization
+  '@media (max-width: 600px)': {
+    fontSize: '20px',
+    lineHeight: '20px',
+  },
 };
 
 const overlayDate = {
@@ -316,6 +340,11 @@ const overlayDate = {
   color: '#ffffff',
   textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)',
   opacity: '0.9',
+  // Mobile optimization
+  '@media (max-width: 600px)': {
+    fontSize: '14px',
+    lineHeight: '18px',
+  },
 };
 
 // Weekly Neighborhood Digest header styles (fallback)
@@ -351,6 +380,12 @@ const paragraph = {
   fontSize: '16px',
   lineHeight: '24px',
   margin: '0 0 24px 0',
+  // Mobile optimization
+  '@media (max-width: 600px)': {
+    fontSize: '15px',
+    lineHeight: '22px',
+    margin: '0 0 16px 0',
+  },
 };
 
 const sectionHeader = {
@@ -403,6 +438,14 @@ const ctaButton = {
   fontWeight: '600',
   fontSize: '16px',
   marginTop: '16px',
+  // Mobile optimization
+  '@media (max-width: 600px)': {
+    padding: '10px 20px',
+    fontSize: '15px',
+    marginTop: '12px',
+    display: 'block',
+    textAlign: 'center',
+  },
 };
 
 const footer = {
@@ -430,6 +473,11 @@ const thisWeekTitle = {
   fontSize: '18px',
   fontWeight: 'bold',
   margin: '20px 0 12px 0',
+  // Mobile optimization
+  '@media (max-width: 600px)': {
+    fontSize: '16px',
+    margin: '16px 0 8px 0',
+  },
 };
 
 const weekAheadTitle = {
@@ -437,6 +485,11 @@ const weekAheadTitle = {
   fontSize: '18px',
   fontWeight: 'bold',
   margin: '20px 0 12px 0',
+  // Mobile optimization
+  '@media (max-width: 600px)': {
+    fontSize: '16px',
+    margin: '16px 0 8px 0',
+  },
 };
 
 const getInvolvedTitle = {
@@ -444,6 +497,11 @@ const getInvolvedTitle = {
   fontSize: '18px',
   fontWeight: 'bold',
   margin: '20px 0 12px 0',
+  // Mobile optimization
+  '@media (max-width: 600px)': {
+    fontSize: '16px',
+    margin: '16px 0 8px 0',
+  },
 };
 
 // Theme-colored section headers
@@ -492,6 +550,12 @@ const skillItem = {
   fontSize: '15px',
   lineHeight: '22px',
   margin: '0 0 8px 0',
+  // Mobile optimization
+  '@media (max-width: 600px)': {
+    fontSize: '14px',
+    lineHeight: '20px',
+    margin: '0 0 6px 0',
+  },
 };
 
 // NEW: Skill name links (green theme)
@@ -607,6 +671,12 @@ const eventItem = {
   fontSize: '15px',
   lineHeight: '22px',
   margin: '0 0 8px 0',
+  // Mobile optimization
+  '@media (max-width: 600px)': {
+    fontSize: '14px',
+    lineHeight: '20px',
+    margin: '0 0 6px 0',
+  },
 };
 
 const eventNameLink = {
