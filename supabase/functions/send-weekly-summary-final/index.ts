@@ -742,34 +742,77 @@ const handler = async (req: Request): Promise<Response> => {
     // Determine recipients (test email or all members)
     const recipients = testEmail ? [{ email: testEmail, name: 'Test User' }] : formattedEmails;
 
-    // Send emails
-    const emailPromises = recipients.map(async (recipient) => {
-      if (!recipient.email) return null;
+    // Send emails with rate limiting to respect Resend's 2 requests/second limit
+    const results = [];
 
-      return resend.emails.send({
-        from: `NeighborhoodOS <weekly@updates.neighborhoodos.com>`,
-        to: [recipient.email],
-        subject: `Your ${neighborhood.name} weekly summary`,
-        html,
-        // Disable Resend's automatic link tracking to prevent URL wrapping
-        tracking: {
-          opens: true,
-          clicks: false, // This prevents the long tracking URLs
-        },
-      });
+    for (let i = 0; i < recipients.length; i++) {
+      const recipient = recipients[i];
+
+      if (!recipient.email) {
+        results.push({ status: 'fulfilled', value: null });
+        continue;
+      }
+
+      console.log(`📧 Sending email ${i + 1}/${recipients.length} to ${recipient.email}...`);
+
+      try {
+        const result = await resend.emails.send({
+          from: `NeighborhoodOS <weekly@updates.neighborhoodos.com>`,
+          to: [recipient.email],
+          subject: `Your ${neighborhood.name} weekly summary`,
+          html,
+          // Disable Resend's automatic link tracking to prevent URL wrapping
+          tracking: {
+            opens: true,
+            clicks: false, // This prevents the long tracking URLs
+          },
+        });
+
+        results.push({ status: 'fulfilled', value: result });
+        console.log(`✅ Email sent to ${recipient.email}: ${result.data?.id || 'success'}`);
+
+      } catch (error) {
+        results.push({ status: 'rejected', reason: error });
+        console.log(`❌ Email failed to ${recipient.email}:`, error.message);
+      }
+
+      // Rate limiting: Wait 600ms between sends to stay under 2 requests/second
+      // (2 req/sec = 500ms minimum, we use 600ms for safety margin)
+      if (i < recipients.length - 1) {
+        console.log('⏱️ Waiting 600ms before next email to respect rate limits...');
+        await new Promise(resolve => setTimeout(resolve, 600));
+      }
+    }
+
+    // Improved logging to debug email delivery issues
+    let actuallySuccessful = 0;
+    let actuallyFailed = 0;
+
+    results.forEach((result, index) => {
+      const recipient = recipients[index];
+      if (!recipient?.email) return; // Skip null recipients
+
+      if (result.status === 'fulfilled') {
+        if (result.value && result.value.data) {
+          console.log(`✅ Email sent successfully to ${recipient.email}: ${result.value.data.id}`);
+          actuallySuccessful++;
+        } else {
+          console.log(`❌ Email API call succeeded but no data returned for ${recipient.email}:`, result.value);
+          actuallyFailed++;
+        }
+      } else {
+        console.log(`❌ Email failed to ${recipient.email}:`, result.reason);
+        actuallyFailed++;
+      }
     });
 
-    const results = await Promise.allSettled(emailPromises);
-    const successful = results.filter(r => r.status === 'fulfilled').length;
-    const failed = results.filter(r => r.status === 'rejected').length;
-
-    console.log(`Weekly summary sent: ${successful} successful, ${failed} failed`);
+    console.log(`Weekly summary sent: ${actuallySuccessful} actually successful, ${actuallyFailed} actually failed`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        sent: successful, 
-        failed,
+        sent: actuallySuccessful,
+        failed: actuallyFailed,
         stats,
         highlights 
       }), 

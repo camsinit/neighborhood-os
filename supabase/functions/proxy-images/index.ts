@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -23,14 +24,15 @@ serve(async (req) => {
       });
     }
 
-    // Construct the Supabase storage URL
+    // Construct the direct public URL for the image
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const imageUrl = `${supabaseUrl}/storage/v1/object/public/${imagePath}`;
+    const publicImageUrl = `${supabaseUrl}/storage/v1/object/public/${imagePath}`;
 
-    // Fetch the image from Supabase
-    const response = await fetch(imageUrl);
+    // Fetch the image directly from the public URL
+    const response = await fetch(publicImageUrl);
     
     if (!response.ok) {
+      console.error('Error fetching image:', response.status, response.statusText);
       return new Response('Image not found', { 
         status: 404, 
         headers: corsHeaders 

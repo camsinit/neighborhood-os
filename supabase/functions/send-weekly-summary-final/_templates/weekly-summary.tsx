@@ -309,42 +309,28 @@ const overlayContainer = {
   left: '0',
   right: '0',
   background: 'linear-gradient(transparent, rgba(0, 0, 0, 0.6))',
-  padding: '20px',
+  padding: '16px',
   display: 'flex',
   flexDirection: 'column' as const,
   justifyContent: 'flex-end',
-  // Mobile optimization
-  '@media (max-width: 600px)': {
-    padding: '12px',
-  },
 };
 
 const overlayTitle = {
-  fontSize: '24px',
-  lineHeight: '24px',
+  fontSize: '20px',
+  lineHeight: '22px',
   margin: '0 0 4px 0',
   color: '#ffffff',
   fontWeight: 'bold',
   textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)',
-  // Mobile optimization
-  '@media (max-width: 600px)': {
-    fontSize: '20px',
-    lineHeight: '20px',
-  },
 };
 
 const overlayDate = {
-  fontSize: '16px',
-  lineHeight: '24px',
+  fontSize: '14px',
+  lineHeight: '18px',
   margin: '0',
   color: '#ffffff',
   textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)',
   opacity: '0.9',
-  // Mobile optimization
-  '@media (max-width: 600px)': {
-    fontSize: '14px',
-    lineHeight: '18px',
-  },
 };
 
 // Weekly Neighborhood Digest header styles (fallback)
