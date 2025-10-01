@@ -129,8 +129,9 @@ const EventCard = ({
 
   // Determine event color based on RSVP status and group affiliation
   const getEventColor = () => {
+    const isGroupEvent = Boolean(event.group || event.group_id);
     // Group events get purple styling
-    if (event.group) {
+    if (isGroupEvent) {
       if (isRsvped) {
         return "border-purple-400 bg-purple-200";
       }
@@ -162,7 +163,7 @@ const EventCard = ({
   // Added mb-2 (margin-bottom) to create space between events
   const eventPreview = <div 
       data-event-id={event.id} 
-      className={`rounded-md px-2 py-1.5 mb-2 text-xs cursor-pointer hover:bg-opacity-80 border-l-4 ${getEventColor()} w-full hover:bg-blue-100 transition-colors relative`} 
+      className={`rounded-md px-2 py-1.5 mb-2 text-xs cursor-pointer hover:bg-opacity-80 border-l-4 ${getEventColor()} w-full ${Boolean(event.group || event.group_id) ? 'hover:bg-purple-200' : 'hover:bg-blue-100'} transition-colors relative`} 
       onClick={handleEventClick}
     >
       {/* Host edit button - only shows when hovering on events you created */}
