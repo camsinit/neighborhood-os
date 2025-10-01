@@ -129,18 +129,19 @@ const EventCard = ({
 
   // Determine event color based on RSVP status and group affiliation
   const getEventColor = () => {
-    // Group events get purple styling
-    if (event.group) {
-      if (isRsvped) {
-        return "border-purple-400 bg-purple-200";
-      }
-      return "border-purple-300 bg-purple-100";
-    }
-    
-    // Regular events use blue/gray styling
+    const isGroupAffiliated = Boolean(event.group || event.group_id);
+
+    // RSVP takes precedence (remains blue)
     if (isRsvped) {
       return "border-blue-300 bg-blue-100";
     }
+
+    // Non-RSVP group events are purple instead of gray
+    if (isGroupAffiliated) {
+      return "border-purple-300 bg-purple-100";
+    }
+
+    // Default non-RSVP non-group color is gray
     return "border-gray-300 bg-gray-100";
   };
 
@@ -162,7 +163,7 @@ const EventCard = ({
   // Added mb-2 (margin-bottom) to create space between events
   const eventPreview = <div 
       data-event-id={event.id} 
-      className={`rounded-md px-2 py-1.5 mb-2 text-xs cursor-pointer hover:bg-opacity-80 border-l-4 ${getEventColor()} w-full hover:bg-blue-100 transition-colors relative`} 
+      className={`rounded-md px-2 py-1.5 mb-2 text-xs cursor-pointer hover:bg-opacity-80 border-l-4 ${getEventColor()} w-full transition-colors relative`} 
       onClick={handleEventClick}
     >
       {/* Host edit button - only shows when hovering on events you created */}
