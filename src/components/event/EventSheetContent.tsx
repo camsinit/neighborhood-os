@@ -30,9 +30,11 @@ import EventDescription from "./details/EventDescription";
 import EventRSVPButton from "./details/EventRSVPButton";
 import EventAttendeesList from "./details/EventAttendeesList";
 import { EventPosts } from "./EventPosts";
+import { EventAttendeesPopover } from "./EventAttendeesPopover";
 import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
 import { useNavigate } from "react-router-dom";
 import { createItemNavigationService } from "@/services/navigation/ItemNavigationService";
+import { useEventRSVPs } from "@/utils/queries/useEventRSVPs";
 
 /**
  * EventSheetContent component displays the full details of an event
@@ -55,7 +57,10 @@ const EventSheetContent = ({
   const user = useUser();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  
+
+  // Fetch event attendees
+  const { data: attendees } = useEventRSVPs(event.id);
+
   // State for neighborhood timezone and edit mode
   const [neighborhoodTimezone, setNeighborhoodTimezone] = useState<string>('America/Los_Angeles');
   const [isEditing, setIsEditing] = useState(false);
@@ -76,9 +81,27 @@ const EventSheetContent = ({
   const handleGroupClick = () => {
     if (event.group?.id) {
       const navigationService = createItemNavigationService(navigate);
-      navigationService.navigateToItem('group', event.group.id, { 
-        showToast: false 
+      navigationService.navigateToItem('group', event.group.id, {
+        showToast: false
       });
+    }
+  };
+
+  // Format attendees text: "[Host First Name] + X neighbors"
+  const getAttendeesText = () => {
+    if (!attendees || attendees.length === 0) return 'No attendees yet';
+
+    const hostAttendee = attendees.find(a => (a as any).isHost);
+    const hostFirstName = hostAttendee?.profiles?.display_name?.split(' ')[0] || 'Host';
+
+    const otherCount = attendees.length - 1;
+
+    if (otherCount === 0) {
+      return hostFirstName;
+    } else if (otherCount === 1) {
+      return `${hostFirstName} + 1 neighbor`;
+    } else {
+      return `${hostFirstName} + ${otherCount} neighbors`;
     }
   };
 
@@ -288,6 +311,58 @@ const EventSheetContent = ({
                   </div>
                 )}
 
+                {/* Clickable Attendees UI */}
+                {attendees && attendees.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-gray-200">
+                    <EventAttendeesPopover attendees={attendees} currentUserId={user?.id}>
+                      <div className="inline-flex items-center gap-2 cursor-pointer hover:bg-gray-50 px-2 py-1 rounded transition-colors">
+                        <Users className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm font-medium text-gray-700">
+                          {getAttendeesText()}
+                        </span>
+                      </div>
+                    </EventAttendeesPopover>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 mt-4">
+                  {isHost && (
+                    <Button
+                      onClick={() => setIsEditing(true)}
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      style={{
+                        borderColor: 'hsl(var(--calendar-color) / 0.3)',
+                        color: 'hsl(var(--calendar-color))'
+                      }}
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit
+                    </Button>
+                  )}
+                  {/* RSVP Button - positioned before Add to Calendar */}
+                  <EventRSVPButton
+                    eventId={event.id}
+                    isHost={isHost}
+                    neighborhoodId={event.neighborhood_id}
+                  />
+                  <Button
+                    onClick={downloadICS}
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    style={{
+                      borderColor: 'hsl(var(--calendar-color) / 0.3)',
+                      color: 'hsl(var(--calendar-color))'
+                    }}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Add to Calendar
+                  </Button>
+                </div>
+
                 {/* Group Affiliation - Purple section if event belongs to a group */}
                 {event.group && (
                   <div className="mt-4">
@@ -317,48 +392,7 @@ const EventSheetContent = ({
                     </div>
                   </div>
                 )}
-
-                {/* Action Buttons at bottom of card */}
-                <div className="flex gap-3 mt-6 pt-4">
-                  {isHost && (
-                    <Button
-                      onClick={() => setIsEditing(true)}
-                      variant="outline"
-                      size="sm"
-                      className="flex-1"
-                      style={{
-                        borderColor: 'hsl(var(--calendar-color) / 0.3)',
-                        color: 'hsl(var(--calendar-color))'
-                      }}
-                    >
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit
-                    </Button>
-                  )}
-                  {/* RSVP Button - positioned before Add to Calendar */}
-                  <EventRSVPButton 
-                    eventId={event.id} 
-                    isHost={isHost}
-                    neighborhoodId={event.neighborhood_id}
-                  />
-                  <Button
-                    onClick={downloadICS}
-                    variant="outline"
-                    size="sm"
-                    className="flex-1"
-                    style={{
-                      borderColor: 'hsl(var(--calendar-color) / 0.3)',
-                      color: 'hsl(var(--calendar-color))'
-                    }}
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    Add to Calendar
-                  </Button>
-                </div>
               </div>
-
-              {/* Attendees section */}
-              <EventAttendeesList eventId={event.id} />
 
               {/* Event Posts section */}
               <div className="pt-6 border-t">
