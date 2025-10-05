@@ -30,16 +30,32 @@ export const profileFormSchema = z.object({
 
 export type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
+// New granular notification preferences structure
 export type NotificationPreferences = {
-  involved_only: boolean;
-  page_specific: {
-    events: boolean;
-    safety: boolean;
-    care: boolean;
-    goods: boolean;
-    skills: boolean;
-    neighbors: boolean;
+  email: {
+    personal: {
+      events: {
+        event_rsvp: boolean;
+        group_event_invitation: boolean;
+      };
+      groups: {
+        group_member_joined: boolean;
+        group_update_comment: boolean;
+        group_invitation: boolean;
+      };
+    };
+    neighborhood: {
+      events: {
+        event_created: boolean;
+      };
+      groups: {
+        group_update_posted: boolean;
+        group_event_created: boolean;
+      };
+      neighbors: {
+        neighbor_joined: boolean;
+      };
+    };
+    weekly_summary: boolean;
   };
-  all_activity: boolean;
-  new_neighbors: boolean;
 };
