@@ -103,15 +103,19 @@ const RSVPButton = ({
     }
   };
 
-  // Updated button styling using blue background by default
+  // Updated button styling - filled blue when RSVP'd, outlined otherwise
   return (
     <Button
       onClick={toggleRSVP}
       disabled={isLoading}
-      variant="outline"
+      variant={hasRSVPed ? "default" : "outline"}
       size="sm"
       className={`transition-colors ${className}`}
-      style={{
+      style={hasRSVPed ? {
+        backgroundColor: 'hsl(var(--calendar-color))',
+        color: 'white',
+        borderColor: 'hsl(var(--calendar-color))'
+      } : {
         borderColor: 'hsl(var(--calendar-color) / 0.3)',
         color: 'hsl(var(--calendar-color))'
       }}
