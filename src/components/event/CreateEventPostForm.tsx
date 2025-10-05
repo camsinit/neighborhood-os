@@ -320,7 +320,6 @@ export function CreateEventPostForm({ eventId, onSuccess, onCancel }: CreateEven
               <Image className="h-4 w-4 mr-2" />
               Add Images
             </Button>
-            <p className="text-xs text-muted-foreground">or drag & drop</p>
           </div>
 
           <div className="flex items-center gap-2">

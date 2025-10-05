@@ -73,6 +73,27 @@ export function EventPosts({ eventId, eventHostId }: EventPostsProps) {
     };
 
     checkPermission();
+
+    // Subscribe to RSVP changes to update permission in real-time
+    const rsvpChannel = supabase
+      .channel(`event_rsvps:${eventId}:${user?.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'event_rsvps',
+          filter: `event_id=eq.${eventId}`,
+        },
+        () => {
+          checkPermission();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(rsvpChannel);
+    };
   }, [user, eventId, eventHostId]);
 
   // Fetch posts
