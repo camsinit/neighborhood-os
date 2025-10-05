@@ -29,6 +29,7 @@ import EventHost from "./details/EventHost";
 import EventDescription from "./details/EventDescription";
 import EventRSVPButton from "./details/EventRSVPButton";
 import EventAttendeesList from "./details/EventAttendeesList";
+import { EventPosts } from "./EventPosts";
 import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
 import { useNavigate } from "react-router-dom";
 import { createItemNavigationService } from "@/services/navigation/ItemNavigationService";
@@ -289,15 +290,30 @@ const EventSheetContent = ({
 
                 {/* Group Affiliation - Purple section if event belongs to a group */}
                 {event.group && (
-                  <div className="mt-3 pt-3 border-t border-gray-200">
-                    <div 
-                      className="flex items-center gap-2 cursor-pointer hover:bg-purple-50 p-2 rounded-lg transition-colors"
+                  <div className="mt-4">
+                    <div
+                      className="flex items-center justify-between gap-3 cursor-pointer bg-purple-50 hover:bg-purple-100 border border-purple-200 hover:border-purple-300 p-3 rounded-lg transition-all hover:shadow-sm group"
                       onClick={handleGroupClick}
                     >
-                      <Users className="h-4 w-4 text-purple-600" />
-                      <span className="text-sm font-bold text-purple-700 hover:text-purple-800">
-                        {event.group.name}
-                      </span>
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center flex-shrink-0">
+                          <Users className="h-4 w-4 text-purple-700" />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-xs text-purple-600 font-medium">Group Event</span>
+                          <span className="text-sm font-bold text-purple-900">
+                            {event.group.name}
+                          </span>
+                        </div>
+                      </div>
+                      <svg
+                        className="h-5 w-5 text-purple-400 group-hover:text-purple-600 group-hover:translate-x-0.5 transition-all"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
                     </div>
                   </div>
                 )}
@@ -340,9 +356,14 @@ const EventSheetContent = ({
                   </Button>
                 </div>
               </div>
-              
+
               {/* Attendees section */}
               <EventAttendeesList eventId={event.id} />
+
+              {/* Event Posts section */}
+              <div className="pt-6 border-t">
+                <EventPosts eventId={event.id} eventHostId={event.host_id} />
+              </div>
             </>
           )}
         </div>

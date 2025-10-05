@@ -29,6 +29,10 @@ const fetchEvents = async (neighborhoodId: string): Promise<Event[]> => {
         id,
         display_name,
         avatar_url
+      ),
+      group:group_id (
+        id,
+        name
       )
     `)
     .eq('neighborhood_id', neighborhoodId) // Filter by current neighborhood
