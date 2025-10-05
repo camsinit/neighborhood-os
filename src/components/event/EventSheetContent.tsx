@@ -29,9 +29,12 @@ import EventHost from "./details/EventHost";
 import EventDescription from "./details/EventDescription";
 import EventRSVPButton from "./details/EventRSVPButton";
 import EventAttendeesList from "./details/EventAttendeesList";
+import { EventPosts } from "./EventPosts";
+import { EventAttendeesPopover } from "./EventAttendeesPopover";
 import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
 import { useNavigate } from "react-router-dom";
 import { createItemNavigationService } from "@/services/navigation/ItemNavigationService";
+import { useEventRSVPs } from "@/utils/queries/useEventRSVPs";
 
 /**
  * EventSheetContent component displays the full details of an event
@@ -54,7 +57,10 @@ const EventSheetContent = ({
   const user = useUser();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  
+
+  // Fetch event attendees
+  const { data: attendees } = useEventRSVPs(event.id);
+
   // State for neighborhood timezone and edit mode
   const [neighborhoodTimezone, setNeighborhoodTimezone] = useState<string>('America/Los_Angeles');
   const [isEditing, setIsEditing] = useState(false);
@@ -75,9 +81,25 @@ const EventSheetContent = ({
   const handleGroupClick = () => {
     if (event.group?.id) {
       const navigationService = createItemNavigationService(navigate);
-      navigationService.navigateToItem('group', event.group.id, { 
-        showToast: false 
+      navigationService.navigateToItem('group', event.group.id, {
+        showToast: false
       });
+    }
+  };
+
+  // Format attendees text: "[Host First Name] + X"
+  const getAttendeesText = () => {
+    if (!attendees || attendees.length === 0) return 'No attendees yet';
+
+    const hostAttendee = attendees.find(a => (a as any).isHost);
+    const hostFirstName = hostAttendee?.profiles?.display_name?.split(' ')[0] || 'Host';
+
+    const otherCount = attendees.length - 1;
+
+    if (otherCount === 0) {
+      return hostFirstName;
+    } else {
+      return `${hostFirstName} + ${otherCount}`;
     }
   };
 
@@ -258,26 +280,29 @@ const EventSheetContent = ({
                     </div>
                   )}
 
-                  {/* Host - Condensed in same line as date/location */}
-                  <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                      {event.profiles?.avatar_url ? (
-                        <img 
-                          src={event.profiles.avatar_url} 
-                          alt={event.profiles.display_name || 'Host'} 
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-xs font-medium text-gray-600">
-                          {event.profiles?.display_name?.[0] || '?'}
+                  {/* Attendees - Clickable popover */}
+                  {attendees && attendees.length > 0 && (
+                    <EventAttendeesPopover attendees={attendees} currentUserId={user?.id}>
+                      <div className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 px-2 py-1 -ml-2 rounded transition-colors">
+                        <div className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                          {event.profiles?.avatar_url ? (
+                            <img
+                              src={event.profiles.avatar_url}
+                              alt={event.profiles.display_name || 'Host'}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-xs font-medium text-gray-600">
+                              {event.profiles?.display_name?.[0] || '?'}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-gray-600">
+                          {getAttendeesText()}
                         </span>
-                      )}
-                    </div>
-                    <span className="text-gray-600">
-                      {event.profiles?.display_name?.split(' ')[0] || 'Anonymous'}
-                      {isHost && <span className="ml-1 text-xs text-gray-500">(You)</span>}
-                    </span>
-                  </div>
+                      </div>
+                    </EventAttendeesPopover>
+                  )}
                 </div>
 
                 {/* Description - Separate section if exists */}
@@ -287,23 +312,8 @@ const EventSheetContent = ({
                   </div>
                 )}
 
-                {/* Group Affiliation - Purple section if event belongs to a group */}
-                {event.group && (
-                  <div className="mt-3 pt-3 border-t border-gray-200">
-                    <div 
-                      className="flex items-center gap-2 cursor-pointer hover:bg-purple-50 p-2 rounded-lg transition-colors"
-                      onClick={handleGroupClick}
-                    >
-                      <Users className="h-4 w-4 text-purple-600" />
-                      <span className="text-sm font-bold text-purple-700 hover:text-purple-800">
-                        {event.group.name}
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Action Buttons at bottom of card */}
-                <div className="flex gap-3 mt-6 pt-4">
+                {/* Action Buttons */}
+                <div className="flex gap-3 mt-4">
                   {isHost && (
                     <Button
                       onClick={() => setIsEditing(true)}
@@ -320,8 +330,8 @@ const EventSheetContent = ({
                     </Button>
                   )}
                   {/* RSVP Button - positioned before Add to Calendar */}
-                  <EventRSVPButton 
-                    eventId={event.id} 
+                  <EventRSVPButton
+                    eventId={event.id}
                     isHost={isHost}
                     neighborhoodId={event.neighborhood_id}
                   />
@@ -339,10 +349,42 @@ const EventSheetContent = ({
                     Add to Calendar
                   </Button>
                 </div>
+
+                {/* Group Affiliation - Purple section if event belongs to a group */}
+                {event.group && (
+                  <div className="mt-4">
+                    <div
+                      className="flex items-center justify-between gap-3 cursor-pointer bg-purple-50 hover:bg-purple-100 border border-purple-200 hover:border-purple-300 p-3 rounded-lg transition-all hover:shadow-sm group"
+                      onClick={handleGroupClick}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center flex-shrink-0">
+                          <Users className="h-4 w-4 text-purple-700" />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-xs text-purple-600 font-medium">Group Event</span>
+                          <span className="text-sm font-bold text-purple-900">
+                            {event.group.name}
+                          </span>
+                        </div>
+                      </div>
+                      <svg
+                        className="h-5 w-5 text-purple-400 group-hover:text-purple-600 group-hover:translate-x-0.5 transition-all"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                )}
               </div>
-              
-              {/* Attendees section */}
-              <EventAttendeesList eventId={event.id} />
+
+              {/* Event Posts section */}
+              <div className="pt-6 border-t">
+                <EventPosts eventId={event.id} eventHostId={event.host_id} />
+              </div>
             </>
           )}
         </div>

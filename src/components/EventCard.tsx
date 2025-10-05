@@ -1,7 +1,6 @@
 
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
 import { Pencil, Clock, Users } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import EditEventDialog from "./event/EditEventDialog";
@@ -129,8 +128,9 @@ const EventCard = ({
 
   // Determine event color based on RSVP status and group affiliation
   const getEventColor = () => {
+    const isGroupEvent = Boolean(event.group || event.group_id);
     // Group events get purple styling
-    if (event.group) {
+    if (isGroupEvent) {
       if (isRsvped) {
         return "border-purple-400 bg-purple-200";
       }
@@ -158,30 +158,44 @@ const EventCard = ({
     });
   };
 
+  // Handle group navigation - prevent event click when clicking group box
+  const handleGroupClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent event sheet from opening
+    if (event.group?.id) {
+      const navigationService = createItemNavigationService(navigate);
+      navigationService.navigateToItem('group', event.group.id, {
+        showToast: false
+      });
+    }
+  };
+
   // Event preview card with click effect for showing details
   // Added mb-2 (margin-bottom) to create space between events
-  const eventPreview = <div 
-      data-event-id={event.id} 
-      className={`rounded-md px-2 py-1.5 mb-2 text-xs cursor-pointer hover:bg-opacity-80 border-l-4 ${getEventColor()} w-full hover:bg-blue-100 transition-colors relative`} 
+  const eventPreview = <div
+      data-event-id={event.id}
+      className={`rounded-md px-2 py-1.5 mb-2 text-xs cursor-pointer hover:bg-opacity-80 border-l-4 ${getEventColor()} w-full ${Boolean(event.group || event.group_id) ? 'hover:bg-purple-200' : 'hover:bg-blue-100'} transition-colors relative`}
       onClick={handleEventClick}
     >
       {/* Host edit button - only shows when hovering on events you created */}
       {isHost && isHovering}
-      
+
       <div className="font-medium line-clamp-2">{event.title}</div>
-      
+
       {/* Show group indicator if this is a group event */}
       {event.group && (
-        <div className="mt-1">
-          <Badge 
-            variant="secondary" 
-            className="text-xs px-1 py-0 h-4 bg-purple-200 text-purple-800 border-purple-300 font-medium"
-          >
-            {event.group.name}
-          </Badge>
+        <div
+          className="mt-1.5 pt-1.5 border-t border-purple-200"
+          onClick={handleGroupClick}
+        >
+          <div className="flex items-center gap-1.5 px-1.5 py-1 rounded bg-purple-50 hover:bg-purple-100 transition-colors cursor-pointer">
+            <Users className="h-3 w-3 text-purple-600 flex-shrink-0" />
+            <span className="text-xs font-medium text-purple-700 line-clamp-1">
+              {event.group.name}
+            </span>
+          </div>
         </div>
       )}
-      
+
       {rsvpCount > 0 && <div className="flex items-center gap-1 text-gray-600 mt-1">
           <Users className="h-3 w-3" />
           <span>{rsvpCount}</span>
