@@ -87,7 +87,7 @@ const EventSheetContent = ({
     }
   };
 
-  // Format attendees text: "[Host First Name] + X neighbors"
+  // Format attendees text: "[Host First Name] + X"
   const getAttendeesText = () => {
     if (!attendees || attendees.length === 0) return 'No attendees yet';
 
@@ -98,10 +98,8 @@ const EventSheetContent = ({
 
     if (otherCount === 0) {
       return hostFirstName;
-    } else if (otherCount === 1) {
-      return `${hostFirstName} + 1 neighbor`;
     } else {
-      return `${hostFirstName} + ${otherCount} neighbors`;
+      return `${hostFirstName} + ${otherCount}`;
     }
   };
 
