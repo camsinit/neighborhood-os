@@ -282,46 +282,35 @@ const EventSheetContent = ({
                     </div>
                   )}
 
-                  {/* Host - Condensed in same line as date/location */}
-                  <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                      {event.profiles?.avatar_url ? (
-                        <img 
-                          src={event.profiles.avatar_url} 
-                          alt={event.profiles.display_name || 'Host'} 
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-xs font-medium text-gray-600">
-                          {event.profiles?.display_name?.[0] || '?'}
+                  {/* Attendees - Clickable popover */}
+                  {attendees && attendees.length > 0 && (
+                    <EventAttendeesPopover attendees={attendees} currentUserId={user?.id}>
+                      <div className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 px-2 py-1 -ml-2 rounded transition-colors">
+                        <div className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                          {event.profiles?.avatar_url ? (
+                            <img
+                              src={event.profiles.avatar_url}
+                              alt={event.profiles.display_name || 'Host'}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-xs font-medium text-gray-600">
+                              {event.profiles?.display_name?.[0] || '?'}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-gray-600">
+                          {getAttendeesText()}
                         </span>
-                      )}
-                    </div>
-                    <span className="text-gray-600">
-                      {event.profiles?.display_name?.split(' ')[0] || 'Anonymous'}
-                      {isHost && <span className="ml-1 text-xs text-gray-500">(You)</span>}
-                    </span>
-                  </div>
+                      </div>
+                    </EventAttendeesPopover>
+                  )}
                 </div>
 
                 {/* Description - Separate section if exists */}
                 {event.description && (
                   <div className="mt-3 pt-3 border-t border-gray-200">
                     <p className="text-sm text-gray-600 whitespace-pre-wrap">{event.description}</p>
-                  </div>
-                )}
-
-                {/* Clickable Attendees UI */}
-                {attendees && attendees.length > 0 && (
-                  <div className="mt-3 pt-3 border-t border-gray-200">
-                    <EventAttendeesPopover attendees={attendees} currentUserId={user?.id}>
-                      <div className="inline-flex items-center gap-2 cursor-pointer hover:bg-gray-50 px-2 py-1 rounded transition-colors">
-                        <Users className="h-4 w-4 text-gray-500" />
-                        <span className="text-sm font-medium text-gray-700">
-                          {getAttendeesText()}
-                        </span>
-                      </div>
-                    </EventAttendeesPopover>
                   </div>
                 )}
 
