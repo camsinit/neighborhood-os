@@ -9,6 +9,8 @@ import { ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BASE_ROUTES } from "@/utils/routes";
 import { createLogger } from "@/utils/logger";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 
 /**
  * Login page component
@@ -22,6 +24,7 @@ const Login = () => {
   // Get navigation and session context
   const navigate = useNavigate();
   const { session, isLoading } = useSessionContext();
+  const isMobile = useIsMobile();
   
   // Redirect authenticated users to home page
   useEffect(() => {
@@ -30,6 +33,31 @@ const Login = () => {
       navigate(BASE_ROUTES.home, { replace: true });
     }
   }, [session, isLoading, navigate]);
+
+  // If on mobile, show desktop recommendation notice instead of the login form
+  if (isMobile) {
+    logger.info("[Login] Mobile device detected - showing desktop recommendation notice");
+    return (
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center p-6">
+        <Card className="w-full max-w-xl shadow-lg">
+          <CardHeader className="text-center">
+            <CardTitle className="text-3xl font-semibold">
+              neighborhoodOS is best experienced on desktop
+            </CardTitle>
+            <CardDescription className="mt-3 text-base">
+              Revisit on desktop to check out neighborhoodOS. We'll optimize for mobile surfaces soon. Stay tuned.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center">
+            {/* Intentionally left without video per request */}
+          </CardContent>
+          <CardFooter className="flex justify-center">
+            <Button className="rounded-full" onClick={() => navigate("/")}>Return to homepage</Button>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
 
   // Improved styling to match our chat aesthetic
   return (
