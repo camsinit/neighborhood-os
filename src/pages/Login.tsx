@@ -9,6 +9,8 @@ import { ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BASE_ROUTES } from "@/utils/routes";
 import { createLogger } from "@/utils/logger";
+import { useIsMobile } from "@/hooks/use-mobile";
+import MobileDesktopNotice from "@/components/auth/MobileDesktopNotice";
 
 /**
  * Login page component
@@ -22,6 +24,7 @@ const Login = () => {
   // Get navigation and session context
   const navigate = useNavigate();
   const { session, isLoading } = useSessionContext();
+  const isMobile = useIsMobile();
   
   // Redirect authenticated users to home page
   useEffect(() => {
@@ -31,7 +34,12 @@ const Login = () => {
     }
   }, [session, isLoading, navigate]);
 
-  // Improved styling to match our chat aesthetic
+  // On mobile, show an interstitial encouraging desktop usage
+  if (isMobile) {
+    return <MobileDesktopNotice />;
+  }
+
+  // Improved styling to match our chat aesthetic (desktop)
   return (
     <div className={cn(
       "min-h-screen relative", 
