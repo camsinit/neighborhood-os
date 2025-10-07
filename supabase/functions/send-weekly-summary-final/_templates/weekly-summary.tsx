@@ -148,11 +148,23 @@ export const WeeklySummaryEmail = ({
         <Text style={thisWeekTitle}>This Week</Text>
         <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.thisWeek }} />
 
-        {/* Show skill highlights naturally integrated */}
-        {highlights.skillsByPerson.length > 0 && (
+        {/* Show activity highlights naturally integrated */}
+        {(highlights.skillsByPerson.length > 0 || highlights.groups.newGroups.length > 0) && (
           <div style={skillsList}>
+            {/* Show new groups inline with other activities */}
+            {highlights.groups.newGroups.map((group, index) => (
+              <Text key={`group-${index}`} style={skillItem}>
+                <Link href={`${baseUrl}/n/${neighborhoodId}/groups?highlight=${group.groupId}&type=group&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_new_group`} style={groupNameLink}>
+                  {group.name}
+                </Link>
+                {' '}was created by {group.createdBy}
+                {group.type === 'physical' && group.unitValue ? ` for ${group.unitValue}` : ''}.
+              </Text>
+            ))}
+
+            {/* Show skills */}
             {highlights.skillsByPerson.map((person, index) => (
-              <Text key={index} style={skillItem}>
+              <Text key={`skill-${index}`} style={skillItem}>
                 <Link href={person.neighborProfileUrl} style={neighborNameLink}>{person.neighborName.split(' ')[0]}</Link>
                 {person.skillCount === 1 ? (
                   <>
@@ -186,24 +198,6 @@ export const WeeklySummaryEmail = ({
               </Text>
             ))}
           </div>
-        )}
-
-        {/* New Groups Section */}
-        {highlights.groups.newGroups.length > 0 && (
-          <>
-            <Text style={groupsHeader}>🎉 New Groups</Text>
-            <div style={groupsList}>
-              {highlights.groups.newGroups.map((group, index) => (
-                <Text key={index} style={groupItem}>
-                  <Link href={`${baseUrl}/n/${neighborhoodId}/groups?highlight=${group.groupId}&type=group&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_new_group`} style={groupNameLink}>
-                    {group.name}
-                  </Link>
-                  {' '}was created by {group.createdBy}
-                  {group.type === 'physical' && group.unitValue ? ` for ${group.unitValue}` : ''}.
-                </Text>
-              ))}
-            </div>
-          </>
         )}
 
         {/* The Week Ahead Section */}
