@@ -632,14 +632,33 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('👥 DEBUG: Found', groupCreatedActivities.length, 'group creation activities this week');
 
-    const newGroupsThisWeek = groupCreatedActivities.map(activity => ({
-      name: activity.metadata?.group_name || 'Unnamed Group',
-      type: activity.metadata?.group_type || 'social',
-      createdBy: activity.profiles?.display_name || 'A neighbor',
-      unitValue: activity.metadata?.physical_unit_value,
-      groupId: activity.content_id,
-      createdAt: activity.created_at
-    }));
+    const newGroupsThisWeek = groupCreatedActivities.map(activity => {
+      console.log('👥 DEBUG: Group activity:', {
+        title: activity.title,
+        metadata: activity.metadata,
+        content_id: activity.content_id
+      });
+
+      // Extract group name from metadata or title
+      let groupName = activity.metadata?.group_name;
+
+      // Fallback: extract from title "Created group \"Group Name\""
+      if (!groupName && activity.title) {
+        const match = activity.title.match(/Created group "(.+)"/);
+        if (match) {
+          groupName = match[1];
+        }
+      }
+
+      return {
+        name: groupName || 'Unnamed Group',
+        type: activity.metadata?.group_type || 'social',
+        createdBy: activity.profiles?.display_name || 'A neighbor',
+        unitValue: activity.metadata?.physical_unit_value,
+        groupId: activity.content_id,
+        createdAt: activity.created_at
+      };
+    });
 
     // Group skills by person for presentation, enhanced with activity group detection
     const skillsByPerson = upcomingActivities.skills.reduce((acc: any[], skill) => {
