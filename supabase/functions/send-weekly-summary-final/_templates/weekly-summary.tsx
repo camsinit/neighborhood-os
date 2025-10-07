@@ -84,6 +84,7 @@ interface WeeklySummaryEmailProps {
         type: string
         createdBy: string
         unitValue?: string
+        groupId: string
       }>
       recentJoins: Array<{
         memberName: string
@@ -185,6 +186,24 @@ export const WeeklySummaryEmail = ({
               </Text>
             ))}
           </div>
+        )}
+
+        {/* New Groups Section */}
+        {highlights.groups.newGroups.length > 0 && (
+          <>
+            <Text style={groupsHeader}>🎉 New Groups</Text>
+            <div style={groupsList}>
+              {highlights.groups.newGroups.map((group, index) => (
+                <Text key={index} style={groupItem}>
+                  <Link href={`${baseUrl}/n/${neighborhoodId}/groups?highlight=${group.groupId}&type=group&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_new_group`} style={groupNameLink}>
+                    {group.name}
+                  </Link>
+                  {' '}was created by {group.createdBy}
+                  {group.type === 'physical' && group.unitValue ? ` for ${group.unitValue}` : ''}.
+                </Text>
+              ))}
+            </div>
+          </>
         )}
 
         {/* The Week Ahead Section */}

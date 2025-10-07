@@ -549,15 +549,8 @@ const handler = async (req: Request): Promise<Response> => {
       })) || []
     };
 
-    // Format stats for email template (current system only)
-    const stats = {
-      newMembers: newNeighbors.length,
-      upcomingEvents: upcomingActivities.events.length,
-      activeSkillRequests: upcomingActivities.skills.filter(s => s.requestType === 'request').length,
-      availableSkills: upcomingActivities.skills.filter(s => s.requestType === 'offer').length,
-    };
-
     // CURATED HIGHLIGHTS - Focus on community story
+    // Note: stats will be calculated after we process all the data
 
     // Get activity groups for proper "View all" link detection
     const processedActivities = activitiesData.data?.map(activity => ({
@@ -632,6 +625,22 @@ const handler = async (req: Request): Promise<Response> => {
       }
     });
 
+    // Extract group creation activities from this week
+    const groupCreatedActivities = thisWeekActivities.filter(activity =>
+      activity.activity_type === 'group_created'
+    );
+
+    console.log('👥 DEBUG: Found', groupCreatedActivities.length, 'group creation activities this week');
+
+    const newGroupsThisWeek = groupCreatedActivities.map(activity => ({
+      name: activity.metadata?.group_name || 'Unnamed Group',
+      type: activity.metadata?.group_type || 'social',
+      createdBy: activity.profiles?.display_name || 'A neighbor',
+      unitValue: activity.metadata?.physical_unit_value,
+      groupId: activity.content_id,
+      createdAt: activity.created_at
+    }));
+
     // Group skills by person for presentation, enhanced with activity group detection
     const skillsByPerson = upcomingActivities.skills.reduce((acc: any[], skill) => {
       const existingPerson = acc.find(p => p.neighborUserId === skill.neighborUserId);
@@ -673,12 +682,23 @@ const handler = async (req: Request): Promise<Response> => {
       skillsByPerson: skillsByPerson,
       totalSkills: upcomingActivities.skills.length,
       groups: {
-        newGroups: [],
-        recentJoins: [],
-        activeGroups: [],
+        newGroups: newGroupsThisWeek.slice(0, 3), // Max 3 new groups
+        recentJoins: [], // TODO: Could extract from group_joined activities
+        activeGroups: [], // TODO: Could query most active groups
         groupEvents: [],
         groupUpdates: []
       }
+    };
+
+    // Format stats for email template (including groups)
+    const stats = {
+      newMembers: newNeighbors.length,
+      upcomingEvents: upcomingActivities.events.length,
+      activeSkillRequests: upcomingActivities.skills.filter(s => s.requestType === 'request').length,
+      availableSkills: upcomingActivities.skills.filter(s => s.requestType === 'offer').length,
+      newGroups: newGroupsThisWeek.length,
+      groupJoins: 0, // TODO: Could extract from group_joined activities
+      activeGroups: 0, // TODO: Could query most active groups
     };
 
     // Format week date range
