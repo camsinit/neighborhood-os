@@ -84,6 +84,7 @@ interface WeeklySummaryEmailProps {
         type: string
         createdBy: string
         unitValue?: string
+        description?: string
         groupId: string
       }>
       recentJoins: Array<{
@@ -158,7 +159,8 @@ export const WeeklySummaryEmail = ({
                   {group.name}
                 </Link>
                 {' '}was created by {group.createdBy}
-                {group.type === 'physical' && group.unitValue ? ` for ${group.unitValue}` : ''}.
+                {group.type === 'physical' && group.unitValue ? ` for ${group.unitValue}` : ''}
+                {group.description ? ` - ${group.description}` : ''}.
               </Text>
             ))}
 

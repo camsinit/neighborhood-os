@@ -101,7 +101,7 @@ interface WeeklySummaryRequest {
  * This function takes comprehensive neighborhood activity data and creates engaging, personalized content
  * structured in 3 sections: new neighbor welcome, past week recap, and week ahead preview
  */
-async function generateAIContent(neighborhoodName: string, stats: any, highlights: any, neighborhoodId: string, newNeighbors: any[], pastWeekActivities: any, upcomingActivities: any) {
+async function generateAIContent(neighborhoodName: string, stats: any, highlights: any, neighborhoodId: string, newNeighbors: any[], pastWeekActivities: any, upcomingActivities: any, newGroups: any[] = []) {
   console.log('🤖 Starting AI content generation...');
   console.log('🔑 CLAUDE_API_KEY exists:', !!CLAUDE_API_KEY);
   console.log('🔑 CLAUDE_API_KEY length:', CLAUDE_API_KEY ? CLAUDE_API_KEY.length : 0);
@@ -112,9 +112,23 @@ async function generateAIContent(neighborhoodName: string, stats: any, highlight
     const createEventUrl = `https://neighborhoodos.com/n/${neighborhoodId}/calendar?create=true`;
     const createSkillUrl = `https://neighborhoodos.com/n/${neighborhoodId}/skills?create=true`;
     const createGroupUrl = `https://neighborhoodos.com/n/${neighborhoodId}/groups?create=true`;
-    
+
+    // Dynamic "This Week" based on actual activities
+    let thisWeekText = "This past week brought new connections and community activity.";
+
+    if (newGroups.length > 0) {
+      const groupDescriptions = newGroups.map(g => {
+        let desc = `${g.createdBy} created ${g.name}`;
+        if (g.description) {
+          desc += ` - ${g.description}`;
+        }
+        return desc;
+      }).join('. ');
+      thisWeekText = groupDescriptions + '.';
+    }
+
     return {
-      thisWeek: "This past week brought new connections and community activity. Thank you to everyone who participated in making our neighborhood more vibrant.",
+      thisWeek: thisWeekText,
       weekAhead: "The calendar is wide open this week! Check out the suggestions below to help fill next week's newsletter with exciting events.",
       getInvolved: [
         `<a href="${createEventUrl}">Since Parker offers electronic music production, organize a beat-making workshop</a> where neighbors can learn to create their own tracks.`,
@@ -639,7 +653,7 @@ const handler = async (req: Request): Promise<Response> => {
     if (groupIds.length > 0) {
       const { data: groupDetails } = await supabase
         .from('groups')
-        .select('id, name, group_type, physical_unit_value')
+        .select('id, name, group_type, physical_unit_value, description')
         .in('id', groupIds);
 
       if (groupDetails) {
@@ -675,6 +689,7 @@ const handler = async (req: Request): Promise<Response> => {
         type: groupDetails?.group_type || activity.metadata?.group_type || 'social',
         createdBy: activity.profiles?.display_name || 'A neighbor',
         unitValue: groupDetails?.physical_unit_value || activity.metadata?.physical_unit_value,
+        description: groupDetails?.description || null,
         groupId: activity.content_id,
         createdAt: activity.created_at
       };
@@ -748,17 +763,19 @@ const handler = async (req: Request): Promise<Response> => {
     // Generate AI-powered content for the newsletter
     console.log('Generating AI-powered content...');
     console.log('New neighbors:', newNeighbors);
+    console.log('New groups:', newGroupsThisWeek);
     console.log('Past week activities:', pastWeekActivities);
     console.log('Upcoming activities:', upcomingActivities);
-    
+
     const aiContent = await generateAIContent(
-      neighborhood.name, 
-      stats, 
-      highlights, 
+      neighborhood.name,
+      stats,
+      highlights,
       neighborhoodId,
       newNeighbors,
       pastWeekActivities,
-      upcomingActivities
+      upcomingActivities,
+      newGroupsThisWeek
     );
     console.log('AI content generated:', aiContent);
 
