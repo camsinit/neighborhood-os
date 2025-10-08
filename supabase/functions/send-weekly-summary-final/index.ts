@@ -97,6 +97,61 @@ interface WeeklySummaryRequest {
 }
 
 /**
+ * Generate dynamic, data-driven suggestions from actual neighborhood activities
+ */
+function generateDynamicSuggestions(upcomingActivities: any, newGroups: any[], neighborhoodId: string): string[] {
+  const suggestions: string[] = [];
+  const createEventUrl = `https://neighborhoodos.com/n/${neighborhoodId}/calendar?create=true`;
+  const createSkillUrl = `https://neighborhoodos.com/n/${neighborhoodId}/skills?create=true`;
+  const createGroupUrl = `https://neighborhoodos.com/n/${neighborhoodId}/groups?create=true`;
+
+  // From skills - pick random neighbors
+  if (upcomingActivities.skills && upcomingActivities.skills.length > 0) {
+    const randomSkills = upcomingActivities.skills
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 2);
+
+    randomSkills.forEach(skill => {
+      const firstName = skill.neighborName.split(' ')[0];
+      const templates = [
+        `Need help with ${skill.category}? <a href="${createSkillUrl}">${firstName} is offering ${skill.title}</a> - reach out on the platform!`,
+        `<a href="${createSkillUrl}">${firstName}'s expertise in ${skill.title}</a> could be just what you need. Check it out!`,
+      ];
+      suggestions.push(templates[Math.floor(Math.random() * templates.length)]);
+    });
+  }
+
+  // From groups - create inviting messages
+  if (newGroups && newGroups.length > 0) {
+    newGroups.forEach(group => {
+      const firstName = group.createdBy.split(' ')[0];
+      const templates = [
+        `<a href="${createGroupUrl}">${firstName} started the ${group.name}</a>${group.description ? ` to ${group.description.toLowerCase()}` : ''}. Join if you're interested!`,
+        `<a href="${createGroupUrl}">Check out the ${group.name}</a> - ${firstName} just launched it and it looks promising!`,
+      ];
+      suggestions.push(templates[Math.floor(Math.random() * templates.length)]);
+    });
+  }
+
+  // Fill with generic but friendly prompts if needed
+  while (suggestions.length < 3) {
+    const genericTemplates = [
+      `<a href="${createEventUrl}">Have an idea for a neighborhood event?</a> Create it and bring neighbors together!`,
+      `<a href="${createSkillUrl}">What are you good at?</a> Share your skills with neighbors who might need help.`,
+      `<a href="${createGroupUrl}">Want to start something new?</a> Create a group around a shared interest!`,
+    ];
+    const unused = genericTemplates.filter(t => !suggestions.includes(t));
+    if (unused.length > 0) {
+      suggestions.push(unused[Math.floor(Math.random() * unused.length)]);
+    } else {
+      break;
+    }
+  }
+
+  return suggestions.slice(0, 3);
+}
+
+/**
  * Generate AI-powered newsletter content using Claude
  * This function takes comprehensive neighborhood activity data and creates engaging, personalized content
  * structured in 3 sections: new neighbor welcome, past week recap, and week ahead preview
@@ -108,19 +163,17 @@ async function generateAIContent(neighborhoodName: string, stats: any, highlight
 
   // If no Claude API key is available, return default content in new 3-section format
   if (!CLAUDE_API_KEY) {
-    console.log('❌ No Claude API key found, using default content');
-    const createEventUrl = `https://neighborhoodos.com/n/${neighborhoodId}/calendar?create=true`;
-    const createSkillUrl = `https://neighborhoodos.com/n/${neighborhoodId}/skills?create=true`;
-    const createGroupUrl = `https://neighborhoodos.com/n/${neighborhoodId}/groups?create=true`;
+    console.log('❌ No Claude API key found, using dynamic fallback content');
 
     // Dynamic "This Week" based on actual activities
     let thisWeekText = "This past week brought new connections and community activity.";
 
     if (newGroups.length > 0) {
       const groupDescriptions = newGroups.map(g => {
-        let desc = `${g.createdBy} created ${g.name}`;
+        const firstName = g.createdBy.split(' ')[0];
+        let desc = `${firstName} started the ${g.name}`;
         if (g.description) {
-          desc += ` - ${g.description}`;
+          desc += `, which ${g.description.toLowerCase()}`;
         }
         return desc;
       }).join('. ');
@@ -130,11 +183,7 @@ async function generateAIContent(neighborhoodName: string, stats: any, highlight
     return {
       thisWeek: thisWeekText,
       weekAhead: "The calendar is wide open this week! Check out the suggestions below to help fill next week's newsletter with exciting events.",
-      getInvolved: [
-        `<a href="${createEventUrl}">Since Parker offers electronic music production, organize a beat-making workshop</a> where neighbors can learn to create their own tracks.`,
-        `<a href="${createSkillUrl}">With Pamela's Costco expertise and Laura's meal exchanges, coordinate a bulk cooking group</a> to share ingredients and recipes.`,
-        `<a href="${createGroupUrl}">Parker's tech skills (WiFi troubleshooting, computer help) could launch a neighborhood tech support circle</a>.`
-      ]
+      getInvolved: generateDynamicSuggestions(upcomingActivities, newGroups, neighborhoodId)
     };
   }
 
@@ -291,41 +340,53 @@ Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
     } catch (parseError) {
       console.error('Failed to parse AI response as JSON:', parseError);
       console.error('Raw AI response:', content);
-      // Return default content with dynamic suggestions structure
-      const createEventUrl = `https://neighborhoodos.com/n/${neighborhoodId}/calendar?create=true`;
-      const createSkillUrl = `https://neighborhoodos.com/n/${neighborhoodId}/skills?create=true`;
-      const createGroupUrl = `https://neighborhoodos.com/n/${neighborhoodId}/groups?create=true`;
+      // Return dynamic fallback content
+      let thisWeekText = "This past week brought new connections and community activity.";
+
+      if (newGroups.length > 0) {
+        const groupDescriptions = newGroups.map(g => {
+          const firstName = g.createdBy.split(' ')[0];
+          let desc = `${firstName} started the ${g.name}`;
+          if (g.description) {
+            desc += `, which ${g.description.toLowerCase()}`;
+          }
+          return desc;
+        }).join('. ');
+        thisWeekText = groupDescriptions + '.';
+      } else if (newNeighbors.length > 0) {
+        thisWeekText = `Welcome to our newest neighbors: ${newNeighbors.map(n => `<a href="${n.profileUrl}">${n.name}</a>`).join(', ')}! This week brought new connections and community activity.`;
+      }
 
       return {
-        thisWeek: newNeighbors.length > 0 ?
-          `Welcome to our newest neighbors: ${newNeighbors.map(n => `<a href="${n.profileUrl}">${n.name}</a>`).join(', ')}! This week brought new connections and community activity.` :
-          "This past week brought new connections and community activity. Thank you to everyone who participated in making our neighborhood more vibrant.",
+        thisWeek: thisWeekText,
         weekAhead: "The calendar is wide open this week! Check out the suggestions below to help fill next week's newsletter with exciting events.",
-        getInvolved: [
-          `<a href="${createEventUrl}">Since Parker offers electronic music production, organize a beat-making workshop</a> where neighbors can learn to create their own tracks.`,
-          `<a href="${createSkillUrl}">With Pamela's Costco expertise and Laura's meal exchanges, coordinate a bulk cooking group</a> to share ingredients and recipes.`,
-          `<a href="${createGroupUrl}">Parker's tech skills (WiFi troubleshooting, computer help) could launch a neighborhood tech support circle</a>.`
-        ]
+        getInvolved: generateDynamicSuggestions(upcomingActivities, newGroups, neighborhoodId)
       };
     }
 
   } catch (error) {
     console.error('Error generating AI content:', error);
-    // Return default content with dynamic suggestions structure
-    const createEventUrl = `https://neighborhoodos.com/n/${neighborhoodId}/calendar?create=true`;
-    const createSkillUrl = `https://neighborhoodos.com/n/${neighborhoodId}/skills?create=true`;
-    const createGroupUrl = `https://neighborhoodos.com/n/${neighborhoodId}/groups?create=true`;
-    
+    // Return dynamic fallback content
+    let thisWeekText = "This past week brought new connections and community activity.";
+
+    if (newGroups.length > 0) {
+      const groupDescriptions = newGroups.map(g => {
+        const firstName = g.createdBy.split(' ')[0];
+        let desc = `${firstName} started the ${g.name}`;
+        if (g.description) {
+          desc += `, which ${g.description.toLowerCase()}`;
+        }
+        return desc;
+      }).join('. ');
+      thisWeekText = groupDescriptions + '.';
+    } else if (newNeighbors.length > 0) {
+      thisWeekText = `Welcome to our newest neighbors: ${newNeighbors.map(n => `<a href="${n.profileUrl}">${n.name}</a>`).join(', ')}! This week brought new connections and community activity.`;
+    }
+
     return {
-      thisWeek: newNeighbors.length > 0 ?
-        `Welcome to our newest neighbors: ${newNeighbors.map(n => `<a href="${n.profileUrl}">${n.name}</a>`).join(', ')}! This week brought new connections and community activity.` :
-        "This past week brought new connections and community activity. Thank you to everyone who participated in making our neighborhood more vibrant.",
+      thisWeek: thisWeekText,
       weekAhead: "The calendar is wide open this week! Check out the suggestions below to help fill next week's newsletter with exciting events.",
-      getInvolved: [
-        `<a href="${createEventUrl}">Since Parker offers electronic music production, organize a beat-making workshop</a> where neighbors can learn to create their own tracks.`,
-        `<a href="${createSkillUrl}">With Pamela's Costco expertise and Laura's meal exchanges, coordinate a bulk cooking group</a> to share ingredients and recipes.`,
-        `<a href="${createGroupUrl}">Parker's tech skills (WiFi troubleshooting, computer help) could launch a neighborhood tech support circle</a>.`
-      ]
+      getInvolved: generateDynamicSuggestions(upcomingActivities, newGroups, neighborhoodId)
     };
   }
 }

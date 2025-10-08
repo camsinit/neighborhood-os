@@ -153,16 +153,22 @@ export const WeeklySummaryEmail = ({
         {(highlights.skillsByPerson.length > 0 || highlights.groups.newGroups.length > 0) && (
           <div style={skillsList}>
             {/* Show new groups inline with other activities */}
-            {highlights.groups.newGroups.map((group, index) => (
-              <Text key={`group-${index}`} style={skillItem}>
-                <Link href={`${baseUrl}/n/${neighborhoodId}/groups?highlight=${group.groupId}&type=group&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_new_group`} style={groupNameLink}>
-                  {group.name}
-                </Link>
-                {' '}was created by {group.createdBy}
-                {group.type === 'physical' && group.unitValue ? ` for ${group.unitValue}` : ''}
-                {group.description ? ` - ${group.description}` : ''}.
-              </Text>
-            ))}
+            {highlights.groups.newGroups.map((group, index) => {
+              const firstName = group.createdBy.split(' ')[0];
+              return (
+                <Text key={`group-${index}`} style={skillItem}>
+                  <Link href={`${baseUrl}/n/${neighborhoodId}/neighbors?profile=${group.createdBy}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary`} style={groupNameLink}>
+                    {firstName}
+                  </Link>
+                  {' '}started the{' '}
+                  <Link href={`${baseUrl}/n/${neighborhoodId}/groups?highlight=${group.groupId}&type=group&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_new_group`} style={groupNameLink}>
+                    {group.name}
+                  </Link>
+                  {group.description ? `, which ${group.description.toLowerCase()}` : ''}
+                  {group.type === 'physical' && group.unitValue ? ` for ${group.unitValue}` : ''}. Join if you're interested!
+                </Text>
+              );
+            })}
 
             {/* Show skills */}
             {highlights.skillsByPerson.map((person, index) => (
@@ -170,14 +176,15 @@ export const WeeklySummaryEmail = ({
                 <Link href={person.neighborProfileUrl} style={neighborNameLink}>{person.neighborName.split(' ')[0]}</Link>
                 {person.skillCount === 1 ? (
                   <>
-                    {' '}shared{' '}
+                    {'\'s offering help with '}
                     <Link href={`${baseUrl}/n/${neighborhoodId}/skills?highlight=skill&type=skills_exchange&id=${person.topSkills[0].id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_skill`} style={skillNameLink}>
                       {person.topSkills[0].title}
                     </Link>
+                    {' - reach out if you need it'}
                   </>
                 ) : (
                   <>
-                    {' '}shared {person.skillCount} skills including{' '}
+                    {' can help with '}
                     {person.topSkills.slice(0, 2).map((skill, skillIndex) => (
                       <span key={skillIndex}>
                         <Link href={`${baseUrl}/n/${neighborhoodId}/skills?highlight=skill&type=skills_exchange&id=${skill.id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_skill`} style={skillNameLink}>
@@ -186,17 +193,18 @@ export const WeeklySummaryEmail = ({
                         {skillIndex === 0 ? ' and ' : ''}
                       </span>
                     ))}
+                    {person.skillCount > 2 ? `, plus ${person.skillCount - 2} more` : ''}
                   </>
                 )}
                 {person.skillCount > 1 && person.activityGroupId && (
                   <>
                     .{' '}
                     <Link href={`${baseUrl}/n/${neighborhoodId}/home?detail=${person.activityGroupId}&type=activity_group&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_neighbor_skills`} style={browseAllLink}>
-                      See all of {person.neighborName.split(' ')[0]}'s offerings
+                      Check out all their offerings
                     </Link>
                   </>
                 )}
-                .
+                !
               </Text>
             ))}
           </div>
@@ -211,11 +219,12 @@ export const WeeklySummaryEmail = ({
           <div style={eventsList}>
             {highlights.upcomingEvents.map((event, index) => (
               <Text key={index} style={eventItem}>
+                Don't miss{' '}
                 <Link href={`${baseUrl}/n/${neighborhoodId}/calendar?highlight=event&type=event&id=${event.id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_upcoming_event`} style={eventNameLink}>
                   {event.title}
                 </Link>
-                {' '}is {event.date}
-                {event.attendees > 0 && ` (${event.attendees} attending)`}.
+                {' '}on {event.date}
+                {event.attendees > 0 && ` - already ${event.attendees} neighbor${event.attendees !== 1 ? 's' : ''} going`}!
               </Text>
             ))}
           </div>
