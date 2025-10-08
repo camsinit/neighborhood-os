@@ -632,6 +632,23 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('👥 DEBUG: Found', groupCreatedActivities.length, 'group creation activities this week');
 
+    // Fetch actual group details from groups table for accurate names
+    const groupIds = groupCreatedActivities.map(a => a.content_id).filter(Boolean);
+    let groupDetailsMap = new Map();
+
+    if (groupIds.length > 0) {
+      const { data: groupDetails } = await supabase
+        .from('groups')
+        .select('id, name, group_type, physical_unit_value')
+        .in('id', groupIds);
+
+      if (groupDetails) {
+        groupDetails.forEach(group => {
+          groupDetailsMap.set(group.id, group);
+        });
+      }
+    }
+
     const newGroupsThisWeek = groupCreatedActivities.map(activity => {
       console.log('👥 DEBUG: Group activity:', {
         title: activity.title,
@@ -639,8 +656,11 @@ const handler = async (req: Request): Promise<Response> => {
         content_id: activity.content_id
       });
 
-      // Extract group name from metadata or title
-      let groupName = activity.metadata?.group_name;
+      // Get actual group details from database
+      const groupDetails = groupDetailsMap.get(activity.content_id);
+
+      // Extract group name from: 1) database, 2) metadata, 3) title
+      let groupName = groupDetails?.name || activity.metadata?.group_name;
 
       // Fallback: extract from title "Created group \"Group Name\""
       if (!groupName && activity.title) {
@@ -652,9 +672,9 @@ const handler = async (req: Request): Promise<Response> => {
 
       return {
         name: groupName || 'Unnamed Group',
-        type: activity.metadata?.group_type || 'social',
+        type: groupDetails?.group_type || activity.metadata?.group_type || 'social',
         createdBy: activity.profiles?.display_name || 'A neighbor',
-        unitValue: activity.metadata?.physical_unit_value,
+        unitValue: groupDetails?.physical_unit_value || activity.metadata?.physical_unit_value,
         groupId: activity.content_id,
         createdAt: activity.created_at
       };
