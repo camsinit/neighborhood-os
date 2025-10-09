@@ -98,6 +98,7 @@ interface WeeklySummaryRequest {
 
 /**
  * Generate dynamic, data-driven suggestions from actual neighborhood activities
+ * Uses timestamp-based seed for more randomization across calls
  */
 function generateDynamicSuggestions(upcomingActivities: any, newGroups: any[], neighborhoodId: string): string[] {
   const suggestions: string[] = [];
@@ -105,48 +106,41 @@ function generateDynamicSuggestions(upcomingActivities: any, newGroups: any[], n
   const createSkillUrl = `https://neighborhoodos.com/n/${neighborhoodId}/skills?create=true`;
   const createGroupUrl = `https://neighborhoodos.com/n/${neighborhoodId}/groups?create=true`;
 
+  // Use timestamp for better randomization
+  const seed = Date.now();
+
   // From skills - pick random neighbors
   if (upcomingActivities.skills && upcomingActivities.skills.length > 0) {
     const randomSkills = upcomingActivities.skills
-      .sort(() => Math.random() - 0.5)
+      .sort(() => 0.5 - Math.random())
       .slice(0, 2);
 
-    randomSkills.forEach(skill => {
+    randomSkills.forEach((skill, idx) => {
       const firstName = skill.neighborName.split(' ')[0];
+      const templateIndex = (seed + idx) % 3; // Use seed for variation
       const templates = [
         `Need help with ${skill.category}? <a href="${createSkillUrl}">${firstName} is offering ${skill.title}</a> - reach out on the platform!`,
         `<a href="${createSkillUrl}">${firstName}'s expertise in ${skill.title}</a> could be just what you need. Check it out!`,
+        `Looking for ${skill.category} help? <a href="${createSkillUrl}">Connect with ${firstName} who offers ${skill.title}</a>!`,
       ];
-      suggestions.push(templates[Math.floor(Math.random() * templates.length)]);
+      suggestions.push(templates[templateIndex]);
     });
   }
 
-  // From groups - create inviting messages
-  if (newGroups && newGroups.length > 0) {
-    newGroups.forEach(group => {
-      const firstName = group.createdBy.split(' ')[0];
-      const templates = [
-        `<a href="${createGroupUrl}">${firstName} started the ${group.name}</a>${group.description ? ` to ${group.description.toLowerCase()}` : ''}. Join if you're interested!`,
-        `<a href="${createGroupUrl}">Check out the ${group.name}</a> - ${firstName} just launched it and it looks promising!`,
-      ];
-      suggestions.push(templates[Math.floor(Math.random() * templates.length)]);
-    });
-  }
+  // From groups - create inviting messages (only if not already shown in activity section)
+  const genericTemplates = [
+    `<a href="${createEventUrl}">Have an idea for a neighborhood event?</a> Create it and bring neighbors together!`,
+    `<a href="${createSkillUrl}">What are you good at?</a> Share your skills with neighbors who might need help.`,
+    `<a href="${createGroupUrl}">Want to start something new?</a> Create a group around a shared interest!`,
+    `<a href="${createEventUrl}">Host a potluck, game night, or skill swap</a> - neighbors love getting together!`,
+    `<a href="${createSkillUrl}">Got a special talent or expertise?</a> Someone in the neighborhood probably needs it.`,
+    `<a href="${createGroupUrl}">Think about starting a book club, running group, or hobby circle</a> - others might join!`,
+  ];
 
-  // Fill with generic but friendly prompts if needed
-  while (suggestions.length < 3) {
-    const genericTemplates = [
-      `<a href="${createEventUrl}">Have an idea for a neighborhood event?</a> Create it and bring neighbors together!`,
-      `<a href="${createSkillUrl}">What are you good at?</a> Share your skills with neighbors who might need help.`,
-      `<a href="${createGroupUrl}">Want to start something new?</a> Create a group around a shared interest!`,
-    ];
-    const unused = genericTemplates.filter(t => !suggestions.includes(t));
-    if (unused.length > 0) {
-      suggestions.push(unused[Math.floor(Math.random() * unused.length)]);
-    } else {
-      break;
-    }
-  }
+  // Shuffle and take unique suggestions
+  const shuffled = genericTemplates.sort(() => 0.5 - Math.random());
+  const needed = 3 - suggestions.length;
+  suggestions.push(...shuffled.slice(0, needed));
 
   return suggestions.slice(0, 3);
 }
@@ -165,19 +159,11 @@ async function generateAIContent(neighborhoodName: string, stats: any, highlight
   if (!CLAUDE_API_KEY) {
     console.log('❌ No Claude API key found, using dynamic fallback content');
 
-    // Dynamic "This Week" based on actual activities
+    // Dynamic "This Week" - keep it generic since details show below
     let thisWeekText = "This past week brought new connections and community activity.";
 
-    if (newGroups.length > 0) {
-      const groupDescriptions = newGroups.map(g => {
-        const firstName = g.createdBy.split(' ')[0];
-        let desc = `${firstName} started the ${g.name}`;
-        if (g.description) {
-          desc += `, which ${g.description.toLowerCase()}`;
-        }
-        return desc;
-      }).join('. ');
-      thisWeekText = groupDescriptions + '.';
+    if (newGroups.length > 0 || upcomingActivities.skills.length > 0) {
+      thisWeekText = "This past week brought new connections and community activity. Check out what's happening below!";
     }
 
     return {
@@ -343,16 +329,8 @@ Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
       // Return dynamic fallback content
       let thisWeekText = "This past week brought new connections and community activity.";
 
-      if (newGroups.length > 0) {
-        const groupDescriptions = newGroups.map(g => {
-          const firstName = g.createdBy.split(' ')[0];
-          let desc = `${firstName} started the ${g.name}`;
-          if (g.description) {
-            desc += `, which ${g.description.toLowerCase()}`;
-          }
-          return desc;
-        }).join('. ');
-        thisWeekText = groupDescriptions + '.';
+      if (newGroups.length > 0 || upcomingActivities.skills.length > 0) {
+        thisWeekText = "This past week brought new connections and community activity. Check out what's happening below!";
       } else if (newNeighbors.length > 0) {
         thisWeekText = `Welcome to our newest neighbors: ${newNeighbors.map(n => `<a href="${n.profileUrl}">${n.name}</a>`).join(', ')}! This week brought new connections and community activity.`;
       }
@@ -369,16 +347,8 @@ Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
     // Return dynamic fallback content
     let thisWeekText = "This past week brought new connections and community activity.";
 
-    if (newGroups.length > 0) {
-      const groupDescriptions = newGroups.map(g => {
-        const firstName = g.createdBy.split(' ')[0];
-        let desc = `${firstName} started the ${g.name}`;
-        if (g.description) {
-          desc += `, which ${g.description.toLowerCase()}`;
-        }
-        return desc;
-      }).join('. ');
-      thisWeekText = groupDescriptions + '.';
+    if (newGroups.length > 0 || upcomingActivities.skills.length > 0) {
+      thisWeekText = "This past week brought new connections and community activity. Check out what's happening below!";
     } else if (newNeighbors.length > 0) {
       thisWeekText = `Welcome to our newest neighbors: ${newNeighbors.map(n => `<a href="${n.profileUrl}">${n.name}</a>`).join(', ')}! This week brought new connections and community activity.`;
     }

@@ -155,6 +155,21 @@ export const WeeklySummaryEmail = ({
             {/* Show new groups inline with other activities */}
             {highlights.groups.newGroups.map((group, index) => {
               const firstName = group.createdBy.split(' ')[0];
+              // Clean up description - remove redundant text
+              let cleanDescription = group.description || '';
+              if (cleanDescription) {
+                // Remove ending punctuation and common phrases we'll add
+                cleanDescription = cleanDescription
+                  .replace(/\.\s*$/, '')
+                  .replace(/please join us!?\.?$/i, '')
+                  .replace(/join if you're interested!?\.?$/i, '')
+                  .trim();
+                // Capitalize first letter if it starts lowercase
+                if (cleanDescription && cleanDescription[0] === cleanDescription[0].toLowerCase()) {
+                  cleanDescription = cleanDescription.charAt(0).toUpperCase() + cleanDescription.slice(1);
+                }
+              }
+
               return (
                 <Text key={`group-${index}`} style={skillItem}>
                   <Link href={`${baseUrl}/n/${neighborhoodId}/neighbors?profile=${group.createdBy}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary`} style={groupNameLink}>
@@ -164,8 +179,9 @@ export const WeeklySummaryEmail = ({
                   <Link href={`${baseUrl}/n/${neighborhoodId}/groups?highlight=${group.groupId}&type=group&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_new_group`} style={groupNameLink}>
                     {group.name}
                   </Link>
-                  {group.description ? `, which ${group.description.toLowerCase()}` : ''}
-                  {group.type === 'physical' && group.unitValue ? ` for ${group.unitValue}` : ''}. Join if you're interested!
+                  {cleanDescription ? `. ${cleanDescription}` : ''}
+                  {group.type === 'physical' && group.unitValue ? ` for ${group.unitValue}` : ''}
+                  . Join if you're interested!
                 </Text>
               );
             })}
