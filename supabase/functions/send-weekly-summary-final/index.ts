@@ -182,7 +182,7 @@ function generateDynamicSuggestions(upcomingActivities: any, allGroups: any[], n
  * This function takes comprehensive neighborhood activity data and creates engaging, personalized content
  * structured in 3 sections: new neighbor welcome, past week recap, and week ahead preview
  */
-async function generateAIContent(neighborhoodName: string, stats: any, highlights: any, neighborhoodId: string, newNeighbors: any[], pastWeekActivities: any, upcomingActivities: any, newGroups: any[] = []) {
+async function generateAIContent(neighborhoodName: string, stats: any, highlights: any, neighborhoodId: string, newNeighbors: any[], pastWeekActivities: any, upcomingActivities: any, newGroups: any[] = [], allActiveSkills: any[] = []) {
   console.log('🤖 Starting AI content generation...');
   console.log('🔑 CLAUDE_API_KEY exists:', !!CLAUDE_API_KEY);
   console.log('🔑 CLAUDE_API_KEY length:', CLAUDE_API_KEY ? CLAUDE_API_KEY.length : 0);
@@ -201,7 +201,7 @@ async function generateAIContent(neighborhoodName: string, stats: any, highlight
     return {
       thisWeek: thisWeekText,
       weekAhead: "The calendar is wide open this week! Check out the suggestions below to help fill next week's newsletter with exciting events.",
-      getInvolved: generateDynamicSuggestions(upcomingActivities, newGroups, neighborhoodId)
+      getInvolved: generateDynamicSuggestions({ skills: allActiveSkills }, newGroups, neighborhoodId)
     };
   }
 
@@ -388,7 +388,7 @@ Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
     return {
       thisWeek: thisWeekText,
       weekAhead: "The calendar is wide open this week! Check out the suggestions below to help fill next week's newsletter with exciting events.",
-      getInvolved: generateDynamicSuggestions(upcomingActivities, newGroups, neighborhoodId)
+      getInvolved: generateDynamicSuggestions({ skills: allActiveSkills }, newGroups, neighborhoodId)
     };
   }
 }
@@ -441,7 +441,8 @@ const handler = async (req: Request): Promise<Response> => {
       createdEventsData,
       availableSkillsData,
       completedSkillsData,
-      newMembersData
+      newMembersData,
+      allSkillsData // ALL active skills for suggestions (not just this week)
     ] = await Promise.all([
       // Events happening in next 7 days (for Week Ahead section)
       supabase
@@ -511,6 +512,23 @@ const handler = async (req: Request): Promise<Response> => {
         .gte('updated_at', weekAgoISO)
         .order('updated_at', { ascending: false })
         .limit(5),
+
+      // ALL active skills for suggestions (not time-bound)
+      supabase
+        .from('skills_exchange')
+        .select(`
+          id,
+          title,
+          skill_category,
+          request_type,
+          created_at,
+          user_id,
+          profiles!skills_exchange_user_id_fkey(id, display_name)
+        `)
+        .eq('neighborhood_id', neighborhoodId)
+        .eq('is_archived', false)
+        .order('created_at', { ascending: false })
+        .limit(50), // Get up to 50 active skills for variety
 
     ]);
 
@@ -625,6 +643,18 @@ const handler = async (req: Request): Promise<Response> => {
         neighborProfileUrl: getProfileURL(neighborhoodId, skill.profiles?.id || skill.user_id)
       })) || []
     };
+
+    // ALL active skills for suggestion generation (not time-bound)
+    const allActiveSkills = allSkillsData.data?.map(skill => ({
+      id: skill.id,
+      title: skill.title,
+      category: skill.skill_category,
+      requestType: skill.request_type,
+      neighborName: skill.profiles?.display_name || `Neighbor ${skill.user_id.substring(0, 8)}`,
+      neighborUserId: skill.profiles?.id || skill.user_id,
+    })) || [];
+
+    console.log('📊 All active skills for suggestions:', allActiveSkills.length);
 
     // CURATED HIGHLIGHTS - Focus on community story
     // Note: stats will be calculated after we process all the data
@@ -838,7 +868,8 @@ const handler = async (req: Request): Promise<Response> => {
       newNeighbors,
       pastWeekActivities,
       upcomingActivities,
-      newGroupsThisWeek
+      newGroupsThisWeek,
+      allActiveSkills // Pass all skills for suggestions
     );
     console.log('AI content generated:', aiContent);
 
