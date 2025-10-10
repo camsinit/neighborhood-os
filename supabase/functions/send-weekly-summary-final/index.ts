@@ -758,6 +758,7 @@ const handler = async (req: Request): Promise<Response> => {
       try {
         const result = await resend.emails.send({
           from: `NeighborhoodOS <weekly@updates.neighborhoodos.com>`,
+          replyTo: 'support@neighborhoodos.com',
           to: [recipient.email],
           subject: `Your ${neighborhood.name} weekly summary`,
           html,

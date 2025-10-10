@@ -72,7 +72,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send the test email using Resend
     const emailResponse = await resend.emails.send({
-      from: "NeighborhoodOS Test <onboarding@resend.dev>", // You'll need to replace this with your verified domain
+      from: "NeighborhoodOS Test <hello@updates.neighborhoodos.com>",
+      replyTo: 'support@neighborhoodos.com',
       to: [recipientEmail],
       subject: `Test Email - ${testType === 'survey' ? 'Survey Submitted' : 'Waitlist Welcome'}`,
       html: html,

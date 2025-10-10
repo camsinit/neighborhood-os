@@ -76,6 +76,7 @@ interface InvitationRequest {
   inviterId?: string           // For better personalization
   neighborhoodId?: string      // For neighborhood context
   personalMessage?: string      // Optional personal note from inviter
+  isAdminInvite?: boolean      // Whether this is an admin invitation
 }
 
 /**
@@ -90,14 +91,15 @@ serve(async (req) => {
   try {
     // Parse the request body to get invitation details
     const requestData = await req.json()
-    const { 
-      recipientEmail, 
-      inviterName, 
-      neighborhoodName, 
+    const {
+      recipientEmail,
+      inviterName,
+      neighborhoodName,
       inviteUrl,
       inviterId,
       neighborhoodId,
-      personalMessage
+      personalMessage,
+      isAdminInvite = false
     }: InvitationRequest = requestData
 
     // Validate required fields
@@ -198,12 +200,15 @@ serve(async (req) => {
         inviterAvatarUrl: inviterProfile?.avatar_url,
         // Pass recipient name so the email can say "Hi {Name},"
         recipientName: recipientDisplayName,
+        // Pass admin invite flag to customize copy
+        isAdminInvite,
       })
     )
 
     // Send the email via Resend using the SDK
     const emailResponse = await resend.emails.send({
       from: 'neighborhoodOS <hello@updates.neighborhoodos.com>',
+      replyTo: 'support@neighborhoodos.com',
       to: [recipientEmail],
       subject: 'Your neighborhood is ready!',
       html: emailHtml,

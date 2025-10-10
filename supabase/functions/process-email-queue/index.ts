@@ -53,6 +53,7 @@ const handler = async (req: Request): Promise<Response> => {
       try {
         const emailResponse = await resend.emails.send({
           from: "neighborhoodOS <hello@updates.neighborhoodos.com>",
+          replyTo: 'support@neighborhoodos.com',
           to: [recipient_email],
           subject: template.subject,
           text: template.text,
