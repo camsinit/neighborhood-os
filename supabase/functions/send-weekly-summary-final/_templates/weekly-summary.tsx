@@ -143,72 +143,78 @@ export const WeeklySummaryEmail = ({
 
         <Text style={greeting}>Hey neighbors!</Text>
 
-        {/* This Week Section */}
-        <Text style={thisWeekTitle}>This Week</Text>
-        <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.thisWeek }} />
-
-        {/* Show skill highlights naturally integrated */}
+        {/* This Week Section - only show if there's skill data */}
         {highlights.skillsByPerson.length > 0 && (
-          <div style={skillsList}>
-            {highlights.skillsByPerson.map((person, index) => (
-              <Text key={index} style={skillItem}>
-                <Link href={person.neighborProfileUrl} style={neighborNameLink}>{person.neighborName.split(' ')[0]}</Link>
-                {person.skillCount === 1 ? (
-                  <>
-                    {' '}shared{' '}
-                    <Link href={`${baseUrl}/n/${neighborhoodId}/skills?highlight=skill&type=skills_exchange&id=${person.topSkills[0].id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_skill`} style={skillNameLink}>
-                      {person.topSkills[0].title}
-                    </Link>
-                  </>
-                ) : (
-                  <>
-                    {' '}shared {person.skillCount} skills including{' '}
-                    {person.topSkills.slice(0, 2).map((skill, skillIndex) => (
-                      <span key={skillIndex}>
-                        <Link href={`${baseUrl}/n/${neighborhoodId}/skills?highlight=skill&type=skills_exchange&id=${skill.id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_skill`} style={skillNameLink}>
-                          {skill.title}
-                        </Link>
-                        {skillIndex === 0 ? ' and ' : ''}
-                      </span>
-                    ))}
-                  </>
-                )}
-                {person.skillCount > 1 && person.activityGroupId && (
-                  <>
-                    .{' '}
-                    <Link href={`${baseUrl}/n/${neighborhoodId}/home?detail=${person.activityGroupId}&type=activity_group&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_neighbor_skills`} style={browseAllLink}>
-                      See all of {person.neighborName.split(' ')[0]}'s offerings
-                    </Link>
-                  </>
-                )}
-                .
-              </Text>
-            ))}
-          </div>
+          <>
+            <Text style={thisWeekTitle}>This Week</Text>
+            <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.thisWeek }} />
+
+            {/* Show skill highlights naturally integrated */}
+            <div style={skillsList}>
+              {highlights.skillsByPerson.map((person, index) => (
+                <Text key={index} style={skillItem}>
+                  <Link href={person.neighborProfileUrl} style={neighborNameLink}>{person.neighborName.split(' ')[0]}</Link>
+                  {person.skillCount === 1 ? (
+                    <>
+                      {' '}shared{' '}
+                      <Link href={`${baseUrl}/n/${neighborhoodId}/skills?highlight=skill&type=skills_exchange&id=${person.topSkills[0].id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_skill`} style={skillNameLink}>
+                        {person.topSkills[0].title}
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      {' '}shared {person.skillCount} skills including{' '}
+                      {person.topSkills.slice(0, 2).map((skill, skillIndex) => (
+                        <span key={skillIndex}>
+                          <Link href={`${baseUrl}/n/${neighborhoodId}/skills?highlight=skill&type=skills_exchange&id=${skill.id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_skill`} style={skillNameLink}>
+                            {skill.title}
+                          </Link>
+                          {skillIndex === 0 ? ' and ' : ''}
+                        </span>
+                      ))}
+                    </>
+                  )}
+                  {person.skillCount > 1 && person.activityGroupId && (
+                    <>
+                      .{' '}
+                      <Link href={`${baseUrl}/n/${neighborhoodId}/home?detail=${person.activityGroupId}&type=activity_group&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_neighbor_skills`} style={browseAllLink}>
+                        See all of {person.neighborName.split(' ')[0]}'s offerings
+                      </Link>
+                    </>
+                  )}
+                  .
+                </Text>
+              ))}
+            </div>
+          </>
         )}
 
-        {/* The Week Ahead Section */}
-        <Text style={weekAheadTitle}>The Week Ahead</Text>
-        <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.weekAhead }} />
-
-        {/* Show upcoming events if any */}
+        {/* The Week Ahead Section - only show if there are upcoming events */}
         {highlights.upcomingEvents.length > 0 && (
-          <div style={eventsList}>
-            {highlights.upcomingEvents.map((event, index) => (
-              <Text key={index} style={eventItem}>
-                <Link href={`${baseUrl}/n/${neighborhoodId}/calendar?highlight=event&type=event&id=${event.id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_upcoming_event`} style={eventNameLink}>
-                  {event.title}
-                </Link>
-                {' '}is {event.date}
-                {event.attendees > 0 && ` (${event.attendees} attending)`}.
-              </Text>
-            ))}
-          </div>
+          <>
+            <Text style={weekAheadTitle}>The Week Ahead</Text>
+            <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.weekAhead }} />
+
+            {/* Show upcoming events */}
+            <div style={eventsList}>
+              {highlights.upcomingEvents.map((event, index) => (
+                <Text key={index} style={eventItem}>
+                  <Link href={`${baseUrl}/n/${neighborhoodId}/calendar?highlight=event&type=event&id=${event.id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_upcoming_event`} style={eventNameLink}>
+                    {event.title}
+                  </Link>
+                  {' '}is {event.date}
+                  {event.attendees > 0 && ` (${event.attendees} attending)`}.
+                </Text>
+              ))}
+            </div>
+          </>
         )}
 
-        {/* Ways to Get Involved Section */}
-        <Text style={getInvolvedTitle}>Ways to Get Involved</Text>
-        {aiContent.getInvolved.map((suggestion, index) => {
+        {/* Ways to Get Involved Section - only show if there are suggestions */}
+        {aiContent.getInvolved && aiContent.getInvolved.length > 0 && (
+          <>
+            <Text style={getInvolvedTitle}>Ways to Get Involved</Text>
+            {aiContent.getInvolved.map((suggestion, index) => {
           // Color-code the links based on their type
           let coloredSuggestion = suggestion;
 
@@ -234,6 +240,8 @@ export const WeeklySummaryEmail = ({
             <Text key={index} style={paragraph} dangerouslySetInnerHTML={{ __html: `• ${coloredSuggestion}` }} />
           );
         })}
+          </>
+        )}
 
         <Text style={paragraph}>
           <Link href={`${baseUrl}/n/${neighborhoodId}?utm_source=email&utm_medium=email&utm_campaign=weekly_summary_dashboard`} style={ctaButton}>
