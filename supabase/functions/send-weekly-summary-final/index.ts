@@ -128,22 +128,17 @@ async function generateAIContent(neighborhoodName: string, stats: any, highlight
 
   try {
     // Calculate total activity count to detect low-activity periods
-    const totalActivities = 
-      pastWeekActivities.completedEvents.length + 
-      pastWeekActivities.archivedGoods.length + 
-      pastWeekActivities.completedSkills.length + 
-      pastWeekActivities.safetyUpdates.length +
-      upcomingActivities.events.length + 
-      upcomingActivities.skills.length + 
-      upcomingActivities.goods.length;
+    const totalActivities =
+      pastWeekActivities.completedEvents.length +
+      pastWeekActivities.completedSkills.length +
+      upcomingActivities.events.length +
+      upcomingActivities.skills.length;
     
     const isLowActivity = totalActivities <= 2; // Consider 2 or fewer activities as "low"
     
     // Create activity URLs for easy posting (using the same URL generation pattern)
     const createEventUrl = `https://neighborhoodos.com/n/${neighborhoodId}/calendar?create=true`;
     const createSkillUrl = `https://neighborhoodos.com/n/${neighborhoodId}/skills?create=true`;
-    const createGoodsUrl = `https://neighborhoodos.com/n/${neighborhoodId}/goods?create=true`;
-    const createSafetyUrl = `https://neighborhoodos.com/n/${neighborhoodId}/safety?create=true`;
     
     // Get current date for seasonal context
     const currentDate = new Date();
