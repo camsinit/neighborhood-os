@@ -17,6 +17,8 @@ interface BasicInvitationEmailProps {
   inviterAvatarUrl?: string;
   // Optional recipient name for personalized greeting (falls back to "neighbor")
   recipientName?: string;
+  // Whether this is an admin invitation
+  isAdminInvite?: boolean;
 }
 
 /**
@@ -30,6 +32,7 @@ export const BasicInvitationEmail = ({
   inviterAvatarUrl,
   // Personalized greeting name derived by the edge function
   recipientName = 'Neighbor',
+  isAdminInvite = false,
 }: BasicInvitationEmailProps) => (
   <Html>
     <Head />
@@ -48,24 +51,46 @@ export const BasicInvitationEmail = ({
         
         {/* Personalized greeting using recipientName when provided */}
         <Text style={greeting}>Hi {recipientName || 'Neighbor'},</Text>
-        
-        {/* Core message aligning with new copy */}
-        <Text style={text}>
-          <strong>{neighborhoodName}</strong> is all set up in neighborhoodOS and ready for you to join as the neighborhood instigator!
-        </Text>
-        
-        <Text style={text}>
-          As the admin for the neighborhood, you’ll be able to:
-        </Text>
-        
-        {/* Simple bulleted list supported by React Email */}
-        <ul style={list}>
-          <li style={listItem}>Welcome your first neighbors</li>
-          <li style={listItem}>Post updates and events</li>
-          <li style={listItem}>Help keep the conversation friendly and useful</li>
-        </ul>
-        
-        <Text style={text}>Your neighborhood awaits...</Text>
+
+        {/* Core message - different copy for admin vs regular invitations */}
+        {isAdminInvite ? (
+          <>
+            <Text style={text}>
+              <strong>{neighborhoodName}</strong> is all set up in neighborhoodOS and ready for you to join as the neighborhood instigator!
+            </Text>
+
+            <Text style={text}>
+              As the admin for the neighborhood, you'll be able to:
+            </Text>
+
+            {/* Simple bulleted list supported by React Email */}
+            <ul style={list}>
+              <li style={listItem}>Welcome your first neighbors</li>
+              <li style={listItem}>Post updates and events</li>
+              <li style={listItem}>Help keep the conversation friendly and useful</li>
+            </ul>
+
+            <Text style={text}>Your neighborhood awaits...</Text>
+          </>
+        ) : (
+          <>
+            <Text style={text}>
+              <strong>{inviterName}</strong> invited you to join <strong>{neighborhoodName}</strong> on neighborhoodOS!
+            </Text>
+
+            <Text style={text}>
+              Join your neighbors to:
+            </Text>
+
+            <ul style={list}>
+              <li style={listItem}>Connect with people nearby</li>
+              <li style={listItem}>Discover local events and activities</li>
+              <li style={listItem}>Share skills and help each other out</li>
+            </ul>
+
+            <Text style={text}>Click below to join your neighborhood.</Text>
+          </>
+        )}
         
         {/* Clear action per new copy */}
         <Link href={inviteUrl} style={ctaButton}>
