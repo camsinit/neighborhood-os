@@ -97,50 +97,82 @@ interface WeeklySummaryRequest {
 }
 
 /**
- * Generate dynamic, data-driven suggestions from actual neighborhood activities
- * Uses timestamp-based seed for more randomization across calls
+ * Generate specific, action-oriented suggestions from actual neighborhood data
+ * Resurfaces existing skills, groups, and opportunities for discovery
  */
-function generateDynamicSuggestions(upcomingActivities: any, newGroups: any[], neighborhoodId: string): string[] {
+function generateDynamicSuggestions(upcomingActivities: any, allGroups: any[], neighborhoodId: string): string[] {
   const suggestions: string[] = [];
-  const createEventUrl = `https://neighborhoodos.com/n/${neighborhoodId}/calendar?create=true`;
-  const createSkillUrl = `https://neighborhoodos.com/n/${neighborhoodId}/skills?create=true`;
-  const createGroupUrl = `https://neighborhoodos.com/n/${neighborhoodId}/groups?create=true`;
+  const baseUrl = `https://neighborhoodos.com/n/${neighborhoodId}`;
 
-  // Use timestamp for better randomization
-  const seed = Date.now();
+  // Build pool of all discoverable items
+  const pool: Array<{type: string, data: any}> = [];
 
-  // From skills - pick random neighbors
+  // Add ALL skills (offers and requests) to pool for discovery
   if (upcomingActivities.skills && upcomingActivities.skills.length > 0) {
-    const randomSkills = upcomingActivities.skills
-      .sort(() => 0.5 - Math.random())
-      .slice(0, 2);
-
-    randomSkills.forEach((skill, idx) => {
-      const firstName = skill.neighborName.split(' ')[0];
-      const templateIndex = (seed + idx) % 3; // Use seed for variation
-      const templates = [
-        `Need help with ${skill.category}? <a href="${createSkillUrl}">${firstName} is offering ${skill.title}</a> - reach out on the platform!`,
-        `<a href="${createSkillUrl}">${firstName}'s expertise in ${skill.title}</a> could be just what you need. Check it out!`,
-        `Looking for ${skill.category} help? <a href="${createSkillUrl}">Connect with ${firstName} who offers ${skill.title}</a>!`,
-      ];
-      suggestions.push(templates[templateIndex]);
+    upcomingActivities.skills.forEach((skill: any) => {
+      pool.push({ type: 'skill', data: skill });
     });
   }
 
-  // From groups - create inviting messages (only if not already shown in activity section)
-  const genericTemplates = [
-    `<a href="${createEventUrl}">Have an idea for a neighborhood event?</a> Create it and bring neighbors together!`,
-    `<a href="${createSkillUrl}">What are you good at?</a> Share your skills with neighbors who might need help.`,
-    `<a href="${createGroupUrl}">Want to start something new?</a> Create a group around a shared interest!`,
-    `<a href="${createEventUrl}">Host a potluck, game night, or skill swap</a> - neighbors love getting together!`,
-    `<a href="${createSkillUrl}">Got a special talent or expertise?</a> Someone in the neighborhood probably needs it.`,
-    `<a href="${createGroupUrl}">Think about starting a book club, running group, or hobby circle</a> - others might join!`,
-  ];
+  // Add ALL groups to pool for discovery
+  if (allGroups && allGroups.length > 0) {
+    allGroups.forEach((group: any) => {
+      pool.push({ type: 'group', data: group });
+    });
+  }
 
-  // Shuffle and take unique suggestions
-  const shuffled = genericTemplates.sort(() => 0.5 - Math.random());
-  const needed = 3 - suggestions.length;
-  suggestions.push(...shuffled.slice(0, needed));
+  // Shuffle pool for randomization
+  const shuffled = pool.sort(() => 0.5 - Math.random());
+
+  // Generate 3 specific suggestions from actual data
+  for (let i = 0; i < Math.min(3, shuffled.length); i++) {
+    const item = shuffled[i];
+
+    if (item.type === 'skill') {
+      const skill = item.data;
+      const firstName = skill.neighborName.split(' ')[0];
+      const skillUrl = `${baseUrl}/skills?highlight=skill&type=skills_exchange&id=${skill.id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_suggestion`;
+
+      if (skill.requestType === 'offer') {
+        // Templates for skill offers
+        const templates = [
+          `Need help with ${skill.category.toLowerCase()}? <a href="${skillUrl}">Connect with ${firstName} who offers ${skill.title}</a>!`,
+          `Looking for ${skill.title.toLowerCase()}? <a href="${skillUrl}">${firstName} can help</a> - reach out!`,
+          `<a href="${skillUrl}">${firstName}'s offering ${skill.title}</a> - perfect if you need ${skill.category.toLowerCase()} help!`,
+        ];
+        suggestions.push(templates[i % templates.length]);
+      } else {
+        // Templates for skill requests
+        const templates = [
+          `Got expertise in ${skill.category.toLowerCase()}? <a href="${skillUrl}">${firstName} is looking for ${skill.title}</a>!`,
+          `Can you help with ${skill.title.toLowerCase()}? <a href="${skillUrl}">${firstName} needs it</a> - reach out!`,
+          `<a href="${skillUrl}">${firstName} is seeking ${skill.title}</a> - can you assist?`,
+        ];
+        suggestions.push(templates[i % templates.length]);
+      }
+    } else if (item.type === 'group') {
+      const group = item.data;
+      const firstName = group.createdBy.split(' ')[0];
+      const groupUrl = `${baseUrl}/groups?highlight=${group.groupId}&type=group&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_suggestion`;
+
+      const templates = [
+        `Interested in ${group.type === 'physical' ? 'your building' : group.description ? group.description.toLowerCase().split('.')[0] : 'community'}? <a href="${groupUrl}">Join ${firstName}'s ${group.name}</a>!`,
+        `<a href="${groupUrl}">Check out the ${group.name}</a> - ${firstName} started it and it's growing!`,
+        `Want to connect with neighbors? <a href="${groupUrl}">Join the ${group.name}</a> led by ${firstName}!`,
+      ];
+      suggestions.push(templates[i % templates.length]);
+    }
+  }
+
+  // If we don't have enough data, add one fallback (but this should be rare)
+  while (suggestions.length < 3) {
+    const fallbacks = [
+      `Browse the <a href="${baseUrl}/skills?utm_source=email&utm_medium=email&utm_campaign=weekly_summary">skills exchange</a> to see who can help with what!`,
+      `Check out <a href="${baseUrl}/groups?utm_source=email&utm_medium=email&utm_campaign=weekly_summary">neighborhood groups</a> - there might be one for you!`,
+      `Explore the <a href="${baseUrl}/calendar?utm_source=email&utm_medium=email&utm_campaign=weekly_summary">calendar</a> to see what neighbors are up to!`,
+    ];
+    suggestions.push(fallbacks[suggestions.length % fallbacks.length]);
+  }
 
   return suggestions.slice(0, 3);
 }
