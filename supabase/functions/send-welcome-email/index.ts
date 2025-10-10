@@ -168,6 +168,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Send the welcome email using consistent from address
     const emailResponse = await resend.emails.send({
       from: "neighborhoodOS <hello@updates.neighborhoodos.com>",
+      replyTo: 'support@neighborhoodos.com',
       to: [recipientEmail],
       subject: `Welcome to ${resolvedNeighborhoodName}, ${recipientName}! 👋`,
       html,

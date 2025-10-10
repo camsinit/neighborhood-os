@@ -204,6 +204,7 @@ serve(async (req) => {
     // Send the email via Resend using the SDK
     const emailResponse = await resend.emails.send({
       from: 'neighborhoodOS <hello@updates.neighborhoodos.com>',
+      replyTo: 'support@neighborhoodos.com',
       to: [recipientEmail],
       subject: 'Your neighborhood is ready!',
       html: emailHtml,

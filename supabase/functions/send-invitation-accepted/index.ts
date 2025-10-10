@@ -74,9 +74,10 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
     // Send email to all recipients
-    const emailPromises = recipientEmails.map(email => 
+    const emailPromises = recipientEmails.map(email =>
       resend.emails.send({
         from: "neighborhoodOS <hello@updates.neighborhoodos.com>",
+        replyTo: 'support@neighborhoodos.com',
         to: [email],
         subject,
         html,

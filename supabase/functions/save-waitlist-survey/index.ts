@@ -181,6 +181,7 @@ serve(async (req) => {
 
       await resend.emails.send({
         from: 'neighborhoodOS <hello@updates.neighborhoodos.com>',
+        replyTo: 'support@neighborhoodos.com',
         to: [email],
         subject: 'Thanks for your neighborhood instigator survey!',
         html,

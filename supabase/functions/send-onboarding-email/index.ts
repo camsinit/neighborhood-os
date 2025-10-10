@@ -257,6 +257,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const emailResponse = await resend.emails.send({
       from: "NeighborhoodOS <hello@updates.neighborhoodos.com>", // Updated to use verified domain
+      replyTo: 'support@neighborhoodos.com',
       to: [recipientEmail],
       subject: template.subject,
       html,
