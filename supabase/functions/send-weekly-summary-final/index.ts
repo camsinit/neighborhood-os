@@ -111,14 +111,15 @@ async function generateAIContent(neighborhoodName: string, stats: any, highlight
     console.log('❌ No Claude API key found, using default content');
     const createEventUrl = `https://neighborhoodos.com/n/${neighborhoodId}/calendar?create=true`;
     const createSkillUrl = `https://neighborhoodos.com/n/${neighborhoodId}/skills?create=true`;
+    const createGroupUrl = `https://neighborhoodos.com/n/${neighborhoodId}/groups?create=true`;
 
     return {
       thisWeek: "This past week brought new connections and community activity. Thank you to everyone who participated in making our neighborhood more vibrant.",
       weekAhead: "The calendar is wide open this week! Check out the suggestions below to help fill next week's newsletter with exciting events.",
       getInvolved: [
-        `<a href="${createEventUrl}">Organize a beat-making workshop</a> where neighbors can learn to create their own tracks.`,
-        `<a href="${createSkillUrl}">Coordinate a bulk cooking group</a> to share ingredients and recipes.`,
-        `<a href="${createEventUrl}">Host a tech support session</a> to help neighbors with WiFi troubleshooting and computer help.`
+        `<a href="${createEventUrl}">Since Parker offers electronic music production, organize a beat-making workshop</a> where neighbors can learn to create their own tracks.`,
+        `<a href="${createSkillUrl}">With Pamela's Costco expertise and Laura's meal exchanges, coordinate a bulk cooking group</a> to share ingredients and recipes.`,
+        `<a href="${createGroupUrl}">Parker's tech skills (WiFi troubleshooting, computer help) could launch a neighborhood tech support circle</a>.`
       ]
     };
   }
@@ -209,6 +210,7 @@ REQUIREMENTS:
 - Include natural links:
   * Events: ${createEventUrl}
   * Skills: ${createSkillUrl}
+  * Groups: ${createGroupUrl}
 - No em-dashes (—), use regular hyphens only
 - Friendly but not overly excited
 
@@ -273,6 +275,7 @@ Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
       // Return default content with dynamic suggestions structure
       const createEventUrl = `https://neighborhoodos.com/n/${neighborhoodId}/calendar?create=true`;
       const createSkillUrl = `https://neighborhoodos.com/n/${neighborhoodId}/skills?create=true`;
+      const createGroupUrl = `https://neighborhoodos.com/n/${neighborhoodId}/groups?create=true`;
 
       return {
         thisWeek: newNeighbors.length > 0 ?
@@ -280,9 +283,9 @@ Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
           "This past week brought new connections and community activity. Thank you to everyone who participated in making our neighborhood more vibrant.",
         weekAhead: "The calendar is wide open this week! Check out the suggestions below to help fill next week's newsletter with exciting events.",
         getInvolved: [
-          `<a href="${createEventUrl}">Organize a beat-making workshop</a> where neighbors can learn to create their own tracks.`,
-          `<a href="${createSkillUrl}">Coordinate a bulk cooking group</a> to share ingredients and recipes.`,
-          `<a href="${createEventUrl}">Host a tech support session</a> to help neighbors with WiFi troubleshooting and computer help.`
+          `<a href="${createEventUrl}">Since Parker offers electronic music production, organize a beat-making workshop</a> where neighbors can learn to create their own tracks.`,
+          `<a href="${createSkillUrl}">With Pamela's Costco expertise and Laura's meal exchanges, coordinate a bulk cooking group</a> to share ingredients and recipes.`,
+          `<a href="${createGroupUrl}">Parker's tech skills (WiFi troubleshooting, computer help) could launch a neighborhood tech support circle</a>.`
         ]
       };
     }
@@ -292,6 +295,7 @@ Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
     // Return default content with dynamic suggestions structure
     const createEventUrl = `https://neighborhoodos.com/n/${neighborhoodId}/calendar?create=true`;
     const createSkillUrl = `https://neighborhoodos.com/n/${neighborhoodId}/skills?create=true`;
+    const createGroupUrl = `https://neighborhoodos.com/n/${neighborhoodId}/groups?create=true`;
 
     return {
       thisWeek: newNeighbors.length > 0 ?
@@ -299,9 +303,9 @@ Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
         "This past week brought new connections and community activity. Thank you to everyone who participated in making our neighborhood more vibrant.",
       weekAhead: "The calendar is wide open this week! Check out the suggestions below to help fill next week's newsletter with exciting events.",
       getInvolved: [
-        `<a href="${createEventUrl}">Organize a beat-making workshop</a> where neighbors can learn to create their own tracks.`,
-        `<a href="${createSkillUrl}">Coordinate a bulk cooking group</a> to share ingredients and recipes.`,
-        `<a href="${createEventUrl}">Host a tech support session</a> to help neighbors with WiFi troubleshooting and computer help.`
+        `<a href="${createEventUrl}">Since Parker offers electronic music production, organize a beat-making workshop</a> where neighbors can learn to create their own tracks.`,
+        `<a href="${createSkillUrl}">With Pamela's Costco expertise and Laura's meal exchanges, coordinate a bulk cooking group</a> to share ingredients and recipes.`,
+        `<a href="${createGroupUrl}">Parker's tech skills (WiFi troubleshooting, computer help) could launch a neighborhood tech support circle</a>.`
       ]
     };
   }
