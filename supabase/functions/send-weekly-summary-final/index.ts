@@ -693,9 +693,9 @@ const handler = async (req: Request): Promise<Response> => {
     console.log('Upcoming activities:', upcomingActivities);
     
     const aiContent = await generateAIContent(
-      neighborhood.name, 
-      stats, 
-      highlights, 
+      neighborhood.name,
+      stats,
+      highlights,
       neighborhoodId,
       newNeighbors,
       pastWeekActivities,
