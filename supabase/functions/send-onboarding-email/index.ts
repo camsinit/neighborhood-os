@@ -54,14 +54,6 @@ const getSkillsLink = (): string => {
   return `${getEmailBaseUrl()}/skills`;
 };
 
-const getFreebiesLink = (): string => {
-  return `${getEmailBaseUrl()}/goods`;
-};
-
-const getUpdatesLink = (): string => {
-  return `${getEmailBaseUrl()}/safety`;
-};
-
 const getDirectoryLink = (): string => {
   return `${getEmailBaseUrl()}/neighbors`;
 };

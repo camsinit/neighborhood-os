@@ -31,14 +31,6 @@ export const getEventsLink = (): string => {
   return `${getEmailBaseUrl()}/events`;
 };
 
-export const getFreebiesLink = (): string => {
-  return `${getEmailBaseUrl()}/goods`;
-};
-
-export const getUpdatesLink = (): string => {
-  return `${getEmailBaseUrl()}/safety`;
-};
-
 export const getDirectoryLink = (): string => {
   return `${getEmailBaseUrl()}/neighbors`;
 };
@@ -97,14 +89,6 @@ export const getWeeklySummaryEventsURL = (): string => {
 
 export const getWeeklySummarySkillsURL = (): string => {
   return addEmailTrackingParams(getSkillsLink(), "weekly_summary_skills", "email");
-};
-
-export const getWeeklySummaryGoodsURL = (): string => {
-  return addEmailTrackingParams(getFreebiesLink(), "weekly_summary_goods", "email");
-};
-
-export const getWeeklySummarySafetyURL = (): string => {
-  return addEmailTrackingParams(getUpdatesLink(), "weekly_summary_safety", "email");
 };
 
 export const getWeeklySummarySettingsURL = (): string => {
