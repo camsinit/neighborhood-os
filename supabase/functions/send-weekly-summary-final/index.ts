@@ -236,9 +236,34 @@ async function generateAIContent(neighborhoodName: string, stats: any, highlight
     const commonSkillCategories = ['home_repair', 'automotive', 'gardening', 'childcare', 'cooking', 'crafts'];
     const missingCategories = commonSkillCategories.filter(cat => !availableCategories.includes(cat));
 
-    const prompt = `You are writing suggestions for a neighborhood newsletter in "${neighborhoodName}". Create 3 warm, neighborly suggestions that feel natural and specific - NOT corporate or boring.
+    const prompt = `You are writing content for a neighborhood newsletter in "${neighborhoodName}". Create warm, neighborly text that feels natural and specific - NOT corporate or boring.
 
 ACTUAL NEIGHBORHOOD DATA:
+
+PAST WEEK ACTIVITY (what happened this week):
+${pastWeekActivities.createdEvents.length > 0 ? 'New Events Created:\n' + pastWeekActivities.createdEvents.slice(0, 3).map(e => {
+  const eventDate = new Date(e.eventTime);
+  const dateStr = eventDate.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'America/Los_Angeles'
+  });
+  const timeStr = eventDate.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone: 'America/Los_Angeles'
+  });
+  return `- ${e.title} (happening ${dateStr} at ${timeStr}, event ID: ${e.url.split('detail=')[1]?.split('&')[0] || 'unknown'})`;
+}).join('\n') : ''}
+${newNeighbors.length > 0 ? `\nNew Neighbors: ${newNeighbors.map(n => n.name).join(', ')}` : ''}
+${newGroups.length > 0 ? `\nNew Groups: ${newGroups.map(g => `${g.name} (${g.type === 'physical' ? 'building' : 'community'} group by ${g.createdBy.split(' ')[0]})`).join(', ')}` : ''}
+
+UPCOMING EVENTS (happening in next 7 days):
+${upcomingActivities.events.length > 0 ? upcomingActivities.events.slice(0, 5).map(e =>
+  `- ${e.title} on ${e.date}${e.attendees > 0 ? ` (${e.attendees} ${e.attendees === 1 ? 'neighbor' : 'neighbors'} going)` : ''} (event ID: ${e.id})`
+).join('\n') : 'No upcoming events'}
 
 NEIGHBORS AND THEIR SKILLS WITH IDS:
 ${Object.entries(skillSpotlightWithIds).map(([neighbor, skills]) =>
@@ -281,9 +306,27 @@ TONE GUIDELINES:
 - Be specific, not generic
 
 YOUR TASK:
-Write exactly 3 suggestions. Mix formats - use neighbor names, group names, AND create-new-thing verbs.
+Generate three pieces of content for the newsletter:
 
-CRITICAL FORMATTING:
+1. THIS WEEK summary (1 sentence about what happened this past week based on PAST WEEK ACTIVITY data)
+   - If new events were created, mention them with [[description:event:id]] and include the EXACT date/time from the data (do not reinterpret dates - use them as provided)
+   - If new neighbors joined, mention them with {{Name}}
+   - If new groups formed, mention them with {{GroupName}}
+   - If nothing happened, return null
+   - Balance: be warm and welcoming but concise - just enough context to make it friendly
+
+2. WEEK AHEAD summary (1 sentence about upcoming events based on UPCOMING EVENTS data)
+   - Mention specific events with [[description:event:id]] and include the EXACT date/time from the data (do not reinterpret dates - copy them precisely)
+   - Include how many neighbors are going if 2 or more
+   - If no upcoming events, return null
+   - Balance: be inviting but concise - just enough context to make it friendly
+
+3. SUGGESTIONS (exactly 3 suggestions for "Ways to Get Involved")
+   - Mix formats - use neighbor names, group names, AND create-new-thing verbs
+   - Link specific skills or events using [[description:type:id]]
+   - 1-2 sentences max per suggestion
+
+CRITICAL FORMATTING FOR ALL SECTIONS:
 - Wrap neighbor names in {{Name}} so we can detect them: {{Parker}}, {{Laura}}, etc.
 - Wrap group names in {{GroupName}} so we can detect them: {{Piedmont Ave Resilience Committee}}
 - Link specific skills or events using [[description:type:id]] syntax:
@@ -292,11 +335,15 @@ CRITICAL FORMATTING:
   * The description should be conversational, not just the title
   * Use the actual IDs provided in the data above
 - Start create-action suggestions with a verb: "Host", "Organize", "Start", "Offer", "Schedule"
-- 1-2 sentences max per suggestion
 - No em-dashes (—), use regular hyphens only
 - Friendly, specific, actionable
 
-Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
+Return as JSON object:
+{
+  "thisWeek": "summary text or null",
+  "weekAhead": "summary text or null",
+  "suggestions": ["suggestion 1", "suggestion 2", "suggestion 3"]
+}`;
 
     console.log('📝 Prompt length:', prompt.length);
     console.log('🎯 Skill data being sent:', Object.keys(skillSpotlightWithIds).length, 'neighbors with skills');
@@ -338,14 +385,20 @@ Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
     const content = data.content[0].text;
     console.log('📄 Raw AI response:', content);
 
-    // Try to parse the JSON response as array of suggestions
+    // Try to parse the JSON response as object with thisWeek, weekAhead, and suggestions
     try {
-      const suggestions = JSON.parse(content);
-      console.log('✨ AI suggestions generated successfully:', suggestions);
+      const aiResponse = JSON.parse(content);
+      console.log('✨ AI content generated successfully:', {
+        hasThisWeek: !!aiResponse.thisWeek,
+        hasWeekAhead: !!aiResponse.weekAhead,
+        suggestionCount: aiResponse.suggestions?.length
+      });
 
-      // Process suggestions to convert {{Name}} and {{GroupName}} markers to HTML links
-      const processedSuggestions = suggestions.map((suggestion: string) => {
-        let processed = suggestion;
+      // Helper function to process AI text with {{Name}}, {{GroupName}}, and [[entity:type:id]] markers
+      const processAIText = (text: string | null): string | null => {
+        if (!text || text === 'null') return null;
+
+        let processed = text;
 
         // Replace {{NeighborName}} with PURPLE links to neighbor profiles
         processed = processed.replace(/\{\{([^}]+)\}\}/g, (match, name) => {
@@ -387,14 +440,14 @@ Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
           }
 
           if (!entityUrl) {
-            console.warn(`Unknown entity type in suggestion: ${type}`);
+            console.warn(`Unknown entity type: ${type}`);
             return text; // Return plain text if type is unknown
           }
 
           return `<a href="${entityUrl}" style="color: ${color}; text-decoration: none; font-weight: 600;">${text}</a>`;
         });
 
-        // Detect and link action verbs at the start of suggestion with context-based colors
+        // Detect and link action verbs at the start of text with context-based colors
         const actionVerbs = ['Host', 'Organize', 'Start', 'Offer', 'Schedule', 'Create', 'Plan', 'Set up', 'Join', 'Launch'];
         for (const verb of actionVerbs) {
           const verbRegex = new RegExp(`^(${verb})\\b`, 'i');
@@ -422,96 +475,23 @@ Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
         }
 
         return processed;
+      };
+
+      // Process all three sections with the same logic
+      const processedThisWeek = processAIText(aiResponse.thisWeek);
+      const processedWeekAhead = processAIText(aiResponse.weekAhead);
+      const processedSuggestions = aiResponse.suggestions.map(processAIText);
+
+      console.log('✅ All sections processed with links:', {
+        thisWeek: processedThisWeek ? 'generated' : 'null',
+        weekAhead: processedWeekAhead ? 'generated' : 'null',
+        suggestions: processedSuggestions.length
       });
 
-      // Build the full AI content structure with the processed suggestions
-      // Build "This Week" section with actual highlights
-      const hasActivity = pastWeekActivities.createdEvents.length > 0 ||
-                         newGroups.length > 0 ||
-                         newNeighbors.length > 0;
-
-      let thisWeekText = "";
-      if (hasActivity) {
-        const highlights = [];
-
-        // Highlight new neighbors
-        if (newNeighbors.length > 0) {
-          const neighborLinks = newNeighbors.slice(0, 3).map(n =>
-            `<a href="${n.profileUrl}" style="color: #7c3aed; text-decoration: none; font-weight: 700;">${n.name.split(' ')[0]}</a>`
-          ).join(', ');
-          const extra = newNeighbors.length > 3 ? ` and ${newNeighbors.length - 3} more` : '';
-          highlights.push(`Welcome ${neighborLinks}${extra} to the neighborhood!`);
-        }
-
-        // Highlight new events with links and timing context
-        if (pastWeekActivities.createdEvents.length > 0) {
-          const eventDescriptions = pastWeekActivities.createdEvents.slice(0, 2).map(e => {
-            const eventDate = new Date(e.eventTime);
-            const timeStr = eventDate.toLocaleDateString('en-US', {
-              weekday: 'short',
-              month: 'short',
-              day: 'numeric',
-              hour: 'numeric',
-              minute: '2-digit'
-            });
-            return `<a href="${e.url}" style="color: #2563eb; text-decoration: none; font-weight: 600;">${e.title}</a> (${timeStr})`;
-          });
-
-          if (pastWeekActivities.createdEvents.length === 1) {
-            highlights.push(`${eventDescriptions[0]} was added to the calendar`);
-          } else if (pastWeekActivities.createdEvents.length === 2) {
-            highlights.push(`${eventDescriptions[0]} and ${eventDescriptions[1]} were added to the calendar`);
-          } else {
-            highlights.push(`${eventDescriptions.join(', ')}, plus ${pastWeekActivities.createdEvents.length - 2} more events were added to the calendar`);
-          }
-        }
-
-        // Highlight new groups with creator context
-        if (newGroups.length > 0) {
-          const groupDescriptions = newGroups.slice(0, 2).map(g => {
-            const creatorFirstName = g.createdBy.split(' ')[0];
-            const typeLabel = g.type === 'physical' ? 'building group' : 'community group';
-            return `<a href="${getGroupURL(neighborhoodId, g.groupId)}" style="color: #7c3aed; text-decoration: none; font-weight: 600;">${g.name}</a> (${typeLabel} started by ${creatorFirstName})`;
-          });
-
-          if (newGroups.length === 1) {
-            highlights.push(`${groupDescriptions[0]} is bringing neighbors together`);
-          } else if (newGroups.length === 2) {
-            highlights.push(`${groupDescriptions[0]} and ${groupDescriptions[1]} are bringing neighbors together`);
-          } else {
-            highlights.push(`${groupDescriptions.join(', ')}, plus ${newGroups.length - 2} more groups are bringing neighbors together`);
-          }
-        }
-
-        thisWeekText = highlights.join(' ');
-      } else {
-        thisWeekText = null; // Hide section if no activity
-      }
-
-      // Build "Week Ahead" section with event details - more conversational
-      let weekAheadText = null;
-      if (upcomingActivities.events.length > 0) {
-        const eventDescriptions = upcomingActivities.events.slice(0, 3).map(e => {
-          const attendeeText = e.attendees > 0 ? ` - ${e.attendees} ${e.attendees === 1 ? 'neighbor is' : 'neighbors are'} already going` : '';
-          return `<a href="${e.url}" style="color: #2563eb; text-decoration: none; font-weight: 600;">${e.title}</a> on ${e.date}${attendeeText}`;
-        });
-
-        if (upcomingActivities.events.length === 1) {
-          weekAheadText = `Coming up this week: ${eventDescriptions[0]}. Don't miss it!`;
-        } else if (upcomingActivities.events.length === 2) {
-          weekAheadText = `Coming up this week: ${eventDescriptions[0]}, and ${eventDescriptions[1]}`;
-        } else if (upcomingActivities.events.length === 3) {
-          weekAheadText = `Coming up this week: ${eventDescriptions.join(', ')}`;
-        } else {
-          weekAheadText = `Coming up this week: ${eventDescriptions.join(', ')}, plus ${upcomingActivities.events.length - 3} more - check the calendar so you don't miss out!`;
-        }
-      }
-      // If no events, return null to hide the section entirely
-
       return {
-        thisWeek: thisWeekText,
-        weekAhead: weekAheadText,
-        getInvolved: processedSuggestions // Use the processed AI-generated suggestions with HTML links
+        thisWeek: processedThisWeek,
+        weekAhead: processedWeekAhead,
+        getInvolved: processedSuggestions
       };
     } catch (parseError) {
       console.error('Failed to parse AI response as JSON:', parseError);
@@ -773,18 +753,28 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Process upcoming activities with URLs
     const upcomingActivities = {
-      events: upcomingEventsData.data?.map(event => ({
-        title: event.title,
-        url: getEventURL(neighborhoodId, event.id),
-        date: new Date(event.time).toLocaleDateString('en-US', { 
-          weekday: 'short', 
-          month: 'short', 
+      events: upcomingEventsData.data?.map(event => {
+        const eventDate = new Date(event.time);
+        const dateStr = eventDate.toLocaleDateString('en-US', {
+          weekday: 'long',
+          month: 'long',
           day: 'numeric',
+          year: 'numeric',
+          timeZone: 'America/Los_Angeles'
+        });
+        const timeStr = eventDate.toLocaleTimeString('en-US', {
           hour: 'numeric',
-          minute: '2-digit'
-        }),
-        attendees: Array.isArray(event.event_rsvps) ? event.event_rsvps.length : 0
-      })) || [],
+          minute: '2-digit',
+          timeZone: 'America/Los_Angeles'
+        });
+        return {
+          title: event.title,
+          url: getEventURL(neighborhoodId, event.id),
+          id: event.id,
+          date: `${dateStr} at ${timeStr}`,
+          attendees: Array.isArray(event.event_rsvps) ? event.event_rsvps.length : 0
+        };
+      }) || [],
       
       
       skills: availableSkillsData.data?.map(skill => ({

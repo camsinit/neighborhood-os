@@ -62,18 +62,20 @@ function SkillsPage() {
     pageName: 'SkillsPage'
   });
 
-  // Handle email URL parameters to open skill sheet
+  // Handle URL parameters to auto-open creation sheets
   useEffect(() => {
-    const highlightParam = searchParams.get('highlight');
-    const typeParam = searchParams.get('type');
-    const idParam = searchParams.get('id');
-    
-    // Check if this is a skill highlight from email URL
-    if (highlightParam === 'skill' && typeParam === 'skills_exchange' && idParam) {
-      console.log('Opening skill sheet from email URL:', idParam);
-      openSheet(idParam);
+    const action = searchParams.get('action');
+
+    if (action === 'offer' || action === 'add_offer') {
+      console.log('Opening skill offer sheet from URL action parameter');
+      setIsSkillOfferSheetOpen(true);
+      setSearchParams({}); // Clear URL params after opening
+    } else if (action === 'request' || action === 'add_request') {
+      console.log('Opening skill request sheet from URL action parameter');
+      setIsSkillRequestSheetOpen(true);
+      setSearchParams({}); // Clear URL params after opening
     }
-  }, [searchParams, openSheet]);
+  }, [searchParams, setSearchParams]);
 
   // Create handler functions using the utility factory functions
   const handleTabChange = createTabChangeHandler(setSearchParams, searchParams);

@@ -261,16 +261,17 @@ export const WeeklySummaryEmail = ({
           <Text key={index} style={paragraph} dangerouslySetInnerHTML={{ __html: `• ${suggestion}` }} />
         ))}
 
-        <Text style={paragraph}>
-          <Link href={`${baseUrl}/n/${neighborhoodId}?utm_source=email&utm_medium=email&utm_campaign=weekly_summary_dashboard`} style={ctaButton}>
-            Visit Your Neighborhood Dashboard
-          </Link>
-        </Text>
-
         <Text style={signoff}>
           Stay neighborly,<br />
           The {neighborhoodName} Community
         </Text>
+
+        <div style={feedbackCallout}>
+          <Text style={feedbackText}>
+            💬 <strong>Have feedback for this newsletter? I want to hear it!</strong><br />
+            Reply to this email with your suggestions or ideas and it'll go straight to my (Cam's) inbox.
+          </Text>
+        </div>
 
         {/* Footer */}
         <Section style={footer}>
@@ -633,6 +634,27 @@ const signoff = {
   fontSize: '16px',
   margin: '20px 0',
   fontStyle: 'italic',
+};
+
+const feedbackCallout = {
+  backgroundColor: '#f3f4f6',
+  border: '1px solid #e5e7eb',
+  borderRadius: '8px',
+  padding: '16px',
+  margin: '24px 0',
+};
+
+const feedbackText = {
+  color: '#374151',
+  fontSize: '16px',
+  lineHeight: '24px',
+  margin: '0',
+};
+
+const feedbackLink = {
+  color: '#2563eb',
+  textDecoration: 'none',
+  fontWeight: '600',
 };
 
 // Quick Actions Styles

@@ -1,6 +1,6 @@
 /**
  * Universal Page Sheet Controller Hook
- * 
+ *
  * This hook provides a unified approach to managing sheet states, URL parameters,
  * and item navigation across all pages. It eliminates the fragmented URL management
  * and creates a consistent pattern for deep linking and navigation.
@@ -8,7 +8,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { HighlightableItemType } from '@/utils/highlight/types';
-import { highlightItem } from '@/utils/highlight';
 import { createLogger } from '@/utils/logger';
 
 const logger = createLogger('PageSheetController');
@@ -35,10 +34,6 @@ interface UsePageSheetControllerReturn {
   openSheet: (itemId: string, item?: any) => void;
   /** Function to close the sheet */
   closeSheet: () => void;
-  /** Whether any item should be highlighted */
-  shouldHighlight: boolean;
-  /** ID of item to highlight */
-  highlightItemId: string | null;
 }
 
 export function usePageSheetController({
@@ -57,56 +52,17 @@ export function usePageSheetController({
   // Parse URL parameters
   const detailParam = searchParams.get('detail');
   const typeParam = searchParams.get('type') as HighlightableItemType;
-  const highlightParam = searchParams.get('highlight');
-  
+
   // Clean up any corrupted IDs (remove date suffixes like "_2025-07-10")
   const cleanId = (id: string | null): string | null => {
     if (!id) return null;
     // Remove any date suffix pattern (_YYYY-MM-DD)
     return id.replace(/_\d{4}-\d{2}-\d{2}$/, '');
   };
-  
+
   // Determine sheet state
   const shouldOpenSheet = Boolean(detailParam && typeParam === contentType);
   const sheetItemId = shouldOpenSheet ? cleanId(detailParam) : null;
-  
-  // Determine highlight state  
-  const shouldHighlight = Boolean(
-    (detailParam && typeParam === contentType) || 
-    (highlightParam && typeParam === contentType)
-  );
-  const highlightItemId = shouldHighlight ? 
-    cleanId(detailParam || highlightParam) : null;
-  
-  // Legacy parameter support (eventId, goodsId, etc.)
-  useEffect(() => {
-    const legacyParams = [
-      'eventId', 'goodsId', 'skillId', 'safetyId', 'neighborId',
-      'updateId' // for safety updates
-    ];
-    
-    let legacyId: string | null = null;
-    for (const param of legacyParams) {
-      const value = searchParams.get(param);
-      if (value) {
-        legacyId = cleanId(value);
-        break;
-      }
-    }
-    
-    if (legacyId) {
-      logger.info(`${pageName}: Converting legacy parameter to modern format`);
-      highlightItem(contentType, legacyId);
-    }
-  }, [searchParams, contentType, pageName]);
-  
-  // Handle highlighting
-  useEffect(() => {
-    if (highlightItemId) {
-      logger.info(`${pageName}: Highlighting item:`, highlightItemId);
-      highlightItem(contentType, highlightItemId);
-    }
-  }, [highlightItemId, contentType, pageName]);
   
   // Fetch sheet item data
   useEffect(() => {
@@ -173,8 +129,6 @@ export function usePageSheetController({
     sheetItem,
     isLoadingSheetItem,
     openSheet,
-    closeSheet,
-    shouldHighlight,
-    highlightItemId
+    closeSheet
   };
 }

@@ -88,6 +88,17 @@ function GroupsPage() {
     }
   }, [searchParams]);
 
+  // Handle URL parameters to auto-open create group sheet
+  useEffect(() => {
+    const action = searchParams.get('action');
+
+    if (action === 'create' || action === 'add_group') {
+      console.log('Opening create group sheet from URL action parameter');
+      setIsCreateGroupSheetOpen(true);
+      setSearchParams({}); // Clear URL params after opening
+    }
+  }, [searchParams, setSearchParams]);
+
   // Handle neighbor sheet opening
   const handleNeighborClick = (itemId: string, item?: any) => {
     openNeighborSheet(itemId);
