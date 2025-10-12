@@ -325,23 +325,23 @@ Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
           const isGroupName = name.includes('Committee') || name.includes('Group') || name.includes('Club') || name.length > 25;
 
           if (isGroupName) {
-            // Group link (PURPLE) - find group ID
+            // Group link (PURPLE) - find group ID using URL generator function
             const group = newGroups.find(g => g.name === name);
             const groupUrl = group
-              ? `${baseUrl}/n/${neighborhoodId}/neighbors?detail=${group.groupId}&type=group`
-              : `${baseUrl}/n/${neighborhoodId}/neighbors?view=groups`;
-            return `<a href="${groupUrl}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_suggestion" style="color: #7c3aed; text-decoration: none; font-weight: 600;">${name}</a>`;
+              ? getGroupURL(neighborhoodId, group.groupId)
+              : `${baseUrl}/neighbors?view=groups&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_suggestion`;
+            return `<a href="${groupUrl}" style="color: #7c3aed; text-decoration: none; font-weight: 600;">${name}</a>`;
           } else {
-            // Neighbor link (PURPLE) - find user ID by fuzzy matching name
+            // Neighbor link (PURPLE) - find user ID by fuzzy matching name using URL generator function
             const neighbor = allActiveSkills.find(s =>
               s.neighborName.toLowerCase().includes(name.toLowerCase()) ||
               name.toLowerCase().includes(s.neighborName.split(' ')[0].toLowerCase())
             );
 
             if (neighbor && neighbor.neighborUserId) {
-              return `<a href="${baseUrl}/n/${neighborhoodId}/neighbors?detail=${neighbor.neighborUserId}&type=neighbors&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_suggestion" style="color: #7c3aed; text-decoration: none; font-weight: 700;">${name}</a>`;
+              return `<a href="${getProfileURL(neighborhoodId, neighbor.neighborUserId)}" style="color: #7c3aed; text-decoration: none; font-weight: 700;">${name}</a>`;
             } else {
-              return `<a href="${baseUrl}/n/${neighborhoodId}/neighbors?view=directory&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_suggestion" style="color: #7c3aed; text-decoration: none; font-weight: 700;">${name}</a>`;
+              return `<a href="${baseUrl}/neighbors?view=directory&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_suggestion" style="color: #7c3aed; text-decoration: none; font-weight: 700;">${name}</a>`;
             }
           }
         });
