@@ -68,6 +68,22 @@ export const getSkillURL = (neighborhoodId: string, category: string): string =>
   return addEmailTrackingParams(url, "weekly_summary_skill", "email");
 };
 
+/**
+ * Generate URL to open a specific skill detail panel
+ *
+ * @example
+ * getSkillDetailURL('uuid-123', 'skill-abc-456')
+ * // => https://neighborhoodos.com/n/uuid-123/skills?detail=skill-abc-456&type=skills&utm...
+ *
+ * Frontend expectation:
+ * - SkillsPage uses usePageSheetController to detect ?detail={id}&type=skills
+ * - Opens skill detail sheet immediately on mount
+ */
+export const getSkillDetailURL = (neighborhoodId: string, skillId: string): string => {
+  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/skills?detail=${skillId}&type=skills`;
+  return addEmailTrackingParams(url, "weekly_summary_skill_detail", "email");
+};
+
 export const getGroupURL = (neighborhoodId: string, groupId: string): string => {
   const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/neighbors?detail=${groupId}&type=group`;
   return addEmailTrackingParams(url, "weekly_summary_group", "email");
@@ -144,4 +160,32 @@ export const getCreateSkillRequestURL = (neighborhoodId: string): string => {
 export const getCreateGroupURL = (neighborhoodId: string): string => {
   const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/neighbors?action=create`;
   return addEmailTrackingParams(url, "weekly_summary_create_group", "email");
+};
+
+/**
+ * Universal entity detail URL generator for contextual entity linking
+ *
+ * Generates URLs that open specific item detail panels across different pages.
+ * Used for [[entity:type:id]] markers in AI-generated suggestions.
+ *
+ * @param neighborhoodId - The neighborhood UUID
+ * @param entityId - The entity UUID
+ * @param entityType - The type of entity ('skills' or 'event')
+ * @returns Fully formed URL with UTM tracking
+ *
+ * @example
+ * getEntityDetailURL('uuid-123', 'skill-456', 'skills')
+ * // => https://neighborhoodos.com/n/uuid-123/skills?detail=skill-456&type=skills&utm...
+ */
+export const getEntityDetailURL = (
+  neighborhoodId: string,
+  entityId: string,
+  entityType: 'skills' | 'event'
+): string => {
+  if (entityType === 'skills') {
+    return getSkillDetailURL(neighborhoodId, entityId);
+  } else if (entityType === 'event') {
+    return getEventURL(neighborhoodId, entityId);
+  }
+  throw new Error(`Unsupported entity type: ${entityType}`);
 };

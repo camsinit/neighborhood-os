@@ -5,7 +5,7 @@ import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import React from 'npm:react@18.3.1'
 import { WeeklySummaryEmail } from './_templates/weekly-summary.tsx'
 import { corsHeaders, handleCorsPreflightRequest, successResponse, errorResponse } from '../_shared/cors.ts'
-import { getProfileURL, getEventURL, getSkillURL, getGroupURL, getCreateEventURL, getCreateSkillOfferURL, getCreateSkillRequestURL, getCreateGroupURL } from './_utils/urlGenerator.ts'
+import { getProfileURL, getEventURL, getSkillURL, getSkillDetailURL, getGroupURL, getCreateEventURL, getCreateSkillOfferURL, getCreateSkillRequestURL, getCreateGroupURL } from './_utils/urlGenerator.ts'
 import { convertToSendingDomainUrl } from './_utils/imageProxy.ts'
 
 // Version marker to track deployments
@@ -190,11 +190,16 @@ async function generateAIContent(neighborhoodName: string, stats: any, highlight
     const shuffledGroups = shuffleArray(newGroups);
 
     // Format neighborhood data for AI analysis - use ALL active skills, not just this week
-    const skillSpotlight = shuffledSkills.reduce((acc, skill) => {
+    // Include skill IDs for contextual entity linking
+    const skillSpotlightWithIds = shuffledSkills.reduce((acc, skill) => {
       if (!acc[skill.neighborName]) {
         acc[skill.neighborName] = [];
       }
-      acc[skill.neighborName].push(`${skill.title} (${skill.category})`);
+      acc[skill.neighborName].push({
+        title: skill.title,
+        category: skill.category,
+        id: skill.id
+      });
       return acc;
     }, {});
 
@@ -213,6 +218,19 @@ async function generateAIContent(neighborhoodName: string, stats: any, highlight
       return `${group.name} (created by ${firstName}, ${typeLabel})`;
     });
 
+    // Format upcoming events with IDs for contextual entity linking
+    const eventSpotlight = upcomingActivities.events.slice(0, 5).map(event => {
+      // Format date in a friendly way
+      const eventDate = new Date(event.date);
+      const dayName = eventDate.toLocaleDateString('en-US', { weekday: 'long' });
+      const timeStr = eventDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      return {
+        title: event.title,
+        date: `${dayName} ${timeStr}`,
+        id: event.id
+      };
+    });
+
     // Identify skill gaps - common categories that are missing
     const availableCategories = Object.keys(skillCategories);
     const commonSkillCategories = ['home_repair', 'automotive', 'gardening', 'childcare', 'cooking', 'crafts'];
@@ -222,9 +240,9 @@ async function generateAIContent(neighborhoodName: string, stats: any, highlight
 
 ACTUAL NEIGHBORHOOD DATA:
 
-NEIGHBORS AND THEIR SKILLS:
-${Object.entries(skillSpotlight).map(([neighbor, skills]) =>
-  `${neighbor}: ${skills.slice(0, 3).join(', ')}${skills.length > 3 ? ` (+ ${skills.length - 3} more)` : ''}`
+NEIGHBORS AND THEIR SKILLS WITH IDS:
+${Object.entries(skillSpotlightWithIds).map(([neighbor, skills]) =>
+  `${neighbor}: ${skills.slice(0, 3).map(s => `${s.title} (${s.category}, id: ${s.id})`).join(', ')}${skills.length > 3 ? ` (+ ${skills.length - 3} more)` : ''}`
 ).join('\n')}
 
 SKILLS BY CATEGORY:
@@ -235,16 +253,19 @@ ${Object.entries(skillCategories).map(([category, skills]) =>
 NEIGHBORHOOD GROUPS:
 ${groupsSpotlight.length > 0 ? groupsSpotlight.join('\n') : 'No groups created yet'}
 
+UPCOMING EVENTS WITH IDS:
+${eventSpotlight.length > 0 ? eventSpotlight.map(e => `${e.title} (${e.date}, id: ${e.id})`).join('\n') : 'No upcoming events scheduled'}
+
 SUGGESTION FORMATS - Each must have ONE clear action:
 
-FORMAT 1: Highlight an existing neighbor's skill (neighbor name will be linked to their profile)
-✅ "{{NeighborName}} can help troubleshoot your computer issues - no need to trek to the Genius Bar!"
-✅ "{{NeighborName}} knows their way around a garden and loves sharing tips on keeping plants alive"
-✅ "{{NeighborName}} offers meal exchanges for those nights when cooking feels like too much"
+FORMAT 1: Highlight an existing neighbor's skill (neighbor name AND skill will be linked)
+✅ "{{Cam}} can help [[troubleshoot computers:skills:abc-123]] - save a trip to the repair shop!"
+✅ "{{Sarah}} knows their way around [[gardening:skills:def-456]] and loves sharing tips on keeping plants alive"
+✅ "{{Laura}} offers [[meal exchanges:skills:ghi-789]] for those nights when cooking feels like too much"
 
-FORMAT 2: Suggest joining an existing group (group name will be linked)
-✅ "{{GroupName}} meets monthly to discuss emergency preparedness - join if you want to know your neighbors AND be ready for anything"
-✅ "Check out {{GroupName}} if you're interested in community resilience and connecting with neighbors"
+FORMAT 2: Suggest joining an existing group or event (group name or event will be linked)
+✅ "{{Resilience Committee}} meets monthly to discuss emergency preparedness - join if you want to know your neighbors AND be ready for anything"
+✅ "Don't miss [[game night:event:xyz-123]] this Friday to connect with neighbors over board games!"
 
 FORMAT 3: Suggest creating something new (verb will be linked to create page)
 ✅ "Host a tool-sharing workshop so neighbors can fix things together instead of buying new"
@@ -265,6 +286,11 @@ Write exactly 3 suggestions. Mix formats - use neighbor names, group names, AND 
 CRITICAL FORMATTING:
 - Wrap neighbor names in {{Name}} so we can detect them: {{Parker}}, {{Laura}}, etc.
 - Wrap group names in {{GroupName}} so we can detect them: {{Piedmont Ave Resilience Committee}}
+- Link specific skills or events using [[description:type:id]] syntax:
+  * For skills: [[troubleshoot computers:skills:abc-123]]
+  * For events: [[game night:event:xyz-456]]
+  * The description should be conversational, not just the title
+  * Use the actual IDs provided in the data above
 - Start create-action suggestions with a verb: "Host", "Organize", "Start", "Offer", "Schedule"
 - 1-2 sentences max per suggestion
 - No em-dashes (—), use regular hyphens only
@@ -273,8 +299,9 @@ CRITICAL FORMATTING:
 Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
 
     console.log('📝 Prompt length:', prompt.length);
-    console.log('🎯 Skill data being sent:', Object.keys(skillSpotlight).length, 'neighbors with skills');
+    console.log('🎯 Skill data being sent:', Object.keys(skillSpotlightWithIds).length, 'neighbors with skills');
     console.log('📊 Categories:', Object.keys(skillCategories));
+    console.log('📅 Event data being sent:', eventSpotlight.length, 'upcoming events');
 
     // Call Claude API
     console.log('🚀 Calling Claude API...');
@@ -344,6 +371,27 @@ Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
               return `<a href="${baseUrl}/neighbors?view=directory&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_suggestion" style="color: #7c3aed; text-decoration: none; font-weight: 700;">${name}</a>`;
             }
           }
+        });
+
+        // Process [[entity:type:id]] markers for contextual entity links (skills, events)
+        processed = processed.replace(/\[\[([^:]+):([^:]+):([^\]]+)\]\]/g, (match, text, type, id) => {
+          let entityUrl = '';
+          let color = '';
+
+          if (type === 'skills') {
+            entityUrl = getSkillDetailURL(neighborhoodId, id);
+            color = '#059669'; // Green for skills
+          } else if (type === 'event') {
+            entityUrl = getEventURL(neighborhoodId, id);
+            color = '#2563eb'; // Blue for events
+          }
+
+          if (!entityUrl) {
+            console.warn(`Unknown entity type in suggestion: ${type}`);
+            return text; // Return plain text if type is unknown
+          }
+
+          return `<a href="${entityUrl}" style="color: ${color}; text-decoration: none; font-weight: 600;">${text}</a>`;
         });
 
         // Detect and link action verbs at the start of suggestion with context-based colors
