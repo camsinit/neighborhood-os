@@ -1,0 +1,277 @@
+# neighborhoodOS Cursor Rules
+
+This is a React + TypeScript + Supabase neighborhood management platform.
+
+## Project Context
+
+**What is neighborhoodOS?**
+A web application that helps neighbors connect, collaborate, and build stronger local communities through Events, Skills, Directory, and Updates modules.
+
+**Tech Stack:**
+- Frontend: React 18, TypeScript, Vite
+- UI: Radix UI + shadcn/ui, Tailwind CSS
+- State: TanStack Query (React Query), Zustand, React Context
+- Backend: Supabase (PostgreSQL, Auth, Edge Functions)
+- Email: React Email templates with Resend API
+- Routing: React Router v6
+
+## Essential Documentation
+
+Before making changes, reference these files:
+
+- **CONTRIBUTING.md** - Coding conventions (MUST READ FIRST)
+- **docs/ARCHITECTURE.md** - System architecture and design
+- **docs/GLOSSARY.md** - Domain terminology
+- **src/README.md** - Frontend code organization
+- **supabase/functions/README.md** - Edge Functions documentation
+
+## Core Rules (from CONTRIBUTING.md)
+
+### 1. Routing and Navigation
+
+**Source of truth:** `src/utils/routes.ts`
+
+```typescript
+// ✅ CORRECT - Use BASE_ROUTES and helpers
+import { BASE_ROUTES, neighborhoodPath } from '@/utils/routes';
+const calendarPath = neighborhoodPath(BASE_ROUTES.calendar, neighborhoodId);
+
+// ❌ WRONG - Never hardcode paths
+const calendarPath = '/calendar';
+```
+
+**Key functions:**
+- `BASE_ROUTES` - Base paths (e.g., '/calendar')
+- `ROUTE_MAP` - Maps item types to base paths
+- `neighborhoodPath()` - Build /n/:id-prefixed paths
+- `extractNeighborhoodId()` - Extract neighborhood ID from path
+- `isOnBaseRoute()` - Check current route
+
+**For item navigation:** Use `ItemNavigationService` from `services/navigation/ItemNavigationService.ts`
+
+### 2. Toast Notifications
+
+**Source of truth:** `src/utils/toast.ts`
+
+```typescript
+// ✅ CORRECT - Use toast utility functions
+import { showSuccessToast, showErrorToast } from '@/utils/toast';
+showSuccessToast('Event created!');
+
+// ❌ WRONG - Don't use the deprecated hook
+import { useToast } from '@/hooks/use-toast'; // DEPRECATED
+```
+
+**Available functions:**
+- `showSuccessToast()`, `showErrorToast()`, `showInfoToast()`, `showWarningToast()`
+- `showToast()`, `showLoadingToast()`, `dismissToast()`
+
+**App uses:** Sonner Toaster (components/ui/sonner.tsx)
+
+### 3. Data Fetching
+
+**For neighborhood-scoped data:** Use `src/hooks/useNeighborhoodQuery.ts`
+
+```typescript
+// ✅ CORRECT - Neighborhood-aware query
+const { data: events } = useNeighborhoodQuery(
+  ['events'], // base key
+  (neighborhoodId) => supabase
+    .from('events')
+    .select('*')
+    .eq('neighborhood_id', neighborhoodId)
+);
+
+// Query key becomes: ['events', neighborhoodId]
+// Query only runs when neighborhoodId exists
+```
+
+**Benefits:**
+- Injects neighborhoodId into query key
+- Gates execution until neighborhoodId available
+- Standardizes neighborhood-scoped fetching
+
+### 4. Deep Links and Highlighting
+
+**URL params:**
+- Prefer: `?detail={id}&type={type}`
+- Legacy support: `?highlight={id}`
+
+**Highlight attributes:**
+```tsx
+<div data-event-id={event.id}>...</div>
+<div data-skill-id={skill.id}>...</div>
+```
+
+**Handler:** `ItemNavigationService.handleDeepLinkParams()`
+
+### 5. Logging
+
+**Source of truth:** `src/utils/logger.ts`
+
+```typescript
+import { createLogger } from '@/utils/logger';
+
+const logger = createLogger('ComponentName');
+logger.info('Something happened', { data });
+logger.error('Error occurred', error);
+```
+
+**Debug mode:** Add `?debug=true` to URL for verbose logging
+
+### 6. Internal Links
+
+Use `Link` or `NavLink` from React Router to avoid full page reloads
+
+```tsx
+import { Link } from 'react-router-dom';
+<Link to={path}>Navigate</Link>
+```
+
+### 7. Types
+
+Tighten obvious `any` types when low-cost. Don't enable strict mode globally.
+
+## Additional Conventions
+
+### File Naming
+- Components: PascalCase (`EventCard.tsx`)
+- Hooks: camelCase with `use` prefix (`useEvents.ts`)
+- Utils: camelCase (`formatDate.ts`)
+- Types: camelCase or descriptive (`emailTypes.ts`)
+
+### Import Aliases
+Use `@/` for src imports:
+
+```typescript
+import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
+```
+
+### Component Organization
+Components organized by feature/domain, not technical role:
+
+```
+components/
+├── ui/              # Shared UI primitives (shadcn/ui)
+├── auth/            # Authentication
+├── calendar/        # Calendar views
+├── events/          # Event management
+├── skills/          # Skills directory
+├── neighbors/       # People directory
+└── layout/          # Layout components
+```
+
+### State Management Patterns
+
+**React Query** for server data:
+```typescript
+const { data, isLoading, error } = useQuery({
+  queryKey: ['resource', id],
+  queryFn: fetchData,
+});
+```
+
+**Mutations:**
+```typescript
+const mutation = useMutation({
+  mutationFn: createItem,
+  onSuccess: () => {
+    queryClient.invalidateQueries(['items']);
+    showSuccessToast('Success!');
+  },
+});
+```
+
+**Zustand** for simple global UI state
+**Context** for feature-specific state
+
+### Email System
+
+**Templates:** Located in `/emails`, use React Email components
+
+**Type system:** Use interfaces from `src/types/emailTypes.ts`
+
+**Edge Functions:** Located in `supabase/functions/`
+
+**See:** `docs/unified-email-system.md` for conventions
+
+### Database Access
+
+**Frontend:** Use Supabase client with RLS policies
+
+```typescript
+import { supabase } from '@/integrations/supabase/client';
+```
+
+**Edge Functions:** Use service role key (bypasses RLS)
+
+```typescript
+const supabase = createClient(
+  Deno.env.get('SUPABASE_URL')!,
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+);
+```
+
+## Common Pitfalls to Avoid
+
+1. ❌ **Don't hardcode routes** - Use `routes.ts`
+2. ❌ **Don't use deprecated `useToast` hook** - Use `toast.ts` utility
+3. ❌ **Don't modify `/components/ui` directly** - Compose or wrap them
+4. ❌ **Don't fetch data without loading/error states**
+5. ❌ **Don't skip TypeScript types** - Type your props and functions
+6. ❌ **Don't put business logic in components** - Use services or hooks
+7. ❌ **Don't commit sensitive data** - Use environment variables
+8. ❌ **Don't skip RLS policies** - Security is at database level
+
+## Key Domain Concepts
+
+- **Neighborhood**: Primary organizational unit (geographic community)
+- **Neighbor**: User who is a member of a neighborhood
+- **Module**: Feature area (Events, Skills, Directory, Updates, etc.)
+- **Physical Unit**: Actual address/building in a neighborhood
+- **Digest**: Weekly email summary (Sundays 9 AM local time)
+- **Edge Function**: Serverless function on Supabase (Deno runtime)
+
+**See:** `docs/GLOSSARY.md` for complete terminology
+
+## Before Making Changes
+
+1. Read `CONTRIBUTING.md` for detailed conventions
+2. Check `docs/ARCHITECTURE.md` to understand system design
+3. Review `docs/GLOSSARY.md` for domain terminology
+4. Look at existing code for patterns to follow
+5. Use `docs/CHECKLISTS.md` to ensure quality
+
+## AI Agent Tips
+
+- Always prefer editing existing files over creating new ones
+- Follow the established patterns in the codebase
+- When in doubt, check the documentation files listed above
+- Use the import alias `@/` for cleaner imports
+- Neighborhood context is critical - most data is neighborhood-scoped
+- Email templates use React Email components, not HTML strings
+- All routes should be neighborhood-aware: `/n/{id}/{module}`
+
+## Development Workflow
+
+```bash
+npm run dev          # Start dev server
+npm run build        # Production build
+npm run lint         # Run ESLint
+```
+
+**Testing emails:**
+```bash
+node scripts/test-user-email.js [userId] [neighborhoodId]
+node scripts/preview-newsletter.js
+```
+
+## Open Source Status
+
+We're in deep build mode right now, but pursuing full open-source by Fall 2025.
+
+## Questions?
+
+When uncertain, consult the documentation files or ask for clarification rather than making assumptions.
+

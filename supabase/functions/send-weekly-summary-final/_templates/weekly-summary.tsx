@@ -11,6 +11,7 @@ import {
   Hr,
 } from 'npm:@react-email/components@0.0.22'
 import * as React from 'npm:react@18.3.1'
+import { getProfileURL, getGroupURL, getEventURL, getSkillURL } from '../_utils/urlGenerator.ts'
 
 // Helper function to add context about how skills are useful with neighbor names
 const getSkillContext = (skillTitle: string, category: string, neighborName: string, requestType: string): string => {
@@ -84,6 +85,8 @@ interface WeeklySummaryEmailProps {
         type: string
         createdBy: string
         unitValue?: string
+        description?: string
+        groupId: string
       }>
       recentJoins: Array<{
         memberName: string
@@ -143,116 +146,132 @@ export const WeeklySummaryEmail = ({
 
         <Text style={greeting}>Hey neighbors!</Text>
 
-        {/* This Week Section - only show if there's skill data */}
-        {highlights.skillsByPerson.length > 0 && (
+        {/* This Week Section - only show if there's activity */}
+        {aiContent.thisWeek && (
           <>
             <Text style={thisWeekTitle}>This Week</Text>
             <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.thisWeek }} />
-
-            {/* Show skill highlights naturally integrated */}
-            <div style={skillsList}>
-              {highlights.skillsByPerson.map((person, index) => (
-                <Text key={index} style={skillItem}>
-                  <Link href={person.neighborProfileUrl} style={neighborNameLink}>{person.neighborName.split(' ')[0]}</Link>
-                  {person.skillCount === 1 ? (
-                    <>
-                      {' '}shared{' '}
-                      <Link href={`${baseUrl}/n/${neighborhoodId}/skills?highlight=skill&type=skills_exchange&id=${person.topSkills[0].id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_skill`} style={skillNameLink}>
-                        {person.topSkills[0].title}
-                      </Link>
-                    </>
-                  ) : (
-                    <>
-                      {' '}shared {person.skillCount} skills including{' '}
-                      {person.topSkills.slice(0, 2).map((skill, skillIndex) => (
-                        <span key={skillIndex}>
-                          <Link href={`${baseUrl}/n/${neighborhoodId}/skills?highlight=skill&type=skills_exchange&id=${skill.id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_skill`} style={skillNameLink}>
-                            {skill.title}
-                          </Link>
-                          {skillIndex === 0 ? ' and ' : ''}
-                        </span>
-                      ))}
-                    </>
-                  )}
-                  {person.skillCount > 1 && person.activityGroupId && (
-                    <>
-                      .{' '}
-                      <Link href={`${baseUrl}/n/${neighborhoodId}/home?detail=${person.activityGroupId}&type=activity_group&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_neighbor_skills`} style={browseAllLink}>
-                        See all of {person.neighborName.split(' ')[0]}'s offerings
-                      </Link>
-                    </>
-                  )}
-                  .
-                </Text>
-              ))}
-            </div>
           </>
+        )}
+
+        {/* Show activity highlights naturally integrated */}
+        {(highlights.skillsByPerson.length > 0 || highlights.groups.newGroups.length > 0) && (
+          <div style={skillsList}>
+            {/* Show new groups inline with other activities */}
+            {highlights.groups.newGroups.map((group, index) => {
+              const firstName = group.createdBy.split(' ')[0];
+              // Clean up description - remove redundant text
+              let cleanDescription = group.description || '';
+              if (cleanDescription) {
+                // Remove ending punctuation and common phrases we'll add
+                cleanDescription = cleanDescription
+                  .replace(/\.\s*$/, '')
+                  .replace(/please join us!?\.?$/i, '')
+                  .replace(/join if you're interested!?\.?$/i, '')
+                  .trim();
+                // Capitalize first letter if it starts lowercase
+                if (cleanDescription && cleanDescription[0] === cleanDescription[0].toLowerCase()) {
+                  cleanDescription = cleanDescription.charAt(0).toUpperCase() + cleanDescription.slice(1);
+                }
+              }
+
+              return (
+                <Text key={`group-${index}`} style={skillItem}>
+                  <Link href={getProfileURL(neighborhoodId, group.createdByUserId)} style={neighborNameLink}>
+                    {firstName}
+                  </Link>
+                  {' '}started the{' '}
+                  <Link href={getGroupURL(neighborhoodId, group.groupId)} style={groupNameLink}>
+                    {group.name}
+                  </Link>
+                  {cleanDescription ? `. ${cleanDescription}` : ''}
+                  {group.type === 'physical' && group.unitValue ? ` for ${group.unitValue}` : ''}
+                  . Join if you're interested!
+                </Text>
+              );
+            })}
+
+            {/* Show skills */}
+            {highlights.skillsByPerson.map((person, index) => (
+              <Text key={`skill-${index}`} style={skillItem}>
+                <Link href={person.neighborProfileUrl} style={neighborNameLink}>{person.neighborName.split(' ')[0]}</Link>
+                {person.skillCount === 1 ? (
+                  <>
+                    {'\'s offering help with '}
+                    <Link href={getSkillURL(neighborhoodId, person.topSkills[0].category)} style={skillNameLink}>
+                      {person.topSkills[0].title}
+                    </Link>
+                    {' - reach out if you need it'}
+                  </>
+                ) : (
+                  <>
+                    {' can help with '}
+                    {person.topSkills.slice(0, 2).map((skill, skillIndex) => (
+                      <span key={skillIndex}>
+                        <Link href={getSkillURL(neighborhoodId, skill.category)} style={skillNameLink}>
+                          {skill.title}
+                        </Link>
+                        {skillIndex === 0 ? ' and ' : ''}
+                      </span>
+                    ))}
+                    {person.skillCount > 2 ? `, plus ${person.skillCount - 2} more` : ''}
+                  </>
+                )}
+                {person.skillCount > 1 && person.activityGroupId && (
+                  <>
+                    .{' '}
+                    <Link href={`${baseUrl}/n/${neighborhoodId}/home?detail=${person.activityGroupId}&type=activity_group&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_neighbor_skills`} style={browseAllLink}>
+                      Check out all their offerings
+                    </Link>
+                  </>
+                )}
+                !
+              </Text>
+            ))}
+          </div>
         )}
 
         {/* The Week Ahead Section - only show if there are upcoming events */}
-        {highlights.upcomingEvents.length > 0 && (
+        {aiContent.weekAhead && (
           <>
             <Text style={weekAheadTitle}>The Week Ahead</Text>
             <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.weekAhead }} />
-
-            {/* Show upcoming events */}
-            <div style={eventsList}>
-              {highlights.upcomingEvents.map((event, index) => (
-                <Text key={index} style={eventItem}>
-                  <Link href={`${baseUrl}/n/${neighborhoodId}/calendar?highlight=event&type=event&id=${event.id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_upcoming_event`} style={eventNameLink}>
-                    {event.title}
-                  </Link>
-                  {' '}is {event.date}
-                  {event.attendees > 0 && ` (${event.attendees} attending)`}.
-                </Text>
-              ))}
-            </div>
           </>
         )}
 
-        {/* Ways to Get Involved Section - only show if there are suggestions */}
-        {aiContent.getInvolved && aiContent.getInvolved.length > 0 && (
-          <>
-            <Text style={getInvolvedTitle}>Ways to Get Involved</Text>
-            {aiContent.getInvolved.map((suggestion, index) => {
-          // Color-code the links based on their type
-          let coloredSuggestion = suggestion;
-
-          // Apply event color (blue) to calendar/event links
-          coloredSuggestion = coloredSuggestion.replace(
-            /(<a href="[^"]*calendar[^"]*"[^>]*>)([^<]+)(<\/a>)/g,
-            `$1<span style="color: #2563eb; text-decoration: none; font-weight: 500;">$2</span>$3`
-          );
-
-          // Apply skill color (green) to skills links
-          coloredSuggestion = coloredSuggestion.replace(
-            /(<a href="[^"]*skills[^"]*"[^>]*>)([^<]+)(<\/a>)/g,
-            `$1<span style="color: #059669; text-decoration: none; font-weight: 500;">$2</span>$3`
-          );
-
-          // Apply group color (purple) to groups links
-          coloredSuggestion = coloredSuggestion.replace(
-            /(<a href="[^"]*groups[^"]*"[^>]*>)([^<]+)(<\/a>)/g,
-            `$1<span style="color: #7c3aed; text-decoration: none; font-weight: 500;">$2</span>$3`
-          );
-
-          return (
-            <Text key={index} style={paragraph} dangerouslySetInnerHTML={{ __html: `• ${coloredSuggestion}` }} />
-          );
-        })}
-          </>
+        {/* Show upcoming events if any */}
+        {highlights.upcomingEvents.length > 0 && (
+          <div style={eventsList}>
+            {highlights.upcomingEvents.map((event, index) => (
+              <Text key={index} style={eventItem}>
+                Don't miss{' '}
+                <Link href={getEventURL(neighborhoodId, event.id)} style={eventNameLink}>
+                  {event.title}
+                </Link>
+                {' '}on {event.date}
+                {event.attendees > 0 && ` - already ${event.attendees} neighbor${event.attendees !== 1 ? 's' : ''} going`}!
+              </Text>
+            ))}
+          </div>
         )}
 
-        <Text style={paragraph}>
-          <Link href={`${baseUrl}/n/${neighborhoodId}?utm_source=email&utm_medium=email&utm_campaign=weekly_summary_dashboard`} style={ctaButton}>
-            Visit Your Neighborhood Dashboard
-          </Link>
-        </Text>
+        {/* Ways to Get Involved Section */}
+        <Text style={getInvolvedTitle}>Ways to Get Involved</Text>
+        {aiContent.getInvolved.map((suggestion, index) => (
+          <Text key={index} style={paragraph} dangerouslySetInnerHTML={{ __html: `• ${suggestion}` }} />
+        ))}
 
         <Text style={signoff}>
           Stay neighborly,<br />
           The {neighborhoodName} Community
         </Text>
+
+        <div style={feedbackCallout}>
+          <Text style={feedbackText}>
+            💬 <strong>Have feedback for this newsletter? I want to hear it!</strong><br />
+            Reply to this email with your suggestions or ideas and it'll go straight to my (Cam's) inbox.
+          </Text>
+        </div>
 
         {/* Footer */}
         <Section style={footer}>
@@ -559,9 +578,9 @@ const skillNameLink = {
   fontWeight: '600',
 };
 
-// NEW: Neighbor name links (green theme, bold)
+// NEW: Neighbor name links (purple theme, bold)
 const neighborNameLink = {
-  color: '#059669',
+  color: '#7c3aed',
   textDecoration: 'none',
   fontWeight: '700',
 };
@@ -615,6 +634,27 @@ const signoff = {
   fontSize: '16px',
   margin: '20px 0',
   fontStyle: 'italic',
+};
+
+const feedbackCallout = {
+  backgroundColor: '#f3f4f6',
+  border: '1px solid #e5e7eb',
+  borderRadius: '8px',
+  padding: '16px',
+  margin: '24px 0',
+};
+
+const feedbackText = {
+  color: '#374151',
+  fontSize: '16px',
+  lineHeight: '24px',
+  margin: '0',
+};
+
+const feedbackLink = {
+  color: '#2563eb',
+  textDecoration: 'none',
+  fontWeight: '600',
 };
 
 // Quick Actions Styles

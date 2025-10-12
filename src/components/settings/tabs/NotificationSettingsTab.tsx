@@ -1,101 +1,189 @@
 import React, { useState, useEffect } from 'react';
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { showInfoToast } from "@/utils/toast";
 import { AutoSaveField } from '../AutoSaveField';
 import { SettingsCard } from '../SettingsCard';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 /**
- * Simplified notification preferences structure - only weekly newsletter for email
+ * Granular notification preferences structure
  */
 interface NotificationPreferences {
-  in_app: {
-    involved_only: boolean;
-    page_specific: {
-      events: boolean;
-      safety: boolean;
-      care: boolean;
-      goods: boolean;
-      skills: boolean;
-      neighbors: boolean;
-    };
-    all_activity: boolean;
-    new_neighbors: boolean;
-  };
   email: {
-    enabled: boolean;
-    frequency: 'weekly';
-    types: {
-      weekly_summary: boolean;
+    personal: {
+      events: {
+        event_rsvp: boolean;
+        group_event_invitation: boolean;
+      };
+      skills: {
+        skill_session_request: boolean;
+        skill_session_cancelled: boolean;
+      };
+      groups: {
+        group_member_joined: boolean;
+        group_update_comment: boolean;
+        group_invitation: boolean;
+      };
     };
+    neighborhood: {
+      events: {
+        event_created: boolean;
+      };
+      skills: {
+        skill_offered: boolean;
+        skill_requested: boolean;
+      };
+      groups: {
+        group_update_posted: boolean;
+        group_event_created: boolean;
+      };
+      neighbors: {
+        neighbor_joined: boolean;
+      };
+    };
+    weekly_summary: boolean;
   };
 }
 
-/**
- * Type guard to check if data is valid NotificationPreferences
- */
-function isValidNotificationPreferences(data: any): data is NotificationPreferences {
-  return (
-    data &&
-    typeof data === 'object' &&
-    data.in_app &&
-    typeof data.in_app === 'object' &&
-    typeof data.in_app.involved_only === 'boolean' &&
-    data.in_app.page_specific &&
-    typeof data.in_app.page_specific === 'object' &&
-    data.email &&
-    typeof data.email === 'object' &&
-    typeof data.email.enabled === 'boolean'
-  );
+interface NotificationItemConfig {
+  key: string;
+  title: string;
+  description: string;
+  category: 'personal' | 'neighborhood' | 'weekly';
+  page?: 'events' | 'skills' | 'groups' | 'neighbors';
 }
 
 /**
  * NotificationSettingsTab Component
- * 
- * Handles notification preferences for both in-app and email notifications
- * with auto-saving functionality using the card-based layout design.
+ *
+ * Displays all notification types organized by category (Personal vs Neighborhood Activity)
+ * and by page, with individual email toggles and disabled text/WhatsApp/mobile toggles
  */
 export const NotificationSettingsTab: React.FC = () => {
-  // Get current user
   const user = useUser();
-  
-  // State for notification preferences - simplified structure
-  const [preferences, setPreferences] = useState<NotificationPreferences>({
-    in_app: {
-      involved_only: true,
-      page_specific: {
-        events: true,
-        safety: true,
-        care: true,
-        goods: true,
-        skills: true,
-        neighbors: true
-      },
-      all_activity: false,
-      new_neighbors: true
-    },
+
+  // Default preferences with all notifications enabled
+  const defaultPreferences: NotificationPreferences = {
     email: {
-      enabled: true,  // Keep enabled for backward compatibility
-      frequency: 'weekly',
-      types: {
-        weekly_summary: true  // Only weekly newsletter, enabled by default
-      }
-    }
-  });
-  
-  // Loading state
+      personal: {
+        events: {
+          event_rsvp: true,
+          group_event_invitation: true,
+        },
+        groups: {
+          group_member_joined: true,
+          group_update_comment: true,
+          group_invitation: true,
+        },
+      },
+      neighborhood: {
+        events: {
+          event_created: true,
+        },
+        groups: {
+          group_update_posted: true,
+          group_event_created: true,
+        },
+        neighbors: {
+          neighbor_joined: true,
+        },
+      },
+      weekly_summary: true,
+    },
+  };
+
+  const [preferences, setPreferences] = useState<NotificationPreferences>(defaultPreferences);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Notification configurations organized by category and page
+  const personalNotifications: NotificationItemConfig[] = [
+    // Events
+    {
+      key: 'event_rsvp',
+      title: 'Event RSVPs',
+      description: 'When someone RSVPs to your event',
+      category: 'personal',
+      page: 'events'
+    },
+    {
+      key: 'group_event_invitation',
+      title: 'Group Event Invitations',
+      description: 'When you\'re invited to a group event',
+      category: 'personal',
+      page: 'events'
+    },
+    // Groups
+    {
+      key: 'group_member_joined',
+      title: 'Group Member Joined',
+      description: 'When someone joins a group you manage',
+      category: 'personal',
+      page: 'groups'
+    },
+    {
+      key: 'group_update_comment',
+      title: 'Group Update Comments',
+      description: 'When someone comments on your group update',
+      category: 'personal',
+      page: 'groups'
+    },
+    {
+      key: 'group_invitation',
+      title: 'Group Invitations',
+      description: 'When you\'re invited to join a group',
+      category: 'personal',
+      page: 'groups'
+    },
+  ];
+
+  const neighborhoodNotifications: NotificationItemConfig[] = [
+    // Events
+    {
+      key: 'event_created',
+      title: 'New Events',
+      description: 'When someone creates a new event',
+      category: 'neighborhood',
+      page: 'events'
+    },
+    // Groups
+    {
+      key: 'group_update_posted',
+      title: 'Group Updates',
+      description: 'When someone posts an update in a group',
+      category: 'neighborhood',
+      page: 'groups'
+    },
+    {
+      key: 'group_event_created',
+      title: 'Group Events',
+      description: 'When someone creates a group event',
+      category: 'neighborhood',
+      page: 'groups'
+    },
+    // Neighbors
+    {
+      key: 'neighbor_joined',
+      title: 'New Neighbors',
+      description: 'When a new neighbor joins your neighborhood',
+      category: 'neighborhood',
+      page: 'neighbors'
+    },
+  ];
+
   /**
-   * Load user notification preferences on component mount
+   * Load user notification preferences
    */
   useEffect(() => {
     const loadPreferences = async () => {
       if (!user?.id) return;
-      
+
       try {
         const { data, error } = await supabase
           .from('profiles')
@@ -104,31 +192,9 @@ export const NotificationSettingsTab: React.FC = () => {
           .single();
 
         if (error) throw error;
-        
-        if (data && data.notification_preferences) {
-          // Validate and type-cast the notification preferences
-          if (isValidNotificationPreferences(data.notification_preferences)) {
-            // Ensure all in-app notifications are defaulted to true
-            const basePrefs = data.notification_preferences as NotificationPreferences;
-            const updatedPreferences: NotificationPreferences = {
-              ...basePrefs,
-              in_app: {
-                ...basePrefs.in_app,
-                page_specific: {
-                  events: true,
-                  safety: true,
-                  care: true,
-                  goods: true,
-                  skills: true,
-                  neighbors: true
-                },
-                new_neighbors: true
-              }
-            };
-            setPreferences(updatedPreferences);
-          } else {
-            console.warn('[NotificationSettingsTab] Invalid notification preferences format, using defaults');
-          }
+
+        if (data?.notification_preferences) {
+          setPreferences(data.notification_preferences as NotificationPreferences);
         }
       } catch (error: any) {
         console.error('[NotificationSettingsTab] Error loading preferences:', error);
@@ -142,90 +208,92 @@ export const NotificationSettingsTab: React.FC = () => {
   }, [user?.id]);
 
   /**
-   * Update an in-app preference field
+   * Update a notification preference
    */
-  const updateInAppPreference = (field: keyof Omit<NotificationPreferences['in_app'], 'page_specific'>, value: boolean) => {
-    setPreferences(prev => ({
-      ...prev,
-      in_app: {
-        ...prev.in_app,
-        [field]: value
+  const updatePreference = (
+    category: 'personal' | 'neighborhood' | 'weekly',
+    page: string | undefined,
+    key: string,
+    value: boolean
+  ) => {
+    setPreferences(prev => {
+      if (category === 'weekly') {
+        return {
+          ...prev,
+          email: {
+            ...prev.email,
+            weekly_summary: value
+          }
+        };
       }
-    }));
-  };
 
-  /**
-   * Update a page-specific in-app preference field
-   */
-  const updatePageSpecific = (page: keyof NotificationPreferences['in_app']['page_specific'], value: boolean) => {
-    setPreferences(prev => ({
-      ...prev,
-      in_app: {
-        ...prev.in_app,
-        page_specific: {
-          ...prev.in_app.page_specific,
-          [page]: value
+      if (!page) return prev;
+
+      return {
+        ...prev,
+        email: {
+          ...prev.email,
+          [category]: {
+            ...prev.email[category],
+            [page]: {
+              ...prev.email[category][page as keyof typeof prev.email[typeof category]],
+              [key]: value
+            }
+          }
         }
-      }
-    }));
+      };
+    });
   };
 
   /**
-   * Show coming soon message for email features
+   * Get the value of a specific notification preference
    */
-  const handleEmailComingSoon = () => {
-    // Email notifications feature is disabled - no toast needed
-  };
-
-  /**
-   * Update an email preference field (disabled for now)
-   */
-  const updateEmailPreference = (field: keyof Omit<NotificationPreferences['email'], 'types' | 'digest_settings'>, value: boolean | string) => {
-    // For now, just show coming soon message
-    handleEmailComingSoon();
-  };
-
-  /**
-   * Update an email type preference field (disabled for weekly_summary)
-   */
-  const updateEmailType = (type: keyof NotificationPreferences['email']['types'], value: boolean) => {
-    // Weekly summary is always enabled - don't allow changes
-    if (type === 'weekly_summary') {
-      return;
+  const getPreferenceValue = (
+    category: 'personal' | 'neighborhood' | 'weekly',
+    page: string | undefined,
+    key: string
+  ): boolean => {
+    if (category === 'weekly') {
+      return preferences.email.weekly_summary;
     }
-    setPreferences(prev => ({
-      ...prev,
-      email: {
-        ...prev.email,
-        types: {
-          ...prev.email.types,
-          [type]: value
-        }
-      }
-    }));
+
+    if (!page) return false;
+
+    const categoryPrefs = preferences.email[category];
+    const pagePrefs = categoryPrefs[page as keyof typeof categoryPrefs];
+
+    if (!pagePrefs || typeof pagePrefs !== 'object') return false;
+
+    return (pagePrefs as Record<string, boolean>)[key] ?? false;
   };
 
+  /**
+   * Group notifications by page for display
+   */
+  const groupByPage = (notifications: NotificationItemConfig[]) => {
+    const grouped: Record<string, NotificationItemConfig[]> = {};
 
-  // Page-specific notification settings configuration
-  const pageSpecificSettings = [
-    { key: 'events' as const, label: 'Events', description: 'New events and event updates' },
-    { key: 'safety' as const, label: 'Safety Updates', description: 'Safety alerts and community notices' },
-    { key: 'care' as const, label: 'Care Requests', description: 'New care requests and responses' },
-    { key: 'goods' as const, label: 'Goods Exchange', description: 'Available items and requests' },
-    { key: 'skills' as const, label: 'Skills Sharing', description: 'Skill offers and session requests' },
-    { key: 'neighbors' as const, label: 'Neighbor Activity', description: 'General neighbor interactions' }
-  ];
+    notifications.forEach(notif => {
+      const page = notif.page || 'other';
+      if (!grouped[page]) {
+        grouped[page] = [];
+      }
+      grouped[page].push(notif);
+    });
 
-  // Email notification types configuration
-  const emailTypes = [
-    { key: 'event_rsvp' as const, label: 'Event RSVPs', description: 'When someone RSVPs to your events' },
-    { key: 'safety_comment' as const, label: 'Safety Comments', description: 'Comments on your safety updates' },
-    { key: 'safety_emergency' as const, label: 'Emergency Alerts', description: 'Critical safety notifications' },
-    { key: 'goods_response' as const, label: 'Goods Responses', description: 'Responses to your goods posts' },
-    { key: 'weekly_summary' as const, label: 'Weekly Summary', description: 'Summary of neighborhood activity' }
-  ];
+    return grouped;
+  };
 
-  // Show loading state
+  const personalGrouped = groupByPage(personalNotifications);
+  const neighborhoodGrouped = groupByPage(neighborhoodNotifications);
+
+  const pageLabels: Record<string, string> = {
+    events: 'Events',
+    skills: 'Skills',
+    groups: 'Groups',
+    neighbors: 'Neighbors'
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -238,75 +306,285 @@ export const NotificationSettingsTab: React.FC = () => {
     );
   }
 
-  // Combined notification settings for unified list view
-  // Simplified notification settings - only weekly newsletter for email
-const allNotificationSettings = [
-    {
-      key: 'weekly_summary',
-      title: 'Weekly Newsletter',
-      description: 'Weekly digest of neighborhood activity and updates',
-      hasInApp: false, // Email only
-      hasEmail: true,
-      inAppChecked: false,
-      emailChecked: preferences.email.types.weekly_summary,
-      onInAppChange: () => {},
-      onEmailChange: (value: boolean) => updateEmailType('weekly_summary', value)
-    }
-  ];
-
   return (
     <div className="space-y-6">
-      {/* Notification Settings */}
-      <SettingsCard 
-        title="Notification Settings" 
-        description="Control how you receive notifications (in-app notifications enabled by default)"
+      {/* Personal Notifications Section */}
+      <SettingsCard
+        title="Personal Notifications"
+        description="Notifications about activity that directly involves you"
       >
-        <div className="space-y-4">
-          {/* Notification list */}
-          <div className="space-y-2">
-            <div className="flex justify-between items-center px-4 py-2 text-sm font-medium text-gray-600">
-              <div>Notification Type</div>
-              <div>Email</div>
-            </div>
-            
-            {allNotificationSettings.map((setting) => (
-              <AutoSaveField 
-                key={setting.key}
-                fieldName="notification_preferences" 
-                value={preferences}
-                debounceMs={500}
-              >
-                <div className="flex justify-between items-center rounded-lg border p-4 hover:bg-gray-50">
-                  {/* Title and description */}
-                  <div className="flex items-center gap-4">
-                    <div className="font-medium text-gray-900 w-40 flex-shrink-0">{setting.title}</div>
-                    <div className="text-sm text-gray-500">{setting.description}</div>
-                  </div>
-                  
-                  {/* Email toggle */}
-                  <div className="flex justify-center">
-                    {setting.hasEmail ? (
-                      <Switch
-                        checked={true}  // Always enabled
-                        onCheckedChange={() => {}}  // Disabled - no change allowed
-                        disabled={true}  // Make it visually disabled
-                      />
-                    ) : (
-                      <span className="text-gray-400 text-sm">—</span>
-                    )}
-                  </div>
-                </div>
-              </AutoSaveField>
-            ))}
-          </div>
-
-          {/* Weekly newsletter info */}
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <p className="text-sm text-blue-700">
-              Your weekly newsletter is sent every Sunday at 11:00 AM with a summary of neighborhood activity and updates. The weekly newsletter is enabled for all members to keep everyone connected with the neighborhood.
-            </p>
+        {/* Sticky Column Headers */}
+        <div className="sticky top-0 z-10 bg-white flex justify-between items-center px-4 py-3 text-sm font-semibold text-gray-700 border-b">
+          <div>Notification Type</div>
+          <div className="flex gap-8">
+            <div className="w-16 text-center">Email</div>
+            <div className="w-16 text-center">Text</div>
+            <div className="w-16 text-center">WhatsApp</div>
+            <div className="w-16 text-center">Mobile</div>
           </div>
         </div>
+        <div className="space-y-6">
+          {Object.entries(personalGrouped).map(([page, notifications]) => (
+            <div key={page} className="space-y-2">
+              <h4 className="text-sm font-semibold text-gray-600 uppercase tracking-wide">
+                {pageLabels[page]}
+              </h4>
+              <div className="space-y-1 pl-2 border-l-2 border-gray-200">
+                {notifications.map((notif) => (
+                  <AutoSaveField
+                    key={notif.key}
+                    fieldName="notification_preferences"
+                    value={preferences}
+                    debounceMs={500}
+                  >
+                    <div className="flex justify-between items-center py-3 px-4 rounded-lg hover:bg-gray-50">
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900">{notif.title}</div>
+                        <div className="text-sm text-gray-500">{notif.description}</div>
+                      </div>
+
+                      <div className="flex gap-8 items-center">
+                        {/* Email Toggle */}
+                        <div className="w-16 flex justify-center">
+                          <Switch
+                            checked={getPreferenceValue(notif.category, notif.page, notif.key)}
+                            onCheckedChange={(value) =>
+                              updatePreference(notif.category, notif.page, notif.key, value)
+                            }
+                          />
+                        </div>
+
+                        {/* Text Toggle - Disabled with tooltip */}
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="w-16 flex justify-center">
+                                <Switch checked={false} disabled />
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Coming Soon</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+
+                        {/* WhatsApp Toggle - Disabled with tooltip */}
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="w-16 flex justify-center">
+                                <Switch checked={false} disabled />
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Coming Soon</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+
+                        {/* Mobile Toggle - Disabled with tooltip */}
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="w-16 flex justify-center">
+                                <Switch checked={false} disabled />
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Coming Soon</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                    </div>
+                  </AutoSaveField>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </SettingsCard>
+
+      {/* Neighborhood Activity Section */}
+      <SettingsCard
+        title="Neighborhood Activity"
+        description="General activity happening in your neighborhood"
+      >
+        {/* Sticky Column Headers */}
+        <div className="sticky top-0 z-10 bg-white flex justify-between items-center px-4 py-3 text-sm font-semibold text-gray-700 border-b">
+          <div>Notification Type</div>
+          <div className="flex gap-8">
+            <div className="w-16 text-center">Email</div>
+            <div className="w-16 text-center">Text</div>
+            <div className="w-16 text-center">WhatsApp</div>
+            <div className="w-16 text-center">Mobile</div>
+          </div>
+        </div>
+        <div className="space-y-6">
+          {Object.entries(neighborhoodGrouped).map(([page, notifications]) => (
+            <div key={page} className="space-y-2">
+              <h4 className="text-sm font-semibold text-gray-600 uppercase tracking-wide">
+                {pageLabels[page]}
+              </h4>
+              <div className="space-y-1 pl-2 border-l-2 border-gray-200">
+                {notifications.map((notif) => (
+                  <AutoSaveField
+                    key={notif.key}
+                    fieldName="notification_preferences"
+                    value={preferences}
+                    debounceMs={500}
+                  >
+                    <div className="flex justify-between items-center py-3 px-4 rounded-lg hover:bg-gray-50">
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900">{notif.title}</div>
+                        <div className="text-sm text-gray-500">{notif.description}</div>
+                      </div>
+
+                      <div className="flex gap-8 items-center">
+                        {/* Email Toggle */}
+                        <div className="w-16 flex justify-center">
+                          <Switch
+                            checked={getPreferenceValue(notif.category, notif.page, notif.key)}
+                            onCheckedChange={(value) =>
+                              updatePreference(notif.category, notif.page, notif.key, value)
+                            }
+                          />
+                        </div>
+
+                        {/* Text Toggle - Disabled with tooltip */}
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="w-16 flex justify-center">
+                                <Switch checked={false} disabled />
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Coming Soon</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+
+                        {/* WhatsApp Toggle - Disabled with tooltip */}
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="w-16 flex justify-center">
+                                <Switch checked={false} disabled />
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Coming Soon</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+
+                        {/* Mobile Toggle - Disabled with tooltip */}
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="w-16 flex justify-center">
+                                <Switch checked={false} disabled />
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Coming Soon</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                    </div>
+                  </AutoSaveField>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </SettingsCard>
+
+      {/* Weekly Summary Section */}
+      <SettingsCard
+        title="Weekly Summary"
+        description="Weekly digest of neighborhood activity"
+      >
+        {/* Sticky Column Headers */}
+        <div className="sticky top-0 z-10 bg-white flex justify-between items-center px-4 py-3 text-sm font-semibold text-gray-700 border-b">
+          <div>Notification Type</div>
+          <div className="flex gap-8">
+            <div className="w-16 text-center">Email</div>
+            <div className="w-16 text-center">Text</div>
+            <div className="w-16 text-center">WhatsApp</div>
+            <div className="w-16 text-center">Mobile</div>
+          </div>
+        </div>
+        <AutoSaveField
+          fieldName="notification_preferences"
+          value={preferences}
+          debounceMs={500}
+        >
+          <div className="flex justify-between items-center py-3 px-4 rounded-lg hover:bg-gray-50">
+            <div className="flex-1">
+              <div className="font-medium text-gray-900">Weekly Newsletter</div>
+              <div className="text-sm text-gray-500">
+                Weekly digest of neighborhood activity and updates (sent Sundays at 11:00 AM)
+              </div>
+            </div>
+
+            <div className="flex gap-8 items-center">
+              {/* Email Toggle */}
+              <div className="w-16 flex justify-center">
+                <Switch
+                  checked={preferences.email.weekly_summary}
+                  onCheckedChange={(value) =>
+                    updatePreference('weekly', undefined, 'weekly_summary', value)
+                  }
+                />
+              </div>
+
+              {/* Text Toggle - Disabled */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="w-16 flex justify-center">
+                      <Switch checked={false} disabled />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Coming Soon</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              {/* WhatsApp Toggle - Disabled */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="w-16 flex justify-center">
+                      <Switch checked={false} disabled />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Coming Soon</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              {/* Mobile Toggle - Disabled */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="w-16 flex justify-center">
+                      <Switch checked={false} disabled />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Coming Soon</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          </div>
+        </AutoSaveField>
       </SettingsCard>
     </div>
   );
