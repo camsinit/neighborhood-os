@@ -485,29 +485,28 @@ Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
 
         thisWeekText = highlights.join(' ');
       } else {
-        thisWeekText = "The neighborhood has been quiet this week - let's change that! Check out the suggestions below to get things started.";
+        thisWeekText = null; // Hide section if no activity
       }
 
-      // Build "Week Ahead" section with event details
-      let weekAheadText = "";
+      // Build "Week Ahead" section with event details - more conversational
+      let weekAheadText = null;
       if (upcomingActivities.events.length > 0) {
         const eventDescriptions = upcomingActivities.events.slice(0, 3).map(e => {
-          const attendeeText = e.attendees > 0 ? ` (${e.attendees} ${e.attendees === 1 ? 'person' : 'people'} going)` : '';
+          const attendeeText = e.attendees > 0 ? ` - ${e.attendees} ${e.attendees === 1 ? 'neighbor is' : 'neighbors are'} already going` : '';
           return `<a href="${e.url}" style="color: #2563eb; text-decoration: none; font-weight: 600;">${e.title}</a> on ${e.date}${attendeeText}`;
         });
 
         if (upcomingActivities.events.length === 1) {
-          weekAheadText = `Coming up: ${eventDescriptions[0]}`;
+          weekAheadText = `Coming up this week: ${eventDescriptions[0]}. Don't miss it!`;
         } else if (upcomingActivities.events.length === 2) {
-          weekAheadText = `Coming up: ${eventDescriptions[0]}, and ${eventDescriptions[1]}`;
+          weekAheadText = `Coming up this week: ${eventDescriptions[0]}, and ${eventDescriptions[1]}`;
         } else if (upcomingActivities.events.length === 3) {
-          weekAheadText = `Coming up: ${eventDescriptions.join(', ')}`;
+          weekAheadText = `Coming up this week: ${eventDescriptions.join(', ')}`;
         } else {
-          weekAheadText = `Coming up: ${eventDescriptions.join(', ')}, plus ${upcomingActivities.events.length - 3} more events!`;
+          weekAheadText = `Coming up this week: ${eventDescriptions.join(', ')}, plus ${upcomingActivities.events.length - 3} more - check the calendar so you don't miss out!`;
         }
-      } else {
-        weekAheadText = "The calendar is wide open this week! Check out the suggestions below to help fill next week's newsletter with exciting events.";
       }
+      // If no events, return null to hide the section entirely
 
       return {
         thisWeek: thisWeekText,

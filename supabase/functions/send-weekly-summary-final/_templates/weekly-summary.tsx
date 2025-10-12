@@ -146,9 +146,13 @@ export const WeeklySummaryEmail = ({
 
         <Text style={greeting}>Hey neighbors!</Text>
 
-        {/* This Week Section */}
-        <Text style={thisWeekTitle}>This Week</Text>
-        <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.thisWeek }} />
+        {/* This Week Section - only show if there's activity */}
+        {aiContent.thisWeek && (
+          <>
+            <Text style={thisWeekTitle}>This Week</Text>
+            <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.thisWeek }} />
+          </>
+        )}
 
         {/* Show activity highlights naturally integrated */}
         {(highlights.skillsByPerson.length > 0 || highlights.groups.newGroups.length > 0) && (
@@ -227,9 +231,13 @@ export const WeeklySummaryEmail = ({
           </div>
         )}
 
-        {/* The Week Ahead Section */}
-        <Text style={weekAheadTitle}>The Week Ahead</Text>
-        <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.weekAhead }} />
+        {/* The Week Ahead Section - only show if there are upcoming events */}
+        {aiContent.weekAhead && (
+          <>
+            <Text style={weekAheadTitle}>The Week Ahead</Text>
+            <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.weekAhead }} />
+          </>
+        )}
 
         {/* Show upcoming events if any */}
         {highlights.upcomingEvents.length > 0 && (
