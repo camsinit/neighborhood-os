@@ -425,10 +425,33 @@ Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
       });
 
       // Build the full AI content structure with the processed suggestions
+      // Calculate actual activity from past week
+      const hasActivity = pastWeekActivities.createdEvents.length > 0 ||
+                         newGroups.length > 0 ||
+                         pastWeekActivities.completedSkills.length > 0 ||
+                         newNeighbors.length > 0;
+
+      let thisWeekText = "This past week brought new connections and community activity.";
+      if (hasActivity) {
+        const highlights = [];
+        if (newNeighbors.length > 0) {
+          highlights.push(`${newNeighbors.length} new neighbor${newNeighbors.length !== 1 ? 's' : ''} joined`);
+        }
+        if (pastWeekActivities.createdEvents.length > 0) {
+          highlights.push(`${pastWeekActivities.createdEvents.length} new event${pastWeekActivities.createdEvents.length !== 1 ? 's' : ''} created`);
+        }
+        if (newGroups.length > 0) {
+          highlights.push(`${newGroups.length} new group${newGroups.length !== 1 ? 's' : ''} started`);
+        }
+        if (highlights.length > 0) {
+          thisWeekText = `This past week: ${highlights.join(', ')}. Check out what's happening below!`;
+        }
+      } else {
+        thisWeekText = "The neighborhood has been quiet this week - let's change that! Check out the suggestions below to get things started.";
+      }
+
       return {
-        thisWeek: upcomingActivities.skills.length > 0 ?
-          `This past week brought new connections and community activity. ${upcomingActivities.skills.slice(0, 3).map(s => s.neighborName).filter((v, i, a) => a.indexOf(v) === i).join(', ')} shared valuable skills with the neighborhood.` :
-          "This past week brought new connections and community activity. Thank you to everyone who participated in making our neighborhood more vibrant.",
+        thisWeek: thisWeekText,
         weekAhead: upcomingActivities.events.length > 0 ?
           `We have ${upcomingActivities.events.length} event${upcomingActivities.events.length !== 1 ? 's' : ''} coming up this week! Check the calendar to join in.` :
           "The calendar is wide open this week! Check out the suggestions below to help fill next week's newsletter with exciting events.",
