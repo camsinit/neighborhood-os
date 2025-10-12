@@ -389,6 +389,8 @@ Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
     } catch (parseError) {
       console.error('Failed to parse AI response as JSON:', parseError);
       console.error('Raw AI response:', content);
+      console.error('Parse error details:', parseError.message);
+
       // Return fallback content
       let thisWeekText = "This past week brought new connections and community activity.";
 
@@ -401,12 +403,16 @@ Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
       return {
         thisWeek: thisWeekText,
         weekAhead: "The calendar is wide open this week! Check out the suggestions below to help fill next week's newsletter with exciting events.",
-        getInvolved: getFallbackSuggestions(neighborhoodId)
+        getInvolved: getFallbackSuggestions(neighborhoodId),
+        parseError: `Failed to parse AI response: ${parseError.message}`,
+        rawResponse: content // Include raw response for debugging
       };
     }
 
   } catch (error) {
     console.error('Error generating AI content:', error);
+    console.error('Error details:', error.message, error.stack);
+
     // Return fallback content
     let thisWeekText = "This past week brought new connections and community activity.";
 
@@ -419,7 +425,8 @@ Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
     return {
       thisWeek: thisWeekText,
       weekAhead: "The calendar is wide open this week! Check out the suggestions below to help fill next week's newsletter with exciting events.",
-      getInvolved: getFallbackSuggestions(neighborhoodId)
+      getInvolved: getFallbackSuggestions(neighborhoodId),
+      error: `AI generation failed: ${error.message}` // Add error info for debugging
     };
   }
 }
