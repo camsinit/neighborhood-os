@@ -443,22 +443,44 @@ Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
           highlights.push(`Welcome ${neighborLinks}${extra} to the neighborhood!`);
         }
 
-        // Highlight new events with links
+        // Highlight new events with links and timing context
         if (pastWeekActivities.createdEvents.length > 0) {
-          const eventLinks = pastWeekActivities.createdEvents.slice(0, 2).map(e =>
-            `<a href="${e.url}" style="color: #2563eb; text-decoration: none; font-weight: 600;">${e.title}</a>`
-          ).join(' and ');
-          const extra = pastWeekActivities.createdEvents.length > 2 ? ` plus ${pastWeekActivities.createdEvents.length - 2} more` : '';
-          highlights.push(`${eventLinks}${extra} ${pastWeekActivities.createdEvents.length === 1 ? 'was' : 'were'} added to the calendar`);
+          const eventDescriptions = pastWeekActivities.createdEvents.slice(0, 2).map(e => {
+            const eventDate = new Date(e.eventTime);
+            const timeStr = eventDate.toLocaleDateString('en-US', {
+              weekday: 'short',
+              month: 'short',
+              day: 'numeric',
+              hour: 'numeric',
+              minute: '2-digit'
+            });
+            return `<a href="${e.url}" style="color: #2563eb; text-decoration: none; font-weight: 600;">${e.title}</a> (${timeStr})`;
+          });
+
+          if (pastWeekActivities.createdEvents.length === 1) {
+            highlights.push(`${eventDescriptions[0]} was added to the calendar`);
+          } else if (pastWeekActivities.createdEvents.length === 2) {
+            highlights.push(`${eventDescriptions[0]} and ${eventDescriptions[1]} were added to the calendar`);
+          } else {
+            highlights.push(`${eventDescriptions.join(', ')}, plus ${pastWeekActivities.createdEvents.length - 2} more events were added to the calendar`);
+          }
         }
 
-        // Highlight new groups
+        // Highlight new groups with creator context
         if (newGroups.length > 0) {
-          const groupLinks = newGroups.slice(0, 2).map(g =>
-            `<a href="${getGroupURL(neighborhoodId, g.groupId)}" style="color: #7c3aed; text-decoration: none; font-weight: 600;">${g.name}</a>`
-          ).join(' and ');
-          const extra = newGroups.length > 2 ? ` and ${newGroups.length - 2} more` : '';
-          highlights.push(`${groupLinks}${extra} started bringing neighbors together`);
+          const groupDescriptions = newGroups.slice(0, 2).map(g => {
+            const creatorFirstName = g.createdBy.split(' ')[0];
+            const typeLabel = g.type === 'physical' ? 'building group' : 'community group';
+            return `<a href="${getGroupURL(neighborhoodId, g.groupId)}" style="color: #7c3aed; text-decoration: none; font-weight: 600;">${g.name}</a> (${typeLabel} started by ${creatorFirstName})`;
+          });
+
+          if (newGroups.length === 1) {
+            highlights.push(`${groupDescriptions[0]} is bringing neighbors together`);
+          } else if (newGroups.length === 2) {
+            highlights.push(`${groupDescriptions[0]} and ${groupDescriptions[1]} are bringing neighbors together`);
+          } else {
+            highlights.push(`${groupDescriptions.join(', ')}, plus ${newGroups.length - 2} more groups are bringing neighbors together`);
+          }
         }
 
         thisWeekText = highlights.join(' ');
@@ -466,11 +488,30 @@ Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
         thisWeekText = "The neighborhood has been quiet this week - let's change that! Check out the suggestions below to get things started.";
       }
 
+      // Build "Week Ahead" section with event details
+      let weekAheadText = "";
+      if (upcomingActivities.events.length > 0) {
+        const eventDescriptions = upcomingActivities.events.slice(0, 3).map(e => {
+          const attendeeText = e.attendees > 0 ? ` (${e.attendees} ${e.attendees === 1 ? 'person' : 'people'} going)` : '';
+          return `<a href="${e.url}" style="color: #2563eb; text-decoration: none; font-weight: 600;">${e.title}</a> on ${e.date}${attendeeText}`;
+        });
+
+        if (upcomingActivities.events.length === 1) {
+          weekAheadText = `Coming up: ${eventDescriptions[0]}`;
+        } else if (upcomingActivities.events.length === 2) {
+          weekAheadText = `Coming up: ${eventDescriptions[0]}, and ${eventDescriptions[1]}`;
+        } else if (upcomingActivities.events.length === 3) {
+          weekAheadText = `Coming up: ${eventDescriptions.join(', ')}`;
+        } else {
+          weekAheadText = `Coming up: ${eventDescriptions.join(', ')}, plus ${upcomingActivities.events.length - 3} more events!`;
+        }
+      } else {
+        weekAheadText = "The calendar is wide open this week! Check out the suggestions below to help fill next week's newsletter with exciting events.";
+      }
+
       return {
         thisWeek: thisWeekText,
-        weekAhead: upcomingActivities.events.length > 0 ?
-          `We have ${upcomingActivities.events.length} event${upcomingActivities.events.length !== 1 ? 's' : ''} coming up this week! Check the calendar to join in.` :
-          "The calendar is wide open this week! Check out the suggestions below to help fill next week's newsletter with exciting events.",
+        weekAhead: weekAheadText,
         getInvolved: processedSuggestions // Use the processed AI-generated suggestions with HTML links
       };
     } catch (parseError) {
