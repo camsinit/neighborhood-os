@@ -49,30 +49,27 @@ export const getWeeklySummarySettingsURL = (): string => {
 
 // Individual item URL generators with deep linking support
 export const getProfileURL = (neighborhoodId: string, userId: string): string => {
-  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/neighbors?highlight=${userId}&type=neighbors&dialog=true`;
+  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/neighbors?detail=${userId}&type=neighbors`;
   return addEmailTrackingParams(url, "weekly_summary_profile", "email");
 };
 
 export const getEventURL = (neighborhoodId: string, eventId: string): string => {
-  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/events?highlight=event&type=event&id=${eventId}`;
+  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/calendar?detail=${eventId}&type=event`;
   return addEmailTrackingParams(url, "weekly_summary_event", "email");
 };
 
 export const getGoodsURL = (neighborhoodId: string, goodsId: string): string => {
-  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/goods?highlight=goods&type=goods_exchange&id=${goodsId}`;
+  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/goods?detail=${goodsId}&type=goods_exchange`;
   return addEmailTrackingParams(url, "weekly_summary_goods_item", "email");
 };
 
-export const getSkillURL = (neighborhoodId: string, skillId: string, category?: string): string => {
-  let url = `${getEmailBaseUrl()}/n/${neighborhoodId}/skills?highlight=skill&type=skills_exchange&id=${skillId}`;
-  if (category) {
-    url += `&category=${category}`;
-  }
+export const getSkillURL = (neighborhoodId: string, category: string): string => {
+  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/skills?category=${category}`;
   return addEmailTrackingParams(url, "weekly_summary_skill", "email");
 };
 
 export const getGroupURL = (neighborhoodId: string, groupId: string): string => {
-  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/groups?highlight=${groupId}&type=group&dialog=true`;
+  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/neighbors?detail=${groupId}&type=group`;
   return addEmailTrackingParams(url, "weekly_summary_group", "email");
 };
 
@@ -82,16 +79,69 @@ export const getSafetyURL = (neighborhoodId: string, safetyId: string): string =
 };
 
 /**
- * Generate URL for activity groups (like neighbor's skills panel)
- * Uses the new activity group URL pattern: /home?detail=group-{userId}-{activityType}&type=activity_group
+ * Generate URL to auto-open event creation form
  *
- * NOTE: This function is deprecated. Newsletter now uses real activity group IDs
- * from the actual activity grouping logic instead of synthetic user-based URLs.
+ * @example
+ * getCreateEventURL('uuid-123')
+ * // => https://neighborhoodos.com/n/uuid-123/calendar?action=add&utm...
+ *
+ * Frontend expectation:
+ * - CalendarPage checks for ?action=add parameter
+ * - Opens event creation sheet immediately on mount
+ * - Clears URL parameter after opening
  */
-// export const getNeighborSkillsGroupURL = (neighborhoodId: string, userId: string): string => {
-//   // Match the frontend logic exactly: activity_type='skill_offered' gets converted to 'skill-offered'
-//   const activityType = 'skill_offered'.replace('_', '-'); // Converts to 'skill-offered'
-//   const groupId = `group-${userId}-${activityType}`;
-//   const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/home?detail=${groupId}&type=activity_group`;
-//   return addEmailTrackingParams(url, "weekly_summary_neighbor_skills", "email");
-// };
+export const getCreateEventURL = (neighborhoodId: string): string => {
+  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/calendar?action=add`;
+  return addEmailTrackingParams(url, "weekly_summary_create_event", "email");
+};
+
+/**
+ * Generate URL to auto-open skill offer creation form
+ *
+ * @example
+ * getCreateSkillOfferURL('uuid-123')
+ * // => https://neighborhoodos.com/n/uuid-123/skills?action=offer&utm...
+ *
+ * Frontend expectation:
+ * - SkillsPage checks for ?action=offer parameter
+ * - Opens SkillOfferSheet immediately on mount
+ * - Clears URL parameter after opening
+ */
+export const getCreateSkillOfferURL = (neighborhoodId: string): string => {
+  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/skills?action=offer`;
+  return addEmailTrackingParams(url, "weekly_summary_create_skill", "email");
+};
+
+/**
+ * Generate URL to auto-open skill request creation form
+ *
+ * @example
+ * getCreateSkillRequestURL('uuid-123')
+ * // => https://neighborhoodos.com/n/uuid-123/skills?action=request&utm...
+ *
+ * Frontend expectation:
+ * - SkillsPage checks for ?action=request parameter
+ * - Opens SkillRequestSheet immediately on mount
+ * - Clears URL parameter after opening
+ */
+export const getCreateSkillRequestURL = (neighborhoodId: string): string => {
+  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/skills?action=request`;
+  return addEmailTrackingParams(url, "weekly_summary_request_skill", "email");
+};
+
+/**
+ * Generate URL to auto-open group creation form
+ *
+ * @example
+ * getCreateGroupURL('uuid-123')
+ * // => https://neighborhoodos.com/n/uuid-123/neighbors?action=create&utm...
+ *
+ * Frontend expectation:
+ * - GroupsPage checks for ?action=create parameter
+ * - Opens CreateGroupForm immediately on mount
+ * - Clears URL parameter after opening
+ */
+export const getCreateGroupURL = (neighborhoodId: string): string => {
+  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/neighbors?action=create`;
+  return addEmailTrackingParams(url, "weekly_summary_create_group", "email");
+};

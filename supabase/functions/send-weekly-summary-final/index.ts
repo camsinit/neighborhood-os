@@ -5,8 +5,31 @@ import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import React from 'npm:react@18.3.1'
 import { WeeklySummaryEmail } from './_templates/weekly-summary.tsx'
 import { corsHeaders, handleCorsPreflightRequest, successResponse, errorResponse } from '../_shared/cors.ts'
-import { getProfileURL, getEventURL, getSkillURL, getGroupURL } from './_utils/urlGenerator.ts'
+import { getProfileURL, getEventURL, getSkillURL, getGroupURL, getCreateEventURL, getCreateSkillOfferURL, getCreateSkillRequestURL, getCreateGroupURL } from './_utils/urlGenerator.ts'
 import { convertToSendingDomainUrl } from './_utils/imageProxy.ts'
+
+// Version marker to track deployments
+const VERSION = 'v2.0.0-defensive-params';
+
+// Helper function to shuffle an array for randomization
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+// Simple fallback suggestions when Claude API is unavailable
+function getFallbackSuggestions(neighborhoodId: string): string[] {
+  const baseUrl = `https://neighborhoodos.com/n/${neighborhoodId}`;
+  return [
+    `Browse the <a href="${baseUrl}/skills?utm_source=email&utm_medium=email&utm_campaign=weekly_summary">skills exchange</a> to see who can help with what!`,
+    `Check out <a href="${baseUrl}/neighbors?view=groups&utm_source=email&utm_medium=email&utm_campaign=weekly_summary">neighborhood groups</a> to find your community!`,
+    `Explore the <a href="${baseUrl}/calendar?utm_source=email&utm_medium=email&utm_campaign=weekly_summary">calendar</a> and join upcoming events!`
+  ];
+}
 
 // Activity grouping logic (copied from frontend)
 interface Activity {
@@ -94,88 +117,9 @@ interface WeeklySummaryRequest {
   neighborhoodId: string;
   testEmail?: string; // Optional: for testing purposes
   previewOnly?: boolean; // Optional: for preview mode (returns HTML without sending)
+  debug?: boolean; // Optional: return debug info instead of HTML
 }
 
-/**
- * Generate specific, action-oriented suggestions from actual neighborhood data
- * Resurfaces existing skills, groups, and opportunities for discovery
- */
-function generateDynamicSuggestions(upcomingActivities: any, allGroups: any[], neighborhoodId: string): string[] {
-  const suggestions: string[] = [];
-  const baseUrl = `https://neighborhoodos.com/n/${neighborhoodId}`;
-
-  // Build pool of all discoverable items
-  const pool: Array<{type: string, data: any}> = [];
-
-  // Add ALL skills (offers and requests) to pool for discovery
-  if (upcomingActivities.skills && upcomingActivities.skills.length > 0) {
-    upcomingActivities.skills.forEach((skill: any) => {
-      pool.push({ type: 'skill', data: skill });
-    });
-  }
-
-  // Add ALL groups to pool for discovery
-  if (allGroups && allGroups.length > 0) {
-    allGroups.forEach((group: any) => {
-      pool.push({ type: 'group', data: group });
-    });
-  }
-
-  // Shuffle pool for randomization
-  const shuffled = pool.sort(() => 0.5 - Math.random());
-
-  // Generate 3 specific suggestions from actual data
-  for (let i = 0; i < Math.min(3, shuffled.length); i++) {
-    const item = shuffled[i];
-
-    if (item.type === 'skill') {
-      const skill = item.data;
-      const firstName = skill.neighborName.split(' ')[0];
-      const skillUrl = `${baseUrl}/skills?highlight=skill&type=skills_exchange&id=${skill.id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_suggestion`;
-
-      if (skill.requestType === 'offer') {
-        // Templates for skill offers
-        const templates = [
-          `Need help with ${skill.category.toLowerCase()}? <a href="${skillUrl}">Connect with ${firstName} who offers ${skill.title}</a>!`,
-          `Looking for ${skill.title.toLowerCase()}? <a href="${skillUrl}">${firstName} can help</a> - reach out!`,
-          `<a href="${skillUrl}">${firstName}'s offering ${skill.title}</a> - perfect if you need ${skill.category.toLowerCase()} help!`,
-        ];
-        suggestions.push(templates[i % templates.length]);
-      } else {
-        // Templates for skill requests
-        const templates = [
-          `Got expertise in ${skill.category.toLowerCase()}? <a href="${skillUrl}">${firstName} is looking for ${skill.title}</a>!`,
-          `Can you help with ${skill.title.toLowerCase()}? <a href="${skillUrl}">${firstName} needs it</a> - reach out!`,
-          `<a href="${skillUrl}">${firstName} is seeking ${skill.title}</a> - can you assist?`,
-        ];
-        suggestions.push(templates[i % templates.length]);
-      }
-    } else if (item.type === 'group') {
-      const group = item.data;
-      const firstName = group.createdBy.split(' ')[0];
-      const groupUrl = `${baseUrl}/groups?highlight=${group.groupId}&type=group&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_suggestion`;
-
-      const templates = [
-        `Interested in ${group.type === 'physical' ? 'your building' : group.description ? group.description.toLowerCase().split('.')[0] : 'community'}? <a href="${groupUrl}">Join ${firstName}'s ${group.name}</a>!`,
-        `<a href="${groupUrl}">Check out the ${group.name}</a> - ${firstName} started it and it's growing!`,
-        `Want to connect with neighbors? <a href="${groupUrl}">Join the ${group.name}</a> led by ${firstName}!`,
-      ];
-      suggestions.push(templates[i % templates.length]);
-    }
-  }
-
-  // If we don't have enough data, add one fallback (but this should be rare)
-  while (suggestions.length < 3) {
-    const fallbacks = [
-      `Browse the <a href="${baseUrl}/skills?utm_source=email&utm_medium=email&utm_campaign=weekly_summary">skills exchange</a> to see who can help with what!`,
-      `Check out <a href="${baseUrl}/groups?utm_source=email&utm_medium=email&utm_campaign=weekly_summary">neighborhood groups</a> - there might be one for you!`,
-      `Explore the <a href="${baseUrl}/calendar?utm_source=email&utm_medium=email&utm_campaign=weekly_summary">calendar</a> to see what neighbors are up to!`,
-    ];
-    suggestions.push(fallbacks[suggestions.length % fallbacks.length]);
-  }
-
-  return suggestions.slice(0, 3);
-}
 
 /**
  * Generate AI-powered newsletter content using Claude
@@ -189,7 +133,7 @@ async function generateAIContent(neighborhoodName: string, stats: any, highlight
 
   // If no Claude API key is available, return default content in new 3-section format
   if (!CLAUDE_API_KEY) {
-    console.log('❌ No Claude API key found, using dynamic fallback content');
+    console.log('❌ No Claude API key found, using fallback content');
 
     // Dynamic "This Week" - keep it generic since details show below
     let thisWeekText = "This past week brought new connections and community activity.";
@@ -201,28 +145,36 @@ async function generateAIContent(neighborhoodName: string, stats: any, highlight
     return {
       thisWeek: thisWeekText,
       weekAhead: "The calendar is wide open this week! Check out the suggestions below to help fill next week's newsletter with exciting events.",
-      getInvolved: generateDynamicSuggestions({ skills: allActiveSkills }, newGroups, neighborhoodId)
+      getInvolved: getFallbackSuggestions(neighborhoodId)
     };
   }
 
   console.log('✅ Claude API key found, proceeding with AI generation...');
 
+  // Check if we have enough data for Claude to work with
+  if (allActiveSkills.length === 0 && newGroups.length === 0) {
+    console.log('⚠️ No skills or groups data available, using fallback suggestions');
+    return {
+      thisWeek: "This past week brought new connections and community activity.",
+      weekAhead: "The calendar is wide open this week! Check out the suggestions below to help fill next week's newsletter with exciting events.",
+      getInvolved: getFallbackSuggestions(neighborhoodId)
+    };
+  }
+
   try {
     // Calculate total activity count to detect low-activity periods
-    const totalActivities = 
-      pastWeekActivities.completedEvents.length + 
-      pastWeekActivities.archivedGoods.length + 
-      pastWeekActivities.completedSkills.length + 
-      pastWeekActivities.safetyUpdates.length +
-      upcomingActivities.events.length + 
-      upcomingActivities.skills.length + 
-      upcomingActivities.goods.length;
-    
+    const totalActivities =
+      pastWeekActivities.createdEvents.length +
+      pastWeekActivities.completedSkills.length +
+      upcomingActivities.events.length +
+      upcomingActivities.skills.length;
+
     const isLowActivity = totalActivities <= 2; // Consider 2 or fewer activities as "low"
     
     // Create activity URLs for easy posting (using the same URL generation pattern)
     const createEventUrl = `https://neighborhoodos.com/n/${neighborhoodId}/calendar?create=true`;
     const createSkillUrl = `https://neighborhoodos.com/n/${neighborhoodId}/skills?create=true`;
+    const createGroupUrl = `https://neighborhoodos.com/n/${neighborhoodId}/groups?create=true`;
     const createGoodsUrl = `https://neighborhoodos.com/n/${neighborhoodId}/goods?create=true`;
     const createSafetyUrl = `https://neighborhoodos.com/n/${neighborhoodId}/safety?create=true`;
     
@@ -233,8 +185,12 @@ async function generateAIContent(neighborhoodName: string, stats: any, highlight
                          currentMonth === 'March' || currentMonth === 'April' || currentMonth === 'May' ? 'spring' :
                          currentMonth === 'June' || currentMonth === 'July' || currentMonth === 'August' ? 'summer' : 'fall';
 
-    // Format neighborhood data for AI analysis
-    const skillSpotlight = upcomingActivities.skills.reduce((acc, skill) => {
+    // Shuffle data for randomization - ensures fresh suggestions each time
+    const shuffledSkills = shuffleArray(allActiveSkills);
+    const shuffledGroups = shuffleArray(newGroups);
+
+    // Format neighborhood data for AI analysis - use ALL active skills, not just this week
+    const skillSpotlight = shuffledSkills.reduce((acc, skill) => {
       if (!acc[skill.neighborName]) {
         acc[skill.neighborName] = [];
       }
@@ -242,7 +198,7 @@ async function generateAIContent(neighborhoodName: string, stats: any, highlight
       return acc;
     }, {});
 
-    const skillCategories = upcomingActivities.skills.reduce((acc, skill) => {
+    const skillCategories = shuffledSkills.reduce((acc, skill) => {
       if (!acc[skill.category]) {
         acc[skill.category] = [];
       }
@@ -250,12 +206,19 @@ async function generateAIContent(neighborhoodName: string, stats: any, highlight
       return acc;
     }, {});
 
+    // Format groups data for AI analysis
+    const groupsSpotlight = shuffledGroups.map(group => {
+      const firstName = group.createdBy.split(' ')[0];
+      const typeLabel = group.type === 'physical' ? 'building group' : 'community group';
+      return `${group.name} (created by ${firstName}, ${typeLabel})`;
+    });
+
     // Identify skill gaps - common categories that are missing
     const availableCategories = Object.keys(skillCategories);
     const commonSkillCategories = ['home_repair', 'automotive', 'gardening', 'childcare', 'cooking', 'crafts'];
     const missingCategories = commonSkillCategories.filter(cat => !availableCategories.includes(cat));
 
-    const prompt = `You are writing suggestions for a neighborhood newsletter in "${neighborhoodName}". Your job is to create 3 specific, actionable suggestions that reference actual neighbors and their real skills.
+    const prompt = `You are writing suggestions for a neighborhood newsletter in "${neighborhoodName}". Create 3 warm, neighborly suggestions that feel natural and specific - NOT corporate or boring.
 
 ACTUAL NEIGHBORHOOD DATA:
 
@@ -269,36 +232,43 @@ ${Object.entries(skillCategories).map(([category, skills]) =>
   `${category}: ${skills.slice(0, 2).join(', ')}${skills.length > 2 ? ` (+ ${skills.length - 2} more)` : ''}`
 ).join('\n')}
 
-MISSING SKILL GAPS:
-${missingCategories.length > 0 ? missingCategories.join(', ') : 'Most common skills are covered'}
+NEIGHBORHOOD GROUPS:
+${groupsSpotlight.length > 0 ? groupsSpotlight.join('\n') : 'No groups created yet'}
 
-PERFECT EXAMPLES OF WHAT I WANT:
-✅ "Since Parker offers electronic music production, organize a beat-making workshop where neighbors can learn to create their own tracks"
-✅ "With Pamela's Costco expertise and Laura's meal exchanges, coordinate a bulk cooking group to share ingredients and recipes"
-✅ "Parker's tech skills (WiFi troubleshooting, computer help) could launch a neighborhood tech support circle"
+SUGGESTION FORMATS - Each must have ONE clear action:
 
-❌ AVOID THESE GENERIC EXAMPLES:
-- "Organize a skill-sharing workshop"
-- "Request skills that complement our expertise"
-- "Start a neighborhood support group"
+FORMAT 1: Highlight an existing neighbor's skill (neighbor name will be linked to their profile)
+✅ "{{NeighborName}} can help troubleshoot your computer issues - no need to trek to the Genius Bar!"
+✅ "{{NeighborName}} knows their way around a garden and loves sharing tips on keeping plants alive"
+✅ "{{NeighborName}} offers meal exchanges for those nights when cooking feels like too much"
+
+FORMAT 2: Suggest joining an existing group (group name will be linked)
+✅ "{{GroupName}} meets monthly to discuss emergency preparedness - join if you want to know your neighbors AND be ready for anything"
+✅ "Check out {{GroupName}} if you're interested in community resilience and connecting with neighbors"
+
+FORMAT 3: Suggest creating something new (verb will be linked to create page)
+✅ "Host a tool-sharing workshop so neighbors can fix things together instead of buying new"
+✅ "Organize a block party to actually meet the people you wave to every morning"
+✅ "Start a meal exchange group for those nights when you made too much pasta (again)"
+✅ "Offer your handyman skills - someone on your block probably has a door that squeaks"
+
+TONE GUIDELINES:
+- Add relatable details (squeaky doors, too much pasta, waving to neighbors)
+- Include the "why" or benefit (no trek to store, instead of buying new)
+- Keep it conversational and warm
+- NO over-promising! Stick to what the data actually shows
+- Be specific, not generic
 
 YOUR TASK:
-Write exactly 3 suggestions that:
-1. Use ACTUAL neighbor names from the data above
-2. Reference their SPECIFIC skills
-3. Create concrete, actionable ideas
-4. Connect neighbors with related skills when possible
+Write exactly 3 suggestions. Mix formats - use neighbor names, group names, AND create-new-thing verbs.
 
-REQUIREMENTS:
-- Use actual neighbor names and skills from the data
-- Be specific and actionable
-- 1-2 sentences per suggestion
-- Include natural links:
-  * Events: ${createEventUrl}
-  * Skills: ${createSkillUrl}
-  * Groups: ${createGroupUrl}
+CRITICAL FORMATTING:
+- Wrap neighbor names in {{Name}} so we can detect them: {{Parker}}, {{Laura}}, etc.
+- Wrap group names in {{GroupName}} so we can detect them: {{Piedmont Ave Resilience Committee}}
+- Start create-action suggestions with a verb: "Host", "Organize", "Start", "Offer", "Schedule"
+- 1-2 sentences max per suggestion
 - No em-dashes (—), use regular hyphens only
-- Friendly but not overly excited
+- Friendly, specific, actionable
 
 Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
 
@@ -318,6 +288,7 @@ Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
       body: JSON.stringify({
         model: 'claude-3-5-sonnet-20241022',
         max_tokens: 1500,
+        temperature: 1.0, // Full creativity for varied suggestions each time
         messages: [
           {
             role: 'user',
@@ -345,7 +316,67 @@ Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
       const suggestions = JSON.parse(content);
       console.log('✨ AI suggestions generated successfully:', suggestions);
 
-      // Build the full AI content structure with the suggestions
+      // Process suggestions to convert {{Name}} and {{GroupName}} markers to HTML links
+      const processedSuggestions = suggestions.map((suggestion: string) => {
+        let processed = suggestion;
+
+        // Replace {{NeighborName}} with PURPLE links to neighbor profiles
+        processed = processed.replace(/\{\{([^}]+)\}\}/g, (match, name) => {
+          const isGroupName = name.includes('Committee') || name.includes('Group') || name.includes('Club') || name.length > 25;
+
+          if (isGroupName) {
+            // Group link (PURPLE) - find group ID
+            const group = newGroups.find(g => g.name === name);
+            const groupUrl = group
+              ? `${baseUrl}/n/${neighborhoodId}/neighbors?detail=${group.groupId}&type=group`
+              : `${baseUrl}/n/${neighborhoodId}/neighbors?view=groups`;
+            return `<a href="${groupUrl}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_suggestion" style="color: #7c3aed; text-decoration: none; font-weight: 600;">${name}</a>`;
+          } else {
+            // Neighbor link (PURPLE) - find user ID by fuzzy matching name
+            const neighbor = allActiveSkills.find(s =>
+              s.neighborName.toLowerCase().includes(name.toLowerCase()) ||
+              name.toLowerCase().includes(s.neighborName.split(' ')[0].toLowerCase())
+            );
+
+            if (neighbor && neighbor.neighborUserId) {
+              return `<a href="${baseUrl}/n/${neighborhoodId}/neighbors?detail=${neighbor.neighborUserId}&type=neighbors&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_suggestion" style="color: #7c3aed; text-decoration: none; font-weight: 700;">${name}</a>`;
+            } else {
+              return `<a href="${baseUrl}/n/${neighborhoodId}/neighbors?view=directory&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_suggestion" style="color: #7c3aed; text-decoration: none; font-weight: 700;">${name}</a>`;
+            }
+          }
+        });
+
+        // Detect and link action verbs at the start of suggestion with context-based colors
+        const actionVerbs = ['Host', 'Organize', 'Start', 'Offer', 'Schedule', 'Create', 'Plan', 'Set up', 'Join', 'Launch'];
+        for (const verb of actionVerbs) {
+          const verbRegex = new RegExp(`^(${verb})\\b`, 'i');
+          if (verbRegex.test(processed)) {
+            let actionUrl = '';
+            let actionColor = '';
+
+            // Check context to determine which page to link to and color to use
+            if (processed.match(/workshop|event|party|meeting|gathering/i)) {
+              actionUrl = getCreateEventURL(neighborhoodId);
+              actionColor = '#2563eb'; // Blue for events
+            } else if (processed.match(/group|circle|committee|club/i)) {
+              actionUrl = getCreateGroupURL(neighborhoodId);
+              actionColor = '#7c3aed'; // Purple for groups
+            } else if (processed.match(/skill|help|offer|service/i)) {
+              actionUrl = getCreateSkillOfferURL(neighborhoodId);
+              actionColor = '#059669'; // Green for skills
+            }
+
+            if (actionUrl && actionColor) {
+              processed = processed.replace(verbRegex, `<a href="${actionUrl}" style="color: ${actionColor}; text-decoration: none; font-weight: 700;">$1</a>`);
+            }
+            break;
+          }
+        }
+
+        return processed;
+      });
+
+      // Build the full AI content structure with the processed suggestions
       return {
         thisWeek: upcomingActivities.skills.length > 0 ?
           `This past week brought new connections and community activity. ${upcomingActivities.skills.slice(0, 3).map(s => s.neighborName).filter((v, i, a) => a.indexOf(v) === i).join(', ')} shared valuable skills with the neighborhood.` :
@@ -353,12 +384,12 @@ Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
         weekAhead: upcomingActivities.events.length > 0 ?
           `We have ${upcomingActivities.events.length} event${upcomingActivities.events.length !== 1 ? 's' : ''} coming up this week! Check the calendar to join in.` :
           "The calendar is wide open this week! Check out the suggestions below to help fill next week's newsletter with exciting events.",
-        getInvolved: suggestions // Use the AI-generated specific suggestions
+        getInvolved: processedSuggestions // Use the processed AI-generated suggestions with HTML links
       };
     } catch (parseError) {
       console.error('Failed to parse AI response as JSON:', parseError);
       console.error('Raw AI response:', content);
-      // Return dynamic fallback content
+      // Return fallback content
       let thisWeekText = "This past week brought new connections and community activity.";
 
       if (newGroups.length > 0 || upcomingActivities.skills.length > 0) {
@@ -370,13 +401,13 @@ Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
       return {
         thisWeek: thisWeekText,
         weekAhead: "The calendar is wide open this week! Check out the suggestions below to help fill next week's newsletter with exciting events.",
-        getInvolved: generateDynamicSuggestions(upcomingActivities, newGroups, neighborhoodId)
+        getInvolved: getFallbackSuggestions(neighborhoodId)
       };
     }
 
   } catch (error) {
     console.error('Error generating AI content:', error);
-    // Return dynamic fallback content
+    // Return fallback content
     let thisWeekText = "This past week brought new connections and community activity.";
 
     if (newGroups.length > 0 || upcomingActivities.skills.length > 0) {
@@ -388,7 +419,7 @@ Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
     return {
       thisWeek: thisWeekText,
       weekAhead: "The calendar is wide open this week! Check out the suggestions below to help fill next week's newsletter with exciting events.",
-      getInvolved: generateDynamicSuggestions({ skills: allActiveSkills }, newGroups, neighborhoodId)
+      getInvolved: getFallbackSuggestions(neighborhoodId)
     };
   }
 }
@@ -398,9 +429,11 @@ const handler = async (req: Request): Promise<Response> => {
   const corsResponse = handleCorsPreflightRequest(req);
   if (corsResponse) return corsResponse;
 
+  console.log(`📦 Running newsletter function version: ${VERSION}`);
+
   try {
     const supabase = createClient(supabaseUrl, supabaseKey)
-    const { neighborhoodId, testEmail, previewOnly }: WeeklySummaryRequest = await req.json();
+    const { neighborhoodId, testEmail, previewOnly, debug }: WeeklySummaryRequest = await req.json();
     
     // Calculate date range for the past week (7 days)
     const weekAgo = new Date();
@@ -442,6 +475,7 @@ const handler = async (req: Request): Promise<Response> => {
       availableSkillsData,
       completedSkillsData,
       newMembersData,
+      profileUpdatesData, // Profile updates (not currently used)
       allSkillsData // ALL active skills for suggestions (not just this week)
     ] = await Promise.all([
       // Events happening in next 7 days (for Week Ahead section)
@@ -531,19 +565,6 @@ const handler = async (req: Request): Promise<Response> => {
         .limit(50), // Get up to 50 active skills for variety
 
     ]);
-
-    // DEBUG: Log the raw query results
-    console.log('🔍 DEBUG: Raw query results:');
-    console.log('📅 Events data:', upcomingEventsData.data?.length || 0, 'items');
-    console.log('🧠 Skills data:', availableSkillsData.data?.length || 0, 'items');
-    console.log('👥 Members data:', newMembersData.data?.length || 0, 'items');
-    
-    if (availableSkillsData.error) {
-      console.log('❌ Skills query error:', availableSkillsData.error);
-    }
-    if (upcomingEventsData.error) {
-      console.log('❌ Events query error:', upcomingEventsData.error);
-    }
 
     // Use the same activity fetching logic as the frontend to ensure consistent data
     const fetchActivitiesForNewsletter = async (neighborhoodId: string): Promise<any[]> => {
@@ -655,6 +676,36 @@ const handler = async (req: Request): Promise<Response> => {
     })) || [];
 
     console.log('📊 All active skills for suggestions:', allActiveSkills.length);
+    console.log('📊 First 3 skills:', allActiveSkills.slice(0, 3).map(s => `${s.neighborName}: ${s.title}`));
+    console.log('📊 allSkillsData structure:', {
+      hasData: !!allSkillsData.data,
+      dataLength: allSkillsData.data?.length || 0,
+      hasError: !!allSkillsData.error,
+      errorMsg: allSkillsData.error?.message
+    });
+
+    // Debug mode - return diagnostic info BEFORE AI generation
+    if (debug) {
+      return new Response(
+        JSON.stringify({
+          debug: true,
+          allActiveSkillsCount: allActiveSkills.length,
+          allActiveSkills: allActiveSkills.slice(0, 10),
+          allSkillsDataLength: allSkillsData.data?.length || 0,
+          allSkillsDataError: allSkillsData.error,
+          hasClaudeApiKey: !!CLAUDE_API_KEY,
+          claudeApiKeyLength: CLAUDE_API_KEY?.length || 0,
+          message: 'Debug info - skills data check (before AI generation)'
+        }, null, 2),
+        {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json",
+            ...corsHeaders,
+          },
+        }
+      );
+    }
 
     // CURATED HIGHLIGHTS - Focus on community story
     // Note: stats will be calculated after we process all the data
@@ -674,39 +725,20 @@ const handler = async (req: Request): Promise<Response> => {
       }
     })) || [];
 
-    // DEBUG: Show Parker's activities specifically
-    const parkerActivities = processedActivities.filter(a => a.actor_id === 'f002afd9-be6d-492c-98a6-6501b2f25e48');
-    console.log('🎯 Parker activities found:', parkerActivities.length);
-    parkerActivities.forEach((activity, i) => {
-      console.log(`  Activity ${i + 1}: ${activity.activity_type} - "${activity.title}" at ${activity.created_at}`);
-    });
-
     // Filter activities to only this week (since last Sunday)
     const thisWeekActivities = processedActivities.filter(activity => {
       const activityDate = new Date(activity.created_at);
       return activityDate >= weekAgo;
     });
 
-    console.log('🎯 DEBUG: Filtered activities to this week only:', thisWeekActivities.length, 'of', processedActivities.length, 'total activities');
-
     // Group activities using the same logic as the frontend, but only for this week's activities
     const activityGroups = groupActivities(thisWeekActivities);
-
-    console.log('🎯 DEBUG: Found', activityGroups.length, 'total activity groups');
-    activityGroups.forEach((group, i) => {
-      console.log(`  Group ${i + 1}: ${group.type} - ${group.count} activities by ${group.primaryActivity.profiles?.display_name || group.primaryActivity.actor_id.substring(0, 8)} (${group.primaryActivity.activity_type})`);
-      if (group.type === 'grouped') {
-        console.log(`    Group ID: ${group.id}`);
-      }
-    });
 
     // Focus on skill activity groups
     const skillActivityGroups = activityGroups.filter(group =>
       group.primaryActivity.activity_type === 'skill_offered' ||
       group.primaryActivity.activity_type === 'skill_requested'
     );
-
-    console.log('🧠 DEBUG: Found', skillActivityGroups.length, 'skill activity groups');
 
     // Create a map of user ID to activity group ID for people who actually have real grouped activities
     const activityGroupMap = new Map();
@@ -728,7 +760,6 @@ const handler = async (req: Request): Promise<Response> => {
       if (group.type === 'grouped' && group.count > 1) {
         const frontendUrlId = createGroupUrlId(group);
         activityGroupMap.set(group.primaryActivity.actor_id, frontendUrlId);
-        console.log(`✅ Real activity group found: ${group.primaryActivity.profiles?.display_name || 'Unknown'} (${group.primaryActivity.actor_id.substring(0, 8)}) -> ${frontendUrlId}`);
       }
     });
 
@@ -736,8 +767,6 @@ const handler = async (req: Request): Promise<Response> => {
     const groupCreatedActivities = thisWeekActivities.filter(activity =>
       activity.activity_type === 'group_created'
     );
-
-    console.log('👥 DEBUG: Found', groupCreatedActivities.length, 'group creation activities this week');
 
     // Fetch actual group details from groups table for accurate names
     const groupIds = groupCreatedActivities.map(a => a.content_id).filter(Boolean);
@@ -757,12 +786,6 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const newGroupsThisWeek = groupCreatedActivities.map(activity => {
-      console.log('👥 DEBUG: Group activity:', {
-        title: activity.title,
-        metadata: activity.metadata,
-        content_id: activity.content_id
-      });
-
       // Get actual group details from database
       const groupDetails = groupDetailsMap.get(activity.content_id);
 
@@ -781,6 +804,7 @@ const handler = async (req: Request): Promise<Response> => {
         name: groupName || 'Unnamed Group',
         type: groupDetails?.group_type || activity.metadata?.group_type || 'social',
         createdBy: activity.profiles?.display_name || 'A neighbor',
+        createdByUserId: activity.actor_id,
         unitValue: groupDetails?.physical_unit_value || activity.metadata?.physical_unit_value,
         description: groupDetails?.description || null,
         groupId: activity.content_id,
@@ -891,22 +915,13 @@ const handler = async (req: Request): Promise<Response> => {
     // If preview mode, return the HTML without sending
     if (previewOnly) {
       console.log('Preview mode: returning HTML without sending emails');
-      return new Response(
-        JSON.stringify({ 
-          success: true, 
-          html,
-          stats,
-          highlights,
-          preview: true
-        }), 
-        {
-          status: 200,
-          headers: {
-            "Content-Type": "application/json",
-            ...corsHeaders,
-          },
-        }
-      );
+      return new Response(html, {
+        status: 200,
+        headers: {
+          "Content-Type": "text/html",
+          ...corsHeaders,
+        },
+      });
     }
 
     // Determine recipients (test email or all members)

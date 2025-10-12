@@ -11,6 +11,7 @@ import {
   Hr,
 } from 'npm:@react-email/components@0.0.22'
 import * as React from 'npm:react@18.3.1'
+import { getProfileURL, getGroupURL, getEventURL, getSkillURL } from '../_utils/urlGenerator.ts'
 
 // Helper function to add context about how skills are useful with neighbor names
 const getSkillContext = (skillTitle: string, category: string, neighborName: string, requestType: string): string => {
@@ -172,11 +173,11 @@ export const WeeklySummaryEmail = ({
 
               return (
                 <Text key={`group-${index}`} style={skillItem}>
-                  <Link href={`${baseUrl}/n/${neighborhoodId}/neighbors?profile=${group.createdBy}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary`} style={groupNameLink}>
+                  <Link href={getProfileURL(neighborhoodId, group.createdByUserId)} style={neighborNameLink}>
                     {firstName}
                   </Link>
                   {' '}started the{' '}
-                  <Link href={`${baseUrl}/n/${neighborhoodId}/groups?highlight=${group.groupId}&type=group&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_new_group`} style={groupNameLink}>
+                  <Link href={getGroupURL(neighborhoodId, group.groupId)} style={groupNameLink}>
                     {group.name}
                   </Link>
                   {cleanDescription ? `. ${cleanDescription}` : ''}
@@ -193,7 +194,7 @@ export const WeeklySummaryEmail = ({
                 {person.skillCount === 1 ? (
                   <>
                     {'\'s offering help with '}
-                    <Link href={`${baseUrl}/n/${neighborhoodId}/skills?highlight=skill&type=skills_exchange&id=${person.topSkills[0].id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_skill`} style={skillNameLink}>
+                    <Link href={getSkillURL(neighborhoodId, person.topSkills[0].category)} style={skillNameLink}>
                       {person.topSkills[0].title}
                     </Link>
                     {' - reach out if you need it'}
@@ -203,7 +204,7 @@ export const WeeklySummaryEmail = ({
                     {' can help with '}
                     {person.topSkills.slice(0, 2).map((skill, skillIndex) => (
                       <span key={skillIndex}>
-                        <Link href={`${baseUrl}/n/${neighborhoodId}/skills?highlight=skill&type=skills_exchange&id=${skill.id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_skill`} style={skillNameLink}>
+                        <Link href={getSkillURL(neighborhoodId, skill.category)} style={skillNameLink}>
                           {skill.title}
                         </Link>
                         {skillIndex === 0 ? ' and ' : ''}
@@ -236,7 +237,7 @@ export const WeeklySummaryEmail = ({
             {highlights.upcomingEvents.map((event, index) => (
               <Text key={index} style={eventItem}>
                 Don't miss{' '}
-                <Link href={`${baseUrl}/n/${neighborhoodId}/calendar?highlight=event&type=event&id=${event.id}&utm_source=email&utm_medium=email&utm_campaign=weekly_summary_upcoming_event`} style={eventNameLink}>
+                <Link href={getEventURL(neighborhoodId, event.id)} style={eventNameLink}>
                   {event.title}
                 </Link>
                 {' '}on {event.date}
@@ -248,32 +249,9 @@ export const WeeklySummaryEmail = ({
 
         {/* Ways to Get Involved Section */}
         <Text style={getInvolvedTitle}>Ways to Get Involved</Text>
-        {aiContent.getInvolved.map((suggestion, index) => {
-          // Color-code the links based on their type
-          let coloredSuggestion = suggestion;
-
-          // Apply event color (blue) to calendar/event links
-          coloredSuggestion = coloredSuggestion.replace(
-            /(<a href="[^"]*calendar[^"]*"[^>]*>)([^<]+)(<\/a>)/g,
-            `$1<span style="color: #2563eb; text-decoration: none; font-weight: 500;">$2</span>$3`
-          );
-
-          // Apply skill color (green) to skills links
-          coloredSuggestion = coloredSuggestion.replace(
-            /(<a href="[^"]*skills[^"]*"[^>]*>)([^<]+)(<\/a>)/g,
-            `$1<span style="color: #059669; text-decoration: none; font-weight: 500;">$2</span>$3`
-          );
-
-          // Apply group color (purple) to groups links
-          coloredSuggestion = coloredSuggestion.replace(
-            /(<a href="[^"]*groups[^"]*"[^>]*>)([^<]+)(<\/a>)/g,
-            `$1<span style="color: #7c3aed; text-decoration: none; font-weight: 500;">$2</span>$3`
-          );
-
-          return (
-            <Text key={index} style={paragraph} dangerouslySetInnerHTML={{ __html: `• ${coloredSuggestion}` }} />
-          );
-        })}
+        {aiContent.getInvolved.map((suggestion, index) => (
+          <Text key={index} style={paragraph} dangerouslySetInnerHTML={{ __html: `• ${suggestion}` }} />
+        ))}
 
         <Text style={paragraph}>
           <Link href={`${baseUrl}/n/${neighborhoodId}?utm_source=email&utm_medium=email&utm_campaign=weekly_summary_dashboard`} style={ctaButton}>
@@ -591,9 +569,9 @@ const skillNameLink = {
   fontWeight: '600',
 };
 
-// NEW: Neighbor name links (green theme, bold)
+// NEW: Neighbor name links (purple theme, bold)
 const neighborNameLink = {
-  color: '#059669',
+  color: '#7c3aed',
   textDecoration: 'none',
   fontWeight: '700',
 };
