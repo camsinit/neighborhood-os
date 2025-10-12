@@ -425,27 +425,43 @@ Return as JSON array: ["suggestion 1", "suggestion 2", "suggestion 3"]`;
       });
 
       // Build the full AI content structure with the processed suggestions
-      // Calculate actual activity from past week
+      // Build "This Week" section with actual highlights
       const hasActivity = pastWeekActivities.createdEvents.length > 0 ||
                          newGroups.length > 0 ||
-                         pastWeekActivities.completedSkills.length > 0 ||
                          newNeighbors.length > 0;
 
-      let thisWeekText = "This past week brought new connections and community activity.";
+      let thisWeekText = "";
       if (hasActivity) {
         const highlights = [];
+
+        // Highlight new neighbors
         if (newNeighbors.length > 0) {
-          highlights.push(`${newNeighbors.length} new neighbor${newNeighbors.length !== 1 ? 's' : ''} joined`);
+          const neighborLinks = newNeighbors.slice(0, 3).map(n =>
+            `<a href="${n.profileUrl}" style="color: #7c3aed; text-decoration: none; font-weight: 700;">${n.name.split(' ')[0]}</a>`
+          ).join(', ');
+          const extra = newNeighbors.length > 3 ? ` and ${newNeighbors.length - 3} more` : '';
+          highlights.push(`Welcome ${neighborLinks}${extra} to the neighborhood!`);
         }
+
+        // Highlight new events with links
         if (pastWeekActivities.createdEvents.length > 0) {
-          highlights.push(`${pastWeekActivities.createdEvents.length} new event${pastWeekActivities.createdEvents.length !== 1 ? 's' : ''} created`);
+          const eventLinks = pastWeekActivities.createdEvents.slice(0, 2).map(e =>
+            `<a href="${e.url}" style="color: #2563eb; text-decoration: none; font-weight: 600;">${e.title}</a>`
+          ).join(' and ');
+          const extra = pastWeekActivities.createdEvents.length > 2 ? ` plus ${pastWeekActivities.createdEvents.length - 2} more` : '';
+          highlights.push(`${eventLinks}${extra} ${pastWeekActivities.createdEvents.length === 1 ? 'was' : 'were'} added to the calendar`);
         }
+
+        // Highlight new groups
         if (newGroups.length > 0) {
-          highlights.push(`${newGroups.length} new group${newGroups.length !== 1 ? 's' : ''} started`);
+          const groupLinks = newGroups.slice(0, 2).map(g =>
+            `<a href="${getGroupURL(neighborhoodId, g.groupId)}" style="color: #7c3aed; text-decoration: none; font-weight: 600;">${g.name}</a>`
+          ).join(' and ');
+          const extra = newGroups.length > 2 ? ` and ${newGroups.length - 2} more` : '';
+          highlights.push(`${groupLinks}${extra} started bringing neighbors together`);
         }
-        if (highlights.length > 0) {
-          thisWeekText = `This past week: ${highlights.join(', ')}. Check out what's happening below!`;
-        }
+
+        thisWeekText = highlights.join(' ');
       } else {
         thisWeekText = "The neighborhood has been quiet this week - let's change that! Check out the suggestions below to get things started.";
       }
