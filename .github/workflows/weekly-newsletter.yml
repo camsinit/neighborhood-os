@@ -1,10 +1,11 @@
 name: Weekly Newsletter Scheduler
 
 on:
-  schedule:
-    # Run every hour on Sundays to catch different timezones
-    # This ensures we hit the 9 AM window for each neighborhood's timezone
-    - cron: '0 * * * 0'  # Every hour on Sunday
+  # SCHEDULE DISABLED - Newsletter deactivated
+  # schedule:
+  #   # Run every hour on Sundays to catch different timezones
+  #   # This ensures we hit the 9 AM window for each neighborhood's timezone
+  #   - cron: '0 * * * 0'  # Every hour on Sunday
   workflow_dispatch:  # Allow manual triggering for testing
 
 jobs:
